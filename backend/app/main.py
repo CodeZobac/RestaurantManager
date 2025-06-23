@@ -1,34 +1,29 @@
 """FastAPI application entry point for Restaurant Manager API"""
 
 from contextlib import asynccontextmanager
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from .core.config import settings
-from .core.database import init_database, close_database
 from .routers import tables_router
+
+# Load environment variables from .env file
+load_dotenv()
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan manager for startup and shutdown events"""
     # Startup
-    try:
-        init_database()
-        print("🚀 Database initialized successfully")
-        print(f"📊 API Documentation available at: http://{settings.host}:{settings.port}/docs")
-    except Exception as e:
-        print(f"❌ Database initialization failed: {e}")
-        raise
-    
+    print(
+        f"📊 API Documentation available at: http://{settings.host}:{settings.port}/docs"
+    )
     yield
-    
     # Shutdown
-    try:
-        await close_database()
-        print("🛑 Database connections closed")
-    except Exception as e:
-        print(f"⚠️  Error during database shutdown: {e}")
+    print("🛑 No database connections to close (using Supabase REST API)")
+
 
 # Create FastAPI application
 app = FastAPI(
@@ -75,7 +70,7 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # Configure CORS
@@ -89,6 +84,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(tables_router, prefix="/api/v1")
+
 
 # Root endpoint
 @app.get("/", tags=["root"])
@@ -105,23 +101,24 @@ async def root():
             "Table joining/unjoining",
             "Supabase PostgreSQL integration",
             "Auto table numbering (T1, T2, T3...)",
-            "Complete API documentation"
+            "Complete API documentation",
         ],
         "implementation_status": {
             "api_structure": "✅ Complete",
-            "database_models": "✅ Complete", 
+            "database_models": "✅ Complete",
             "pydantic_schemas": "✅ Complete",
             "business_logic": "🚧 TODO - Placeholder methods",
             "supabase_connection": "🚧 TODO - Needs credentials",
-            "authentication": "🚧 TODO - Future phase"
+            "authentication": "🚧 TODO - Future phase",
         },
         "next_steps": [
             "Set DATABASE_URL environment variable",
             "Implement TableService methods",
             "Test with Supabase database",
-            "Add authentication layer"
-        ]
+            "Add authentication layer",
+        ],
     }
+
 
 # Health check endpoint
 @app.get("/health", tags=["health"])
@@ -130,8 +127,9 @@ async def health_check():
     return {
         "status": "healthy",
         "message": "API is running",
-        "version": settings.app_version
+        "version": settings.app_version,
     }
+
 
 # Global exception handler
 @app.exception_handler(Exception)
@@ -142,22 +140,23 @@ async def global_exception_handler(request, exc):
         content={
             "message": "Internal server error",
             "detail": "An unexpected error occurred. Please check the server logs.",
-            "type": "internal_error"
-        }
+            "type": "internal_error",
+        },
     )
+
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     print(f"🍽️  Starting Restaurant Manager API...")
     print(f"📡 Server: http://{settings.host}:{settings.port}")
     print(f"📚 Documentation: http://{settings.host}:{settings.port}/docs")
     print(f"🔧 Debug mode: {settings.debug}")
-    
+
     uvicorn.run(
         "app.main:app",
         host=settings.host,
         port=settings.port,
         reload=settings.reload or settings.debug,
-        log_level="debug" if settings.debug else "info"
+        log_level="debug" if settings.debug else "info",
     )
