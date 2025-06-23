@@ -13,8 +13,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../../../../../../components/ui/dialog';
-import { Button } from '../../../../../../components/ui/button';
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -22,15 +22,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '../../../../../../components/ui/form';
-import { Input } from '../../../../../../components/ui/input';
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../../../../../../components/ui/select';
+} from '@/components/ui/select';
 
 interface TableFormDialogProps {
   open: boolean;
