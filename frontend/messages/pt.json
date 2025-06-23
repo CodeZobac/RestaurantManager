@@ -1,0 +1,76 @@
+{
+  "TableManagement": {
+    "title": "Gestão de Mesas",
+    "addNew": "Adicionar Nova Mesa",
+    "search": "Procurar mesas...",
+    "name": "Nome",
+    "capacity": "Capacidade",
+    "location": "Localização",
+    "status": "Estado",
+    "actions": "Ações",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "noTables": "Nenhuma mesa encontrada",
+    "createSuccess": "Mesa criada com sucesso",
+    "updateSuccess": "Mesa atualizada com sucesso",
+    "deleteSuccess": "Mesa eliminada com sucesso",
+    "deleteError": "Falha ao eliminar mesa",
+    "loading": "A carregar mesas...",
+    "guests": "convidados"
+  },
+  "TableForm": {
+    "createTitle": "Adicionar Nova Mesa",
+    "editTitle": "Editar Mesa",
+    "description": "Configure os detalhes da mesa do seu restaurante",
+    "nameLabel": "Nome da Mesa",
+    "namePlaceholder": "ex: Mesa 1, Bancada da Janela",
+    "nameRequired": "Nome da mesa é obrigatório",
+    "capacityLabel": "Capacidade",
+    "capacityPlaceholder": "Número de convidados",
+    "capacityRequired": "Capacidade é obrigatória",
+    "capacityMin": "Capacidade deve ser pelo menos 1",
+    "locationLabel": "Localização",
+    "locationPlaceholder": "ex: Área de jantar principal",
+    "statusLabel": "Estado",
+    "cancel": "Cancelar",
+    "save": "Guardar Mesa",
+    "update": "Atualizar Mesa"
+  },
+  "Status": {
+    "available": "Disponível",
+    "maintenance": "Manutenção",
+    "reserved": "Reservada"
+  },
+  "DeleteDialog": {
+    "title": "Eliminar Mesa",
+    "description": "Tem a certeza que pretende eliminar esta mesa? Esta ação não pode ser desfeita.",
+    "cancel": "Cancelar",
+    "delete": "Eliminar"
+  },
+  "Onboarding": {
+    "welcome": "Bem-vindo ao Restaurant Manager",
+    "setupTables": "Vamos configurar as mesas do seu restaurante",
+    "description": "Adicione as mesas do seu restaurante para começar com a gestão de reservas",
+    "tableCount": "Quantas mesas tem o seu restaurante?",
+    "tableCountPlaceholder": "Insira o número de mesas",
+    "next": "Seguinte",
+    "previous": "Anterior",
+    "finish": "Concluir Configuração",
+    "skipForNow": "Saltar por agora",
+    "step": "Passo {current} de {total}",
+    "customizeTitle": "Personalizar as Suas Mesas",
+    "customizeDescription": "Reveja e personalize as mesas geradas para o seu restaurante",
+    "defaultNamePrefix": "Mesa",
+    "defaultLocation": "Área de jantar principal"
+  },
+  "LanguageSelector": {
+    "selectLanguage": "Selecionar Idioma",
+    "english": "English",
+    "portuguese": "Português"
+  },
+  "Common": {
+    "error": "Ocorreu um erro",
+    "retry": "Tentar novamente",
+    "close": "Fechar"
+  }
+}

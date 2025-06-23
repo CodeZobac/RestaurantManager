@@ -1,0 +1,76 @@
+{
+  "TableManagement": {
+    "title": "Table Management",
+    "addNew": "Add New Table",
+    "search": "Search tables...",
+    "name": "Name",
+    "capacity": "Capacity",
+    "location": "Location", 
+    "status": "Status",
+    "actions": "Actions",
+    "edit": "Edit",
+    "delete": "Delete",
+    "noTables": "No tables found",
+    "createSuccess": "Table created successfully",
+    "updateSuccess": "Table updated successfully",
+    "deleteSuccess": "Table deleted successfully",
+    "deleteError": "Failed to delete table",
+    "loading": "Loading tables...",
+    "guests": "guests"
+  },
+  "TableForm": {
+    "createTitle": "Add New Table",
+    "editTitle": "Edit Table",
+    "description": "Configure your restaurant table details",
+    "nameLabel": "Table Name",
+    "namePlaceholder": "e.g., Table 1, Window Booth",
+    "nameRequired": "Table name is required",
+    "capacityLabel": "Capacity",
+    "capacityPlaceholder": "Number of guests",
+    "capacityRequired": "Capacity is required",
+    "capacityMin": "Capacity must be at least 1",
+    "locationLabel": "Location",
+    "locationPlaceholder": "e.g., Main dining area",
+    "statusLabel": "Status",
+    "cancel": "Cancel",
+    "save": "Save Table",
+    "update": "Update Table"
+  },
+  "Status": {
+    "available": "Available",
+    "maintenance": "Maintenance", 
+    "reserved": "Reserved"
+  },
+  "DeleteDialog": {
+    "title": "Delete Table",
+    "description": "Are you sure you want to delete this table? This action cannot be undone.",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
+  "Onboarding": {
+    "welcome": "Welcome to Restaurant Manager",
+    "setupTables": "Let's set up your restaurant tables",
+    "description": "Add your restaurant tables to get started with reservation management",
+    "tableCount": "How many tables does your restaurant have?",
+    "tableCountPlaceholder": "Enter number of tables",
+    "next": "Next",
+    "previous": "Previous",
+    "finish": "Finish Setup",
+    "skipForNow": "Skip for now",
+    "step": "Step {current} of {total}",
+    "customizeTitle": "Customize Your Tables",
+    "customizeDescription": "Review and customize the generated tables for your restaurant",
+    "defaultNamePrefix": "Table",
+    "defaultLocation": "Main dining area"
+  },
+  "LanguageSelector": {
+    "selectLanguage": "Select Language",
+    "english": "English",
+    "portuguese": "Português"
+  },
+  "Common": {
+    "error": "An error occurred",
+    "retry": "Try again",
+    "close": "Close"
+  }
+}
