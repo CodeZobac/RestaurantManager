@@ -72,5 +72,53 @@
     "error": "An error occurred",
     "retry": "Try again",
     "close": "Close"
+  },
+  "Reservation": {
+    "title": "Make a Reservation",
+    "subtitle": "Reserve your table at our restaurant",
+    "form": {
+      "customerName": "Full Name",
+      "customerNamePlaceholder": "Enter your full name",
+      "customerEmail": "Email Address",
+      "customerEmailPlaceholder": "Enter your email address",
+      "customerPhone": "Phone Number",
+      "customerPhonePlaceholder": "Enter your phone number",
+      "reservationDate": "Date",
+      "reservationDatePlaceholder": "Select a date",
+      "reservationTime": "Time",
+      "reservationTimePlaceholder": "Select a time",
+      "partySize": "Party Size",
+      "partySizePlaceholder": "Number of guests",
+      "specialRequests": "Special Requests",
+      "specialRequestsPlaceholder": "Any special requirements or dietary restrictions (optional)",
+      "contactInfo": "Contact Information",
+      "contactInfoDescription": "Please provide at least one contact method",
+      "dateTimeInfo": "Date & Time",
+      "partyInfo": "Party Details",
+      "submitButton": "Request Reservation",
+      "submitting": "Submitting..."
+    },
+    "validation": {
+      "nameMinLength": "Name must be at least 2 characters",
+      "nameMaxLength": "Name must not exceed 200 characters",
+      "invalidEmail": "Please enter a valid email address",
+      "phoneMinLength": "Phone number must be at least 10 digits",
+      "phoneMaxLength": "Phone number must not exceed 20 characters",
+      "dateRequired": "Please select a date",
+      "timeRequired": "Please select a time",
+      "partySizeMin": "Party size must be at least 1",
+      "partySizeMax": "Party size cannot exceed 20",
+      "specialRequestsMaxLength": "Special requests must not exceed 500 characters",
+      "contactRequired": "Please provide either an email address or phone number"
+    },
+    "status": {
+      "success": "Reservation Request Submitted!",
+      "successMessage": "Your reservation request has been submitted successfully. We will confirm your booking shortly.",
+      "pending": "Your request is pending confirmation",
+      "error": "Failed to Submit Reservation",
+      "noTablesAvailable": "Sorry, no tables are available for the selected date and time. Please try a different time slot.",
+      "serverError": "An error occurred while processing your request. Please try again.",
+      "makeAnother": "Make Another Reservation"
+    }
   }
 }
