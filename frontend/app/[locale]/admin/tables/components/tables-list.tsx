@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { useTranslations } from 'next-intl';
-import { Table } from '@/lib/types';
+import React from "react";
+import { useTranslations } from "next-intl";
+import { Table } from "@/lib/types";
 import {
   Table as TableComponent,
   TableBody,
@@ -10,11 +10,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Edit, Trash2, Users } from 'lucide-react';
-import { useTableStore } from '@/lib/store';
-import { TableStatusBadge } from './table-status-badge';
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Edit, Trash2, Users } from "lucide-react";
+import { useTableStore } from "@/lib/store";
+import { TableStatusBadge } from "./table-status-badge";
 
 interface TablesListProps {
   tables: Table[];
@@ -23,13 +23,13 @@ interface TablesListProps {
 }
 
 export function TablesList({ tables, loading, onEditClick }: TablesListProps) {
-  const t = useTranslations('TableManagement');
+  const t = useTranslations("TableManagement");
   const { setSelectedTable } = useTableStore();
 
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
-        <div className="text-muted-foreground">{t('loading')}</div>
+        <div className="text-muted-foreground">{t("loading")}</div>
       </div>
     );
   }
@@ -38,7 +38,7 @@ export function TablesList({ tables, loading, onEditClick }: TablesListProps) {
     return (
       <div className="text-center py-12">
         <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-        <h3 className="text-lg font-medium mb-2">{t('noTables')}</h3>
+        <h3 className="text-lg font-medium mb-2">{t("noTables")}</h3>
         <p className="text-muted-foreground">
           Start by adding your first table to manage reservations.
         </p>
@@ -51,11 +51,11 @@ export function TablesList({ tables, loading, onEditClick }: TablesListProps) {
       <TableComponent>
         <TableHeader>
           <TableRow>
-            <TableHead>{t('name')}</TableHead>
-            <TableHead>{t('capacity')}</TableHead>
-            <TableHead>{t('location')}</TableHead>
-            <TableHead>{t('status')}</TableHead>
-            <TableHead className="text-right">{t('actions')}</TableHead>
+            <TableHead>{t("name")}</TableHead>
+            <TableHead>{t("capacity")}</TableHead>
+            <TableHead>{t("location")}</TableHead>
+            <TableHead>{t("status")}</TableHead>
+            <TableHead className="text-right">{t("actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -65,7 +65,7 @@ export function TablesList({ tables, loading, onEditClick }: TablesListProps) {
               <TableCell>
                 <div className="flex items-center gap-1">
                   <Users className="h-4 w-4 text-muted-foreground" />
-                  {table.capacity} {t('guests')}
+                  {table.capacity} {t("guests")}
                 </div>
               </TableCell>
               <TableCell>
@@ -89,7 +89,7 @@ export function TablesList({ tables, loading, onEditClick }: TablesListProps) {
                     }}
                   >
                     <Edit className="h-4 w-4 mr-1" />
-                    {t('edit')}
+                    {t("edit")}
                   </Button>
                   <Button
                     variant="outline"
@@ -99,7 +99,7 @@ export function TablesList({ tables, loading, onEditClick }: TablesListProps) {
                     }}
                   >
                     <Trash2 className="h-4 w-4 mr-1" />
-                    {t('delete')}
+                    {t("delete")}
                   </Button>
                 </div>
               </TableCell>
