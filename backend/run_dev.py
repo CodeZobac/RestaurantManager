@@ -13,7 +13,7 @@ from pathlib import Path
 def main():
     """Run the development server"""
     # Add the backend directory to Python path
-    backend_dir = Path(__file__).parent
+    backend_dir = Path(__file__).parent.absolute()
     sys.path.insert(0, str(backend_dir))
     
     # Check for .env file

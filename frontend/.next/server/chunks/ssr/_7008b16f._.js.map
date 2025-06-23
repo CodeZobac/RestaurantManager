@@ -1,0 +1,8 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 6, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
+    {"offset": {"line": 30, "column": 0}, "map": {"version":3,"sources":["file:///home/cabozzz/dev/RestaurantManager/frontend/i18n/navigation.ts"],"sourcesContent":["import {createNavigation} from 'next-intl/navigation';\nimport {routing} from './routing';\n\n// Lightweight wrappers around Next.js' navigation\n// APIs that consider the routing configuration\nexport const {Link, redirect, usePathname, useRouter, getPathname} =\n  createNavigation(routing);\n"],"names":[],"mappings":";;;;;;;AAAA;AACA;;;AAIO,MAAM,EAAC,IAAI,EAAE,QAAQ,EAAE,WAAW,EAAE,SAAS,EAAE,WAAW,EAAC,GAChE,CAAA,GAAA,8PAAA,CAAA,mBAAgB,AAAD,EAAE,+GAAA,CAAA,UAAO","debugId":null}},
+    {"offset": {"line": 48, "column": 0}, "map": {"version":3,"sources":["file:///home/cabozzz/dev/RestaurantManager/frontend/app/%5Blocale%5D/page.tsx"],"sourcesContent":["import {setRequestLocale} from 'next-intl/server';\nimport {redirect} from '@/i18n/navigation';\n\ninterface PageProps {\n  params: Promise<{locale: string}>;\n}\n\nexport default async function HomePage({params}: PageProps) {\n  const {locale} = await params;\n  setRequestLocale(locale);\n\n  // For now, redirect to tables management\n  // Later we'll add logic to check onboarding status\n  redirect({href: '/admin/tables', locale});\n}\n"],"names":[],"mappings":";;;AAAA;AACA;;;AAMe,eAAe,SAAS,EAAC,MAAM,EAAY;IACxD,MAAM,EAAC,MAAM,EAAC,GAAG,MAAM;IACvB,CAAA,GAAA,2QAAA,CAAA,mBAAgB,AAAD,EAAE;IAEjB,yCAAyC;IACzC,mDAAmD;IACnD,CAAA,GAAA,kHAAA,CAAA,WAAQ,AAAD,EAAE;QAAC,MAAM;QAAiB;IAAM;AACzC","debugId":null}}]
+}
