@@ -1,4 +1,4 @@
-import { Table, CreateTableData, UpdateTableData, TempTable, CreateReservationData, ReservationResponse } from './types';
+import { Table, CreateTableData, UpdateTableData, TempTable, CreateReservationData, ReservationResponse, DashboardStatusResponse } from './types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -84,6 +84,13 @@ export const reservationApi = {
       method: 'POST',
       body: JSON.stringify(data),
     });
+  },
+};
+
+export const dashboardApi = {
+  // Get dashboard status for a specific date
+  getDashboardStatus: (date: string): Promise<DashboardStatusResponse> => {
+    return fetchApi<DashboardStatusResponse>(`/dashboard-status?date=${date}`);
   },
 };
 
