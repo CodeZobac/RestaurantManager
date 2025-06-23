@@ -79,3 +79,23 @@ export interface ReservationResponse {
   reservation?: Reservation;
   error?: string;
 }
+
+// Dashboard related types
+export interface DashboardTable {
+  id: number;
+  name: string;
+  capacity: number;
+  location?: string;
+  status: 'available' | 'pending' | 'confirmed';
+  reservation?: {
+    id: number;
+    customer_name: string;
+    reservation_time: string;
+    party_size: number;
+  };
+}
+
+export interface DashboardStatusResponse {
+  date: string;
+  tables: DashboardTable[];
+}
