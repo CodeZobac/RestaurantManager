@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse
 
 from .core.config import settings
 from .routers import tables_router
+from .routers.reservations import router as reservations_router
 
 # Load environment variables from .env file
 load_dotenv()
@@ -84,6 +85,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(tables_router, prefix="/api/v1")
+app.include_router(reservations_router)
 
 
 # Root endpoint

@@ -19,9 +19,10 @@ import { TableStatusBadge } from './table-status-badge';
 interface TablesListProps {
   tables: Table[];
   loading: boolean;
+  onEditClick?: () => void;
 }
 
-export function TablesList({ tables, loading }: TablesListProps) {
+export function TablesList({ tables, loading, onEditClick }: TablesListProps) {
   const t = useTranslations('TableManagement');
   const { setSelectedTable } = useTableStore();
 
@@ -82,7 +83,10 @@ export function TablesList({ tables, loading }: TablesListProps) {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setSelectedTable(table)}
+                    onClick={() => {
+                      setSelectedTable(table);
+                      if (onEditClick) onEditClick();
+                    }}
                   >
                     <Edit className="h-4 w-4 mr-1" />
                     {t('edit')}
@@ -91,7 +95,6 @@ export function TablesList({ tables, loading }: TablesListProps) {
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      // This will be handled by the DeleteTableDialog
                       setSelectedTable(table);
                     }}
                   >

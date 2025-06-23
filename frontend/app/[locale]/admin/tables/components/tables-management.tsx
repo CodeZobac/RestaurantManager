@@ -10,11 +10,13 @@ import { TablesList } from './tables-list';
 import { SimpleTableForm } from './simple-table-form';
 import { DeleteTableDialog } from './delete-table-dialog';
 import { LanguageSelector } from '@/components/language-selector';
+import { TableFormDialog } from './table-form-dialog';
 
 export function TablesManagement() {
   const t = useTranslations('TableManagement');
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   
   const {
     tables,
@@ -74,13 +76,18 @@ export function TablesManagement() {
       </div>
 
       {/* Tables List */}
-      <TablesList tables={filteredTables} loading={loading} />
+      <TablesList tables={filteredTables} loading={loading} onEditClick={() => setIsEditDialogOpen(true)} />
 
       {/* Dialogs */}
       <SimpleTableForm
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
         mode="create"
+      />
+      <TableFormDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        mode="edit"
       />
       <DeleteTableDialog />
     </div>
