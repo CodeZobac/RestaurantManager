@@ -1,9 +1,0 @@
-{
-  "status": 307,
-  "headers": {
-    "location": "/pt/admin/tables",
-    "x-nextjs-stale-time": "300",
-    "x-nextjs-prerender": "1",
-    "x-next-cache-tags": "_N_T_/layout,_N_T_/[locale]/layout,_N_T_/[locale]/page,_N_T_/pt"
-  }
-}

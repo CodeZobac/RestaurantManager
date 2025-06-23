@@ -1,7 +1,0 @@
-{
-  "/[locale]/admin/dashboard/page": "app/[locale]/admin/dashboard/page.js",
-  "/[locale]/admin/tables/page": "app/[locale]/admin/tables/page.js",
-  "/[locale]/page": "app/[locale]/page.js",
-  "/_not-found/page": "app/_not-found/page.js",
-  "/favicon.ico/route": "app/favicon.ico/route.js"
-}
