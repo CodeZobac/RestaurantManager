@@ -120,5 +120,21 @@
       "serverError": "An error occurred while processing your request. Please try again.",
       "makeAnother": "Make Another Reservation"
     }
+  },
+  "Dashboard": {
+    "title": "Restaurant Dashboard",
+    "selectDate": "Select Date",
+    "tableStatus": "Table Status",
+    "noReservations": "No reservations",
+    "capacity": "Capacity",
+    "reservedBy": "Reserved by",
+    "availableTables": "Available Tables",
+    "pendingReservations": "Pending Reservations",
+    "confirmedReservations": "Confirmed Reservations",
+    "loading": "Loading dashboard...",
+    "error": "Failed to load dashboard",
+    "retry": "Try again",
+    "guests": "guests",
+    "at": "at"
   }
 }

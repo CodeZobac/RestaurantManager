@@ -120,5 +120,21 @@
       "serverError": "Ocorreu um erro ao processar o seu pedido. Por favor tente novamente.",
       "makeAnother": "Fazer Outra Reserva"
     }
+  },
+  "Dashboard": {
+    "title": "Painel do Restaurante",
+    "selectDate": "Selecionar Data",
+    "tableStatus": "Estado da Mesa",
+    "noReservations": "Sem reservas",
+    "capacity": "Capacidade",
+    "reservedBy": "Reservado por",
+    "availableTables": "Mesas Disponíveis",
+    "pendingReservations": "Reservas Pendentes",
+    "confirmedReservations": "Reservas Confirmadas",
+    "loading": "Carregando painel...",
+    "error": "Falha ao carregar painel",
+    "retry": "Tentar novamente",
+    "guests": "convidados",
+    "at": "às"
   }
 }
