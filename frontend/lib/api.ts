@@ -1,4 +1,4 @@
-import { Table, CreateTableData, UpdateTableData, TempTable } from './types';
+import { Table, CreateTableData, UpdateTableData, TempTable, CreateReservationData, ReservationResponse } from './types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -73,6 +73,16 @@ export const tableApi = {
   completeOnboarding: (): Promise<void> => {
     return fetchApi<void>('/onboarding/complete', {
       method: 'POST',
+    });
+  },
+};
+
+export const reservationApi = {
+  // Create a new reservation
+  createReservation: (data: CreateReservationData): Promise<ReservationResponse> => {
+    return fetchApi<ReservationResponse>('/reservations', {
+      method: 'POST',
+      body: JSON.stringify(data),
     });
   },
 };
