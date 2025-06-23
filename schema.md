@@ -38,7 +38,7 @@ CREATE TABLE customers (
     phone VARCHAR(20),                          -- Phone for SMS reminders (optional)
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    
+
     -- Ensure at least one contact method is provided
     CONSTRAINT check_contact_info CHECK (email IS NOT NULL OR phone IS NOT NULL)
 );
@@ -69,9 +69,9 @@ CREATE TABLE reservations (
     confirmed_at TIMESTAMP WITH TIME ZONE,      -- When it was confirmed
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    
+
     -- Ensure party size doesn't exceed table capacity
-    CONSTRAINT check_party_size_capacity 
+    CONSTRAINT check_party_size_capacity
         CHECK (party_size <= (SELECT capacity FROM tables WHERE id = table_id))
 );
 
@@ -83,8 +83,8 @@ CREATE INDEX idx_reservations_customer ON reservations(customer_id);
 CREATE INDEX idx_reservations_reminder ON reservations(reminder_sent, status, reservation_date, reservation_time);
 
 -- Unique constraint to prevent double booking
-CREATE UNIQUE INDEX idx_unique_table_datetime 
-    ON reservations(table_id, reservation_date, reservation_time) 
+CREATE UNIQUE INDEX idx_unique_table_datetime
+    ON reservations(table_id, reservation_date, reservation_time)
     WHERE status IN ('pending', 'confirmed');
 ```
 
@@ -194,7 +194,7 @@ CREATE INDEX idx_audit_logs_created_at ON audit_logs(created_at);
 
 ```sql
 CREATE VIEW reservation_analytics AS
-SELECT 
+SELECT
     DATE_TRUNC('day', reservation_date) as date,
     COUNT(*) as total_reservations,
     COUNT(*) FILTER (WHERE status = 'confirmed') as confirmed_reservations,
@@ -211,7 +211,7 @@ GROUP BY DATE_TRUNC('day', reservation_date);
 
 ```sql
 CREATE VIEW peak_hours_analytics AS
-SELECT 
+SELECT
     EXTRACT(hour FROM reservation_time) as hour,
     COUNT(*) as reservation_count,
     AVG(party_size) as avg_party_size
@@ -225,14 +225,14 @@ ORDER BY hour;
 
 ```sql
 CREATE VIEW table_utilization AS
-SELECT 
+SELECT
     t.id,
     t.name,
     t.capacity,
     COUNT(r.id) as total_reservations,
     COUNT(r.id) FILTER (WHERE r.status = 'confirmed') as confirmed_reservations,
     ROUND(
-        COUNT(r.id) FILTER (WHERE r.status = 'confirmed')::numeric / 
+        COUNT(r.id) FILTER (WHERE r.status = 'confirmed')::numeric /
         NULLIF(COUNT(r.id), 0) * 100, 2
     ) as confirmation_rate
 FROM tables t
