@@ -1,16 +1,20 @@
 from fastapi import APIRouter, Request, HTTPException
 from app.services.telegram_service import telegram_service
+from app.services.reservation_service import reservation_service # Import the new service
 from app.core.config import settings
 import httpx
 import os
 import re
 from typing import Optional
 from fastapi import APIRouter, Request, HTTPException
-from app.services.telegram_service import telegram_service
-from app.core.config import settings
-from app.supabase_client import supabase_get, supabase_patch # Import supabase_get and supabase_patch
+from app.supabase_client import supabase_get, supabase_patch
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup # Ensure this is imported for inline buttons
 
 router = APIRouter(prefix="/telegram", tags=["telegram"])
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 @router.get("/secret")
 async def get_secret():
@@ -38,10 +42,6 @@ async def is_telegram_admin(user_id: int, phone_number: Optional[str] = None) ->
     except Exception as e:
         logger.error(f"Unexpected error checking admin status: {e}", exc_info=True)
         return False
-
-import logging
-
-logger = logging.getLogger(__name__)
 
 @router.post("/webhook")
 async def telegram_webhook(request: Request):
@@ -88,18 +88,13 @@ async def telegram_webhook(request: Request):
             )
         return {"ok": True}
 
-    # Handle regular messages (e.g., /start or email)
+    # Handle regular messages (e.g., /start, /pending_reservations or email)
     if message:
         text = message.get("text", "")
         username = chat.get("username", "")
         first_name = chat.get("first_name", "")
 
         if text.strip() == "/start":
-            if telegram_service:
-                await telegram_service.bot.send_message(
-                    chat_id=user_id,
-                    text="Welcome, Admin! Please reply with your email address to complete registration."
-                )
             # Search for admin record by telegram_chat_id or phone_number
             query_params = f"telegram_chat_id=eq.{user_id}"
             if phone_number:
@@ -133,6 +128,39 @@ async def telegram_webhook(request: Request):
                         text="Unauthorized: You are not registered as an admin."
                     )
                 return {"ok": True}
+            return {"ok": True}
+        
+        elif text.strip() == "/pending_reservations":
+            if telegram_service and reservation_service:
+                pending_reservations = await reservation_service.get_pending_reservations()
+                if pending_reservations:
+                    for reservation in pending_reservations:
+                        reservation_info = (
+                            f"<b>Reservation ID:</b> {reservation.id}\n"
+                            f"<b>Client Name:</b> {reservation.client_name}\n"
+                            f"<b>Contact:</b> {reservation.client_contact}\n"
+                            f"<b>Time:</b> {reservation.reservation_time.strftime('%Y-%m-%d %H:%M')}\n"
+                            f"<b>Party Size:</b> {reservation.party_size}\n"
+                            f"<b>Status:</b> {reservation.status}"
+                        )
+                        keyboard = [
+                            [
+                                InlineKeyboardButton("Confirm", callback_data=f"confirm:{reservation.id}"),
+                                InlineKeyboardButton("Discard", callback_data=f"discard:{reservation.id}")
+                            ]
+                        ]
+                        reply_markup = InlineKeyboardMarkup(keyboard)
+                        await telegram_service.bot.send_message(
+                            chat_id=user_id,
+                            text=f"New pending reservation:\n{reservation_info}",
+                            reply_markup=reply_markup,
+                            parse_mode="HTML"
+                        )
+                else:
+                    await telegram_service.bot.send_message(
+                        chat_id=user_id,
+                        text="No pending reservations at the moment."
+                    )
             return {"ok": True}
 
         # If admin replies with an email address
@@ -188,7 +216,6 @@ async def telegram_webhook(request: Request):
         # Edit original Telegram message to show action was completed
         if telegram_service:
             try:
-                from telegram import InlineKeyboardMarkup
                 text = f"Reservation {reservation_id} {new_status} by admin."
                 telegram_service.bot.edit_message_text(
                     chat_id=chat["id"],
