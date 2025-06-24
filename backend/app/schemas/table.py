@@ -13,8 +13,7 @@ class TableBase(BaseModel):
 
 class TableCreate(TableBase):
     """Schema for creating a new table"""
-    # Auto-generate table name if not provided (T1, T2, T3, etc.)
-    name: Optional[str] = Field(None, description="Table identifier - auto-generated if not provided")
+    name: Optional[str] = Field(None, description="Table identifier (e.g., T1, T2, T3). Auto-generated if not provided.")
     
     model_config = ConfigDict(
         json_schema_extra={

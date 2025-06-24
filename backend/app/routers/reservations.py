@@ -1,25 +1,25 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, BackgroundTasks
 from ..schemas.reservation import (
     ReservationCreate,
     ReservationResponse,
     ReservationErrorResponse,
 )
-import os
 import httpx
 from datetime import datetime, timedelta
+from app.core.config import settings
+from app.services.telegram_service import telegram_service
+from app.supabase_client import supabase_get # Import supabase_get
 
-SUPABASE_URL = os.environ["SUPABASE_URL"].rstrip("/")
-SUPABASE_KEY = os.environ["SUPABASE_SERVICE_KEY"]
+router = APIRouter(prefix="/reservations", tags=["reservations"])
 
 def get_supabase_headers():
+    """Helper function to get Supabase headers"""
     return {
-        "apikey": SUPABASE_KEY,
-        "Authorization": f"Bearer {SUPABASE_KEY}",
+        "apikey": settings.supabase_anon_key,
+        "Authorization": f"Bearer {settings.supabase_anon_key}",
         "Content-Type": "application/json",
         "Prefer": "return=representation",
     }
-
-router = APIRouter(prefix="/reservations", tags=["reservations"])
 
 @router.post(
     "/",
@@ -29,12 +29,12 @@ router = APIRouter(prefix="/reservations", tags=["reservations"])
     summary="Create a reservation",
     description="Create a reservation if a table is available for the requested time and party size.",
 )
-async def create_reservation(reservation: ReservationCreate):
+async def create_reservation(reservation: ReservationCreate, background_tasks: BackgroundTasks):
     try:
         # 1. Find available tables with enough capacity
         async with httpx.AsyncClient() as client:
             tables_resp = await client.get(
-                f"{SUPABASE_URL}/rest/v1/tables",
+                f"{settings.supabase_url}/rest/v1/tables",
                 headers=get_supabase_headers(),
             )
             tables_resp.raise_for_status()
@@ -49,7 +49,7 @@ async def create_reservation(reservation: ReservationCreate):
         # 2. Check reservations for each suitable table
         async with httpx.AsyncClient() as client:
             reservations_resp = await client.get(
-                f"{SUPABASE_URL}/rest/v1/reservations",
+                f"{settings.supabase_url}/rest/v1/reservations",
                 headers=get_supabase_headers(),
             )
             reservations_resp.raise_for_status()
@@ -100,7 +100,7 @@ async def create_reservation(reservation: ReservationCreate):
         }
         async with httpx.AsyncClient() as client:
             created_resp = await client.post(
-                f"{SUPABASE_URL}/rest/v1/reservations",
+                f"{settings.supabase_url}/rest/v1/reservations",
                 headers=get_supabase_headers(),
                 json=reservation_data,
             )
@@ -110,6 +110,35 @@ async def create_reservation(reservation: ReservationCreate):
                 raise HTTPException(status_code=400, detail=f"Supabase POST error: {created_resp.text}") from e
             created = created_resp.json()
         created_res = created[0]
+
+        # Send Telegram notification in background to all registered admins if status is pending and bot is configured
+        if created_res.get("status") == "pending" and telegram_service:
+            reservation_info = (
+                f"Name: {created_res.get('client_name')}\n"
+                f"Contact: {created_res.get('client_contact')}\n"
+                f"Date: {created_res.get('reservation_date')}\n"
+                f"Time: {created_res.get('reservation_time')}\n"
+                f"Party Size: {created_res.get('party_size')}\n"
+                f"Table: {created_res.get('table_id')}"
+            )
+            try:
+                # Fetch all admins with a telegram_chat_id
+                admins = await supabase_get("admins", params={"select": "telegram_chat_id", "telegram_chat_id": "not.is.null"})
+                
+                for admin in admins:
+                    chat_id = admin.get("telegram_chat_id")
+                    if chat_id:
+                        background_tasks.add_task(
+                            telegram_service.send_reservation_notification,
+                            chat_id,
+                            str(created_res["id"]),
+                            reservation_info
+                        )
+            except Exception as e:
+                # Log but do not fail reservation creation
+                import logging
+                logging.getLogger(__name__).error(f"Failed to send Telegram notification to admins: {e}")
+
         return ReservationResponse(
             reservation_id=created_res["id"],
             status=created_res["status"],
