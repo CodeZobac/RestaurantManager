@@ -2,6 +2,8 @@ import {NextIntlClientProvider, hasLocale} from 'next-intl';
 import {notFound} from 'next/navigation';
 import {setRequestLocale} from 'next-intl/server';
 import {routing} from '@/i18n/routing';
+import Provider from '@/components/SessionProvider';
+import { auth } from '@/auth';
 
 export function generateStaticParams() {
   return routing.locales.map((locale: string) => ({locale}));
@@ -22,11 +24,14 @@ export default async function LocaleLayout({
 
   // Enable static rendering
   setRequestLocale(locale);
+  const session = await auth();
 
   return (
     <html lang={locale}>
       <body>
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <Provider session={session}>
+          <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        </Provider>
       </body>
     </html>
   );
