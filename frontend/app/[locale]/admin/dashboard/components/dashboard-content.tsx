@@ -55,8 +55,11 @@ export function DashboardContent() {
     fetchDashboardData(selectedDate);
   };
 
+  // Debug: log tables before reduce
+  console.log("DASHBOARD DEBUG: tables =", tables);
+
   // Count tables by status
-  const statusCounts = tables.reduce(
+  const statusCounts = (tables ?? []).reduce(
     (acc, table) => {
       acc[table.status] = (acc[table.status] || 0) + 1;
       return acc;
@@ -106,7 +109,7 @@ export function DashboardContent() {
           </Button>
         </div>
       ) : (
-        <TableGrid tables={tables} onTableClick={handleTableClick} />
+        <TableGrid tables={tables ?? []} onTableClick={handleTableClick} />
       )}
     </div>
   );

@@ -85,7 +85,8 @@ app.add_middleware(
 
 # Include routers
 app.include_router(tables_router, prefix="/api/v1")
-app.include_router(reservations_router, prefix="/api/v1")
+
+app.include_router(reservations_router)
 
 
 # Root endpoint

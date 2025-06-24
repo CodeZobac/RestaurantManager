@@ -1,120 +1,62 @@
-from fastapi import APIRouter, HTTPException
-from ..schemas.reservation import (
-    ReservationCreate,
-    ReservationResponse,
-    ReservationErrorResponse,
-)
-import os
-import httpx
-from datetime import datetime, timedelta
+from fastapi import APIRouter, Query, HTTPException
+from datetime import date
+from app.supabase_client import supabase_get
+from app.schemas.reservation import DashboardStatusResponse, Reservation, DashboardTable, ReservationSummary
+from app.core.logger import logger
 
-SUPABASE_URL = os.environ["SUPABASE_URL"].rstrip("/")
-SUPABASE_KEY = os.environ["SUPABASE_SERVICE_KEY"]
+router = APIRouter()
 
-def get_supabase_headers():
-    return {
-        "apikey": SUPABASE_KEY,
-        "Authorization": f"Bearer {SUPABASE_KEY}",
-        "Content-Type": "application/json",
-        "Prefer": "return=representation",
-    }
-
-router = APIRouter(prefix="/reservations", tags=["reservations"])
-
-@router.post(
-    "/",
-    response_model=ReservationResponse,
-    responses={400: {"model": ReservationErrorResponse}},
-    status_code=201,
-    summary="Create a reservation",
-    description="Create a reservation if a table is available for the requested time and party size.",
-)
-async def create_reservation(reservation: ReservationCreate):
+@router.get("/api/v1/dashboard-status", response_model=DashboardStatusResponse)
+async def dashboard_status(date: date = Query(...)):
     try:
-        # 1. Find available tables with enough capacity
-        async with httpx.AsyncClient() as client:
-            tables_resp = await client.get(
-                f"{SUPABASE_URL}/rest/v1/tables",
-                headers=get_supabase_headers(),
-            )
-            tables_resp.raise_for_status()
-            tables = tables_resp.json()
+        # Fetch all tables
+        tables_data = await supabase_get("tables")
+        logger.debug(f"Supabase tables: {tables_data}")
 
-        suitable_tables = [
-            t for t in tables if t.get("capacity", 0) >= reservation.party_size
-        ]
-        if not suitable_tables:
-            return ReservationErrorResponse(error="No tables available for this party size")  # type: ignore
+        # Fetch reservations for the date
+        reservations_data = await supabase_get("reservations", {"reservation_date": f"eq.{date}"})
+        logger.debug(f"Supabase reservations: {reservations_data}")
 
-        # 2. Check reservations for each suitable table
-        async with httpx.AsyncClient() as client:
-            reservations_resp = await client.get(
-                f"{SUPABASE_URL}/rest/v1/reservations",
-                headers=get_supabase_headers(),
-            )
-            reservations_resp.raise_for_status()
-            reservations = reservations_resp.json()
+        # Map reservations by table_id for quick lookup
+        reservations_by_table = {r["table_id"]: r for r in reservations_data}
 
-        requested_time = reservation.reservation_time
-        # Assume 2-hour slot per reservation
-        slot_start = requested_time
-        slot_end = requested_time + timedelta(hours=2)
+        # Compose dashboard tables with status and filtered fields
+        dashboard_tables = []
+        for table in tables_data:
+            reservation = reservations_by_table.get(table["id"])
+            status = reservation["status"] if reservation else "available"
+            
+            table_data = {
+                "id": table["id"],
+                "name": table["name"],
+                "capacity": table["capacity"],
+                "location": table.get("location"),
+                "status": status,
+            }
+            
+            if reservation:
+                table_data["reservation"] = {
+                    "id": reservation["id"],
+                    "customer_name": reservation.get("customer_name") or reservation.get("client_name") or "",
+                    "reservation_time": reservation["reservation_time"],
+                    "party_size": reservation["party_size"],
+                }
+            
+            dashboard_tables.append(table_data)
 
-        def is_conflict(existing):
-            existing_time = datetime.fromisoformat(existing["reservation_time"])
-            existing_start = existing_time
-            existing_end = existing_time + timedelta(hours=2)
-            # Overlap if slot_start < existing_end and slot_end > existing_start
-            return (
-                existing["table_id"] == table_id
-                and slot_start < existing_end
-                and slot_end > existing_start
-            )
+        logger.debug(f"Dashboard tables count: {len(dashboard_tables)}")
+        logger.debug(f"Dashboard response structure: date={date}, tables_count={len(dashboard_tables)}, reservations_count={len(reservations_data)}")
 
-        available_table_id = None
-        for table in suitable_tables:
-            table_id = table["id"]
-            conflict = any(
-                r["table_id"] == table_id and
-                slot_start < datetime.fromisoformat(r["reservation_time"]) + timedelta(hours=2) and
-                slot_end > datetime.fromisoformat(r["reservation_time"])
-                for r in reservations
-            )
-            if not conflict:
-                available_table_id = table_id
-                break
-
-        if available_table_id is None:
-            return ReservationErrorResponse(error="No tables available at the requested time")  # type: ignore
-
-        # 3. Create reservation
-        reservation_data = {
-            "client_name": reservation.client_name,
-            "client_contact": reservation.client_contact,
-            "reservation_time": reservation.reservation_time.time().isoformat(),
-            "reservation_date": reservation.reservation_time.date().isoformat(),
-            "party_size": reservation.party_size,
-            "table_id": available_table_id,
-            "status": "pending",
-            "customer_id": reservation.customer_id,
+        # Return the properly structured response
+        response = {
+            "date": str(date),
+            "tables": dashboard_tables,
+            "reservations": reservations_data
         }
-        async with httpx.AsyncClient() as client:
-            created_resp = await client.post(
-                f"{SUPABASE_URL}/rest/v1/reservations",
-                headers=get_supabase_headers(),
-                json=reservation_data,
-            )
-            try:
-                created_resp.raise_for_status()
-            except httpx.HTTPStatusError as e:
-                raise HTTPException(status_code=400, detail=f"Supabase POST error: {created_resp.text}") from e
-            created = created_resp.json()
-        created_res = created[0]
-        return ReservationResponse(
-            reservation_id=created_res["id"],
-            status=created_res["status"],
-            table_id=created_res["table_id"],
-            message="Reservation created",
-        )
+        
+        logger.debug(f"Final response: {response}")
+        return response
+        
     except Exception as e:
+        logger.error(f"Dashboard status error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))

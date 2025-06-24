@@ -3,6 +3,7 @@
 from typing import List
 from fastapi import APIRouter, HTTPException
 from ..schemas.table import TableCreate, TableUpdate, TableResponse
+from fastapi import Body
 from ..supabase_client import (
     supabase_get,
     supabase_post,
@@ -49,6 +50,26 @@ async def create_table(table: TableCreate) -> TableResponse:
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.post(
+    "/bulk",
+    response_model=List[TableResponse],
+    status_code=201,
+    summary="Create multiple tables",
+    description="Create multiple restaurant tables in bulk.",
+)
+async def create_tables_bulk(
+    tables: List[TableCreate] = Body(..., embed=True)
+) -> List[TableResponse]:
+    """
+    Create multiple tables in bulk
+    """
+    try:
+        payload = [table.model_dump(exclude_unset=True, exclude_none=True) for table in tables]
+        data = await supabase_post("tables", payload)
+        return data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.patch(
     "/{table_id}",
@@ -61,6 +82,25 @@ async def update_table(table_id: int, table: TableUpdate) -> TableResponse:
     Update an existing table
     """
     try:
+        data = await supabase_patch(
+            "tables", table_id, table.model_dump(exclude_unset=True, exclude_none=True)
+        )
+        return data[0]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.put(
+    "/{table_id}",
+    response_model=TableResponse,
+    summary="Replace table",
+    description="Replace a table's properties (full update).",
+)
+async def replace_table(table_id: int, table: TableUpdate) -> TableResponse:
+    """
+    Replace an existing table (PUT)
+    """
+    try:
+        # For simplicity, treat PUT as PATCH (since Supabase upsert is partial)
         data = await supabase_patch(
             "tables", table_id, table.model_dump(exclude_unset=True, exclude_none=True)
         )
