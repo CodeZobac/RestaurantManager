@@ -1,13 +1,15 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { Pool } from "pg";
 import bcrypt from "bcryptjs";
-
-const pool = new Pool({
-  connectionString: process.env.POSTGRES_URL,
-});
+import { supabaseAdmin } from "@/lib/supabase";
+import "@/types/auth";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  secret: process.env.AUTH_SECRET,
+  session: {
+    strategy: "jwt",
+    maxAge: 24 * 60 * 60, // 24 hours
+  },
   providers: [
     Credentials({
       credentials: {
@@ -20,16 +22,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
 
         try {
-          const { rows } = await pool.query(
-            "SELECT * FROM admins WHERE email = $1",
-            [credentials.email]
-          );
+          const { data: admin, error } = await supabaseAdmin
+            .from('admins')
+            .select('*')
+            .eq('email', credentials.email)
+            .single();
 
-          if (rows.length === 0) {
+          if (error || !admin) {
             return null;
           }
-
-          const admin = rows[0];
 
           const passwordMatch = await bcrypt.compare(
             credentials.password as string,
@@ -39,12 +40,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           if (passwordMatch) {
             let restaurantName = null;
             if (admin.restaurant_id) {
-              const { rows: restaurantRows } = await pool.query(
-                "SELECT name FROM restaurants WHERE id = $1",
-                [admin.restaurant_id]
-              );
-              if (restaurantRows.length > 0) {
-                restaurantName = restaurantRows[0].name;
+              const { data: restaurant } = await supabaseAdmin
+                .from('restaurants')
+                .select('name')
+                .eq('id', admin.restaurant_id)
+                .single();
+              
+              if (restaurant) {
+                restaurantName = restaurant.name;
               }
             }
 
@@ -68,5 +71,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   pages: {
     signIn: "/auth/signin",
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.role = user.role;
+        token.restaurant_id = user.restaurant_id;
+        token.restaurant_name = user.restaurant_name;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token) {
+        session.user.id = token.id as string;
+        session.user.role = token.role as string;
+        session.user.restaurant_id = token.restaurant_id as string | null;
+        session.user.restaurant_name = token.restaurant_name as string | null;
+      }
+      return session;
+    },
   },
 });

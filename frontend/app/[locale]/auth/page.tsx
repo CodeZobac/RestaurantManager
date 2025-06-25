@@ -75,6 +75,46 @@ const LoginSignupForm = () => {
     setIsActive(false);
   };
 
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const signInResponse = await signIn('credentials', {
+        redirect: false,
+        email,
+        password,
+      });
+
+      if (signInResponse?.error) {
+        throw new Error(signInResponse.error);
+      }
+
+      // Get current session to check restaurant status
+      const response = await fetch('/api/auth/session');
+      const session = await response.json();
+      
+      const locale = window.location.pathname.split('/')[1];
+      
+      if (session?.user?.restaurant_id) {
+        // User has a restaurant, redirect to admin tables
+        window.location.href = `/${locale}/admin/tables`;
+      } else {
+        // User doesn't have a restaurant, redirect to onboarding
+        window.location.href = `/${locale}/onboarding`;
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError(t('unknownError'));
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSignIn = async () => {
       setIsLoading(true);
       try {
@@ -228,13 +268,16 @@ const LoginSignupForm = () => {
         >
           {/* Login Form */}
           <div className="form-box login">
-            <form className="w-full">
+            <form className="w-full" onSubmit={handleLogin}>
               <h1 className="text-4xl mb-4">{t('loginTitle')}</h1>
+              {error && <p className="text-red-500">{error}</p>}
               <div className="relative my-[30px]">
                 <input 
-                  type="text" 
-                  placeholder={t('usernamePlaceholder')}
+                  type="email" 
+                  placeholder={t('emailPlaceholder')}
                   required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full py-[13px] pl-5 pr-[50px] bg-[#eee] rounded-lg border-none outline-none text-base text-gray-800 font-medium"
                 />
                 <i className='bx bxs-user absolute right-5 top-1/2 transform -translate-y-1/2 text-xl'></i>
@@ -244,6 +287,8 @@ const LoginSignupForm = () => {
                   type="password" 
                   placeholder={t('passwordPlaceholder')}
                   required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full py-[13px] pl-5 pr-[50px] bg-[#eee] rounded-lg border-none outline-none text-base text-gray-800 font-medium"
                 />
                 <i className='bx bxs-lock-alt absolute right-5 top-1/2 transform -translate-y-1/2 text-xl'></i>
@@ -254,8 +299,9 @@ const LoginSignupForm = () => {
               <button 
                 type="submit" 
                 className="w-full h-12 bg-[#7494ec] rounded-lg shadow-sm border-none cursor-pointer text-base text-white font-semibold"
+                disabled={isLoading}
               >
-                {t('loginButton')}
+                {isLoading ? t('loggingInButton') : t('loginButton')}
               </button>
               <p className="text-sm my-[15px]">{t('orLoginWithSocial')}</p>
               <div className="flex justify-center">

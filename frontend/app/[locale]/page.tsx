@@ -130,13 +130,13 @@ export default function RestaurantLandingPage() {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#menu" className="text-gray-700 hover:text-orange-600 transition-colors">{t('navMenu')}</a>
-              <a href="#about" className="text-gray-700 hover:text-orange-600 transition-colors">{t('navAbout')}</a>
-              <a href="#contact" className="text-gray-700 hover:text-orange-600 transition-colors">{t('navContact')}</a>
+              <a href="#menu" className={`transition-colors hover:text-orange-600 ${isScrolled ? 'text-gray-700' : 'text-white'}`}>{t('navMenu')}</a>
+              <a href="#about" className={`transition-colors hover:text-orange-600 ${isScrolled ? 'text-gray-700' : 'text-white'}`}>{t('navAbout')}</a>
+              <a href="#contact" className={`transition-colors hover:text-orange-600 ${isScrolled ? 'text-gray-700' : 'text-white'}`}>{t('navContact')}</a>
               
               <Dialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-gray-600 hover:text-orange-600">
+                  <Button variant="ghost" size="sm" className={`hover:text-orange-600 ${isScrolled ? 'text-gray-600' : 'text-white'}`}>
                     <User className="w-4 h-4 mr-2" />
                     {t('managerLogin')}
                   </Button>

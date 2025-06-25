@@ -11,12 +11,16 @@ const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env
 
 export async function POST(request: Request) {
   const session = await auth();
+  
+  console.log('Session data:', JSON.stringify(session, null, 2));
 
   if (!session || !session.user || !session.user.id) {
+    console.log('No valid session found:', { session });
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const userId = session.user.id;
+  console.log('User ID from session:', userId);
 
   try {
     const { restaurantName, phoneNumber, tableRegions } = await request.json();
@@ -24,7 +28,10 @@ export async function POST(request: Request) {
     // 1. Create the restaurant
     const { data: restaurant, error: restaurantError } = await supabase
       .from('restaurants')
-      .insert({ name: restaurantName })
+      .insert({ 
+        id: crypto.randomUUID(),
+        name: restaurantName 
+      })
       .select()
       .single();
 
@@ -61,6 +68,7 @@ export async function POST(request: Request) {
                     restaurant_id: restaurant.id,
                     table_region_id: correspondingRegion.id,
                     name: `Table ${i}`,
+                    location: region.name, // Add the location field
                     capacity: 4, // Default capacity, can be changed later
                     status: 'available',
                 });

@@ -1,6 +1,6 @@
 from typing import Optional, List
 from datetime import date, time, datetime
-from pydantic import BaseModel, field
+from pydantic import BaseModel, Field
 
 class Reservation(BaseModel):
     id: int
