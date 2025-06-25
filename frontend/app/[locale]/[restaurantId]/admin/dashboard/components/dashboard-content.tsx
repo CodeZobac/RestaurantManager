@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
 import { dashboardApi, ApiError } from '@/lib/api';
@@ -16,7 +16,7 @@ export function DashboardContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchDashboardData = async (date: Date) => {
+  const fetchDashboardData = useCallback(async (date: Date) => {
     setLoading(true);
     setError(null);
     
@@ -34,11 +34,11 @@ export function DashboardContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
 
   useEffect(() => {
     fetchDashboardData(selectedDate);
-  }, [selectedDate]);
+  }, [selectedDate, fetchDashboardData]);
 
   const handleDateChange = (date: Date | undefined) => {
     if (date) {

@@ -179,6 +179,7 @@ export function TableFormDialog({ open, onOpenChange, mode }: TableFormDialogPro
                       <SelectItem value="available">{tStatus('available')}</SelectItem>
                       <SelectItem value="maintenance">{tStatus('maintenance')}</SelectItem>
                       <SelectItem value="reserved">{tStatus('reserved')}</SelectItem>
+                      <SelectItem value="occupied">{tStatus('occupied')}</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

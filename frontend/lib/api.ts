@@ -8,8 +8,6 @@ import {
   DashboardStatusResponse,
 } from "./types";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
 class ApiError extends Error {
   constructor(public status: number, message: string) {
     super(message);
@@ -21,18 +19,28 @@ async function fetchApi<T>(
   endpoint: string,
   options?: RequestInit
 ): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
+  // Use internal Next.js API routes
+  const url = endpoint.startsWith('/api') ? endpoint : `/api${endpoint}`;
 
   const response = await fetch(url, {
     headers: {
       "Content-Type": "application/json",
       ...options?.headers,
     },
+    credentials: 'include', // Include cookies for session
     ...options,
   });
 
   if (!response.ok) {
-    throw new ApiError(response.status, `API Error: ${response.statusText}`);
+    const errorText = await response.text();
+    let errorMessage;
+    try {
+      const errorJson = JSON.parse(errorText);
+      errorMessage = errorJson.error || response.statusText;
+    } catch {
+      errorMessage = errorText || response.statusText;
+    }
+    throw new ApiError(response.status, errorMessage);
   }
 
   return response.json();
@@ -41,28 +49,33 @@ async function fetchApi<T>(
 export const tableApi = {
   // Get all tables
   getTables: (): Promise<Table[]> => {
-    return fetchApi<Table[]>("/api/v1/tables/");
+    return fetchApi<Table[]>("/api/tables");
   },
 
   // Create a single table
   createTable: (data: CreateTableData): Promise<Table> => {
-    return fetchApi<Table>("/api/v1/tables/", {
+    return fetchApi<Table>("/api/tables", {
       method: "POST",
       body: JSON.stringify(data),
     });
   },
 
   // Create multiple tables (for onboarding)
-  createTablesBulk: (tables: TempTable[]): Promise<Table[]> => {
-    return fetchApi<Table[]>("/api/v1/tables/bulk/", {
-      method: "POST",
-      body: JSON.stringify({ tables }),
-    });
+  createTablesBulk: async (tables: TempTable[]): Promise<Table[]> => {
+    const createdTables: Table[] = [];
+    for (const table of tables) {
+      const createdTable = await fetchApi<Table>("/api/tables", {
+        method: "POST",
+        body: JSON.stringify(table),
+      });
+      createdTables.push(createdTable);
+    }
+    return createdTables;
   },
 
   // Update a table
   updateTable: (id: number, data: UpdateTableData): Promise<Table> => {
-    return fetchApi<Table>(`/api/v1/tables/${id}/`, {
+    return fetchApi<Table>(`/api/tables/${id}`, {
       method: "PUT",
       body: JSON.stringify(data),
     });
@@ -70,7 +83,7 @@ export const tableApi = {
 
   // Delete a table
   deleteTable: (id: number): Promise<void> => {
-    return fetchApi<void>(`/api/v1/tables/${id}/`, {
+    return fetchApi<void>(`/api/tables/${id}`, {
       method: "DELETE",
     });
   },
@@ -105,27 +118,8 @@ export const dashboardApi = {
   getDashboardStatus: async (
     date: string
   ): Promise<DashboardStatusResponse> => {
-    const raw = await fetchApi<any>(`/api/v1/dashboard-status?date=${date}`);
-    console.log("DASHBOARD RAW RESPONSE:", raw);
-    // Map backend response to expected DashboardStatusResponse
-    return {
-      date: raw.date,
-      tables: (raw.tables ?? []).map((table: any) => ({
-        id: table.id,
-        name: table.name,
-        capacity: table.capacity,
-        location: table.location,
-        status: table.status,
-        reservation: table.reservation
-          ? {
-              id: table.reservation.id,
-              customer_name: table.reservation.customer_name ?? "",
-              reservation_time: table.reservation.reservation_time,
-              party_size: table.reservation.party_size,
-            }
-          : undefined,
-      })),
-    };
+    const response = await fetchApi<DashboardStatusResponse>(`/api/dashboard-status?date=${date}`);
+    return response;
   },
 };
 

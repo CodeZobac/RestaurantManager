@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
 
 interface TableStatusBadgeProps {
-  status: 'available' | 'maintenance' | 'reserved';
+  status: 'available' | 'maintenance' | 'pending' | 'occupied';
 }
 
 export function TableStatusBadge({ status }: TableStatusBadgeProps) {
@@ -16,8 +16,10 @@ export function TableStatusBadge({ status }: TableStatusBadgeProps) {
         return 'default'; // Green
       case 'maintenance':
         return 'secondary'; // Yellow
-      case 'reserved':
+      case 'pending':
         return 'destructive'; // Red
+      case 'occupied':
+        return 'outline'; // Blue
       default:
         return 'outline';
     }
