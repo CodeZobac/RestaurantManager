@@ -39,7 +39,8 @@
   "Status": {
     "available": "Available",
     "maintenance": "Maintenance", 
-    "reserved": "Reserved"
+    "occupied": "Occupied",
+	"pending": "Pending"
   },
   "DeleteDialog": {
     "title": "Delete Table",

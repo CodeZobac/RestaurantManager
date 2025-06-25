@@ -39,7 +39,8 @@
   "Status": {
     "available": "Disponível",
     "maintenance": "Manutenção",
-    "reserved": "Reservada"
+    "occupied": "Ocupado",
+	"pending": "Pendente"
   },
   "DeleteDialog": {
     "title": "Eliminar Mesa",
