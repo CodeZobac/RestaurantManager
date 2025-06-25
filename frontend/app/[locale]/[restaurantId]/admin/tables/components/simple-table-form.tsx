@@ -46,7 +46,7 @@ export function SimpleTableForm({ open, onOpenChange, mode }: SimpleTableFormPro
     name: '',
     capacity: '4',
     location: '',
-    status: 'available' as 'available' | 'maintenance' | 'reserved',
+    status: 'available' as 'available' | 'maintenance' | 'pending' | 'occupied',
   });
 
   const [errors, setErrors] = useState({
@@ -181,7 +181,7 @@ export function SimpleTableForm({ open, onOpenChange, mode }: SimpleTableFormPro
             <Label htmlFor="status">{t('statusLabel')}</Label>
             <Select
               value={formData.status}
-              onValueChange={(value: 'available' | 'maintenance' | 'reserved') =>
+              onValueChange={(value: 'available' | 'maintenance' | 'pending' | 'occupied') =>
                 setFormData({ ...formData, status: value })
               }
             >
@@ -191,7 +191,8 @@ export function SimpleTableForm({ open, onOpenChange, mode }: SimpleTableFormPro
               <SelectContent>
                 <SelectItem value="available">{tStatus('available')}</SelectItem>
                 <SelectItem value="maintenance">{tStatus('maintenance')}</SelectItem>
-                <SelectItem value="reserved">{tStatus('reserved')}</SelectItem>
+                <SelectItem value="pending">{tStatus('pending')}</SelectItem>
+                <SelectItem value="occupied">{tStatus('occupied')}</SelectItem>
               </SelectContent>
             </Select>
           </div>

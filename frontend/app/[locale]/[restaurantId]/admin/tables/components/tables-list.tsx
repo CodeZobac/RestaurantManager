@@ -13,18 +13,16 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Users } from "lucide-react";
-import { useTableStore } from "@/lib/store";
 import { TableStatusBadge } from "./table-status-badge";
 
 interface TablesListProps {
   tables: Table[];
   loading: boolean;
-  onEditClick?: () => void;
+  onEditClick?: (table: Table) => void;
 }
 
 export function TablesList({ tables, loading, onEditClick }: TablesListProps) {
   const t = useTranslations("TableManagement");
-  const { setSelectedTable } = useTableStore();
 
   if (loading) {
     return (
@@ -83,10 +81,7 @@ export function TablesList({ tables, loading, onEditClick }: TablesListProps) {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => {
-                      setSelectedTable(table);
-                      if (onEditClick) onEditClick();
-                    }}
+                    onClick={() => onEditClick?.(table)}
                   >
                     <Edit className="h-4 w-4 mr-1" />
                     {t("edit")}
@@ -95,7 +90,7 @@ export function TablesList({ tables, loading, onEditClick }: TablesListProps) {
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      setSelectedTable(table);
+                      // TODO: Implement delete functionality
                     }}
                   >
                     <Trash2 className="h-4 w-4 mr-1" />
