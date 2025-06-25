@@ -1,15 +1,18 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useState, useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { reservationSchema, type ReservationFormData } from "@/lib/schemas";
-import { reservationApi, ApiError } from "@/lib/api";
+import { reservationApi, restaurantApi, ApiError } from "@/lib/api";
+import { Restaurant } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FormStatusDisplay } from "@/app/[locale]/reserve/components/form-status-display";
+import { MapPin, Calendar, Loader2, ChefHat } from "lucide-react";
 
 type FormStatus = "idle" | "submitting" | "success" | "error";
 
@@ -17,16 +20,36 @@ export function ReservationForm() {
   const t = useTranslations("Reservation");
   const [formStatus, setFormStatus] = useState<FormStatus>("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [loadingRestaurants, setLoadingRestaurants] = useState(true);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isValid },
     reset,
+    control,
   } = useForm<ReservationFormData>({
     resolver: zodResolver(reservationSchema),
     mode: "onChange",
   });
+
+  // Load restaurants on component mount
+  useEffect(() => {
+    const fetchRestaurants = async () => {
+      try {
+        setLoadingRestaurants(true);
+        const restaurantData = await restaurantApi.getRestaurants();
+        setRestaurants(restaurantData);
+      } catch (error) {
+        console.error('Failed to load restaurants:', error);
+      } finally {
+        setLoadingRestaurants(false);
+      }
+    };
+
+    fetchRestaurants();
+  }, []);
 
   const onSubmit = async (data: ReservationFormData) => {
     try {
@@ -76,6 +99,62 @@ export function ReservationForm() {
           message={errorMessage}
         />
       )}
+
+      {/* Restaurant Selection Section */}
+      <div className="space-y-6">
+        <div className="border-b border-gray-200 pb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
+              <ChefHat className="w-4 h-4 text-white" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900">
+              {t("form.selectRestaurant")}
+            </h3>
+          </div>
+          <p className="text-sm text-gray-600 mt-2">
+            Choose your preferred dining location
+          </p>
+        </div>
+
+        <div>
+          <Label htmlFor="restaurant_id">
+            {t("form.restaurant")} *
+          </Label>
+          {loadingRestaurants ? (
+            <div className="flex items-center gap-2 p-3 border rounded-md bg-gray-50">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span className="text-sm text-gray-600">Loading restaurants...</span>
+            </div>
+          ) : (
+            <Controller
+              name="restaurant_id"
+              control={control}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className={errors.restaurant_id ? "border-red-500" : ""}>
+                    <SelectValue placeholder="Select a restaurant location" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {restaurants.map((restaurant) => (
+                      <SelectItem key={restaurant.id} value={restaurant.id}>
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-gray-500" />
+                          {restaurant.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          )}
+          {errors.restaurant_id && (
+            <p className="text-sm text-red-600 mt-1">
+              {t(`validation.${errors.restaurant_id.message}`)}
+            </p>
+          )}
+        </div>
+      </div>
 
       {/* Contact Information Section */}
       <div className="space-y-6">
@@ -240,12 +319,20 @@ export function ReservationForm() {
       <div className="pt-6">
         <Button
           type="submit"
-          disabled={formStatus === "submitting" || !isValid}
-          className="w-full"
+          disabled={formStatus === "submitting" || !isValid || loadingRestaurants}
+          className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white py-4 text-lg rounded-full shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         >
-          {formStatus === "submitting"
-            ? t("form.submitting")
-            : t("form.submitButton")}
+          {formStatus === "submitting" ? (
+            <div className="flex items-center gap-2">
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span>Creating your reservation...</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              <span>{t("form.submitButton")}</span>
+            </div>
+          )}
         </Button>
       </div>
     </form>

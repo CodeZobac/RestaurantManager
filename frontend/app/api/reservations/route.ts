@@ -53,7 +53,28 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { customer_name, customer_email, customer_phone, table_id, reservation_date, reservation_time, party_size, special_requests } = body;
+    const { customer_name, customer_email, customer_phone, restaurant_id, reservation_date, reservation_time, party_size, special_requests } = body;
+
+    // Find available table that can accommodate the party size in the selected restaurant
+    const { data: availableTables, error: tablesError } = await supabase
+      .from('tables')
+      .select('id, name, capacity')
+      .eq('restaurant_id', restaurant_id)
+      .eq('status', 'available')
+      .gte('capacity', party_size)
+      .order('capacity', { ascending: true })
+      .limit(1);
+
+    if (tablesError) throw tablesError;
+
+    if (!availableTables || availableTables.length === 0) {
+      return NextResponse.json({ 
+        success: false,
+        error: 'No available tables found for the requested party size at this restaurant' 
+      }, { status: 409 });
+    }
+
+    const table_id = availableTables[0].id;
 
     // Create or get customer
     let customer_id;
@@ -100,6 +121,7 @@ export async function POST(request: Request) {
       .insert({
         customer_id,
         table_id,
+        restaurant_id,
         reservation_date,
         reservation_time,
         party_size,

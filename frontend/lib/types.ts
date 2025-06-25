@@ -67,6 +67,7 @@ export interface CreateReservationData {
   customer_name: string;
   customer_email?: string;
   customer_phone?: string;
+  restaurant_id: string;
   reservation_date: string;
   reservation_time: string;
   party_size: number;
@@ -98,4 +99,12 @@ export interface DashboardTable {
 export interface DashboardStatusResponse {
   date: string;
   tables: DashboardTable[];
+}
+
+// Restaurant related types
+export interface Restaurant {
+  id: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
 }

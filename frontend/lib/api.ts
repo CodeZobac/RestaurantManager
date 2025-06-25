@@ -6,6 +6,7 @@ import {
   CreateReservationData,
   ReservationResponse,
   DashboardStatusResponse,
+  Restaurant,
 } from "./types";
 
 class ApiError extends Error {
@@ -120,6 +121,13 @@ export const dashboardApi = {
   ): Promise<DashboardStatusResponse> => {
     const response = await fetchApi<DashboardStatusResponse>(`/api/dashboard-status?date=${date}`);
     return response;
+  },
+};
+
+export const restaurantApi = {
+  // Get all restaurants
+  getRestaurants: (): Promise<Restaurant[]> => {
+    return fetchApi<Restaurant[]>("/api/restaurants");
   },
 };
 

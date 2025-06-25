@@ -15,6 +15,7 @@ export const reservationSchema = z.object({
   customer_name: z.string().min(2, 'nameMinLength').max(200, 'nameMaxLength'),
   customer_email: z.string().email('invalidEmail').optional().or(z.literal('')),
   customer_phone: z.string().min(10, 'phoneMinLength').max(20, 'phoneMaxLength').optional().or(z.literal('')),
+  restaurant_id: z.string().min(1, 'restaurantRequired'),
   reservation_date: z.string().min(1, 'dateRequired'),
   reservation_time: z.string().min(1, 'timeRequired'),
   party_size: z.number().min(1, 'partySizeMin').max(20, 'partySizeMax'),
