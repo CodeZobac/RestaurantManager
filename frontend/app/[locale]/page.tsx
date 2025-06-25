@@ -2,9 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { 
   Calendar, 
   Clock, 
@@ -20,17 +17,21 @@ import {
   Menu,
   X,
   User,
-  Lock,
-  Sparkles
+  Sparkles,
+  Globe
 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { useRouter, usePathname } from '@/i18n/navigation';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 
 export default function RestaurantLandingPage() {
   const t = useTranslations('LandingPage');
+  const router = useRouter();
+  const pathname = usePathname();
+  const locale = useLocale();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Simulate scroll effect
@@ -98,16 +99,11 @@ export default function RestaurantLandingPage() {
   ];
 
   const handleReservation = () => {
-    // In a real Next.js app, this would be:
-    // router.push(`/${locale}/reserve`);
-    console.log('Navigating to reservation page');
+    router.push('/reserve');
   };
 
   const handleLogin = () => {
-    // In a real Next.js app, this would be:
-    // router.push(`/${locale}/auth`);
-    console.log('Navigating to auth page');
-    setLoginDialogOpen(false);
+    router.push('/auth');
   };
 
   return (
@@ -134,48 +130,10 @@ export default function RestaurantLandingPage() {
               <a href="#about" className={`transition-colors hover:text-orange-600 ${isScrolled ? 'text-gray-700' : 'text-white'}`}>{t('navAbout')}</a>
               <a href="#contact" className={`transition-colors hover:text-orange-600 ${isScrolled ? 'text-gray-700' : 'text-white'}`}>{t('navContact')}</a>
               
-              <Dialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="ghost" size="sm" className={`hover:text-orange-600 ${isScrolled ? 'text-gray-600' : 'text-white'}`}>
-                    <User className="w-4 h-4 mr-2" />
-                    {t('managerLogin')}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                      <Lock className="w-5 h-5 text-orange-500" />
-                      {t('managerLogin')}
-                    </DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4 mt-4">
-                    <div>
-                      <Label htmlFor="email">{t('loginEmailLabel')}</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder={t('loginEmailPlaceholder')}
-                        className="mt-2"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="password">{t('loginPasswordLabel')}</Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        placeholder={t('loginPasswordPlaceholder')}
-                        className="mt-2"
-                      />
-                    </div>
-                    <Button onClick={handleLogin} className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700">
-                      {t('signInButton')}
-                    </Button>
-                    <p className="text-sm text-gray-500 text-center">
-                      {t('accessDashboard')}
-                    </p>
-                  </div>
-                </DialogContent>
-              </Dialog>
+              <Button variant="ghost" size="sm" onClick={handleLogin} className={`hover:text-orange-600 ${isScrolled ? 'text-gray-600' : 'text-white'}`}>
+                <User className="w-4 h-4 mr-2" />
+                {t('managerLogin')}
+              </Button>
 
               <Button 
                 onClick={handleReservation}
@@ -183,6 +141,28 @@ export default function RestaurantLandingPage() {
               >
                 {t('makeReservationButton')}
               </Button>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className={`hover:bg-white/10 ${isScrolled ? 'text-gray-600 hover:text-gray-900' : 'text-white'}`}>
+                    <Globe className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-white/95 backdrop-blur-md border-gray-200/50 shadow-lg">
+                  <DropdownMenuItem 
+                    onClick={() => router.replace(pathname, { locale: 'en' })}
+                    className={`cursor-pointer ${locale === 'en' ? 'bg-orange-100 text-orange-700' : ''}`}
+                  >
+                    English
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => router.replace(pathname, { locale: 'pt' })}
+                    className={`cursor-pointer ${locale === 'pt' ? 'bg-orange-100 text-orange-700' : ''}`}
+                  >
+                    Português
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* Mobile menu button */}
