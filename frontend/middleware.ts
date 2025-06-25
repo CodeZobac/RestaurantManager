@@ -20,8 +20,8 @@ export default async function middleware(request: NextRequest) {
     const session = await auth();
     
     if (!session || !session.user) {
-      // No session, redirect to auth page
-      return Response.redirect(new URL(`/${locale}/auth`, request.url));
+      // No session, redirect to home page
+      return Response.redirect(new URL(`/${locale}`, request.url));
     }
     
     if (!session.user.restaurant_id) {
