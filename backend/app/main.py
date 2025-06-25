@@ -7,9 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from .core.config import settings
-from .routers import tables_router
-from .routers.reservations import router as reservations_router
-from .routers.telegram import router as telegram_router
+from .routers import tables_router, reservations_router, telegram_router
 
 # Load environment variables from .env file
 load_dotenv()
