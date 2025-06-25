@@ -47,7 +47,7 @@ const editTableSchema = z.object({
   location: z.string()
     .min(1, 'Location is required')
     .max(100, 'Location must be less than 100 characters'),
-  status: z.enum(['available', 'occupied', 'reserved', 'maintenance'], {
+  status: z.enum(['available', 'occupied', 'pending', 'maintenance'], {
     required_error: 'Please select a table status',
   }),
 });
@@ -75,8 +75,8 @@ const statusOptions = [
     variant: 'secondary' as const,
   },
   { 
-    value: 'reserved', 
-    label: 'Reserved', 
+    value: 'pending', 
+    label: 'Pending', 
     description: 'Has upcoming reservation',
     variant: 'outline' as const,
   },
@@ -89,7 +89,7 @@ const statusOptions = [
 ];
 
 export default function EditForm({ table, isOpen, onClose, onSuccess }: EditFormProps) {
-  const { updateTable, loading, error, clearError } = useTableStore();
+  const { updateTable, error, clearError } = useTableStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<EditTableFormData>({
