@@ -2,41 +2,57 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Calendar, Settings, LogOut } from 'lucide-react';
+import { Menu, Calendar, Settings, LogOut, User, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
+import { useSession, signOut } from 'next-auth/react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { useTranslations } from 'next-intl';
 
-interface HeaderProps {
-  adminName?: string;
-}
-
-export default function Header({ adminName = 'Admin' }: HeaderProps) {
+export default function Header() {
+  const t = useTranslations('Header');
   const pathname = usePathname();
   const router = useRouter();
+  const { data: session } = useSession();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const navigationItems = [
     {
-      href: '/dashboard',
-      label: 'Dashboard',
+      href: `/dashboard`,
+      label: t('dashboardLabel'),
       icon: Calendar,
-      description: 'View daily reservations and table status'
+      description: t('dashboardDescription')
     },
     {
-      href: '/tables',
-      label: 'Tables',
+      href: `/tables`,
+      label: t('tablesLabel'),
       icon: Settings,
-      description: 'Manage restaurant tables and layout'
+      description: t('tablesDescription')
     }
   ];
 
   const handleNavigation = (href: string) => {
-    router.push(href);
+    const restaurantId = session?.user?.restaurant_id;
+    if (restaurantId) {
+      router.push(`/${pathname.split('/')[1]}/${restaurantId}/admin${href}`);
+    }
     setIsSheetOpen(false);
   };
 
-  const isActive = (href: string) => pathname === href;
+  const isActive = (href: string) => {
+    const restaurantId = session?.user?.restaurant_id;
+    if (restaurantId) {
+      return pathname === `/${pathname.split('/')[1]}/${restaurantId}/admin${href}`;
+    }
+    return false;
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
@@ -49,7 +65,7 @@ export default function Header({ adminName = 'Admin' }: HeaderProps) {
                 <span className="text-white font-bold text-sm">R</span>
               </div>
               <span className="font-semibold text-gray-900 hidden sm:inline-block">
-                RestaurantAdmin
+                {session?.user?.restaurant_name || t('restaurantAdmin')}
               </span>
             </div>
           </div>
@@ -86,17 +102,31 @@ export default function Header({ adminName = 'Admin' }: HeaderProps) {
 
           {/* User Info & Mobile Menu */}
           <div className="flex items-center space-x-3">
-            {/* User Badge */}
-            <Badge variant="secondary" className="hidden sm:inline-flex bg-gray-100 text-gray-700 hover:bg-gray-200">
-              {adminName}
-            </Badge>
+            {/* User Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center space-x-2">
+                  <User className="w-5 h-5" />
+                  <span className="hidden sm:inline-block">{session?.user?.name || t('adminLabel')}</span>
+                  <ChevronDown className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>{t('myAccountLabel')}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => signOut({ callbackUrl: '/' })}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  {t('logoutButton')}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {/* Mobile Menu */}
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="sm" className="md:hidden">
                   <Menu className="h-5 w-5" />
-                  <span className="sr-only">Toggle menu</span>
+                  <span className="sr-only">{t('toggleMenu')}</span>
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-72">
@@ -107,8 +137,8 @@ export default function Header({ adminName = 'Admin' }: HeaderProps) {
                       <span className="text-white font-bold text-sm">R</span>
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">RestaurantAdmin</p>
-                      <p className="text-sm text-gray-500">{adminName}</p>
+                      <p className="font-semibold text-gray-900">{session?.user?.restaurant_name || t('restaurantAdmin')}</p>
+                      <p className="text-sm text-gray-500">{session?.user?.name || t('adminLabel')}</p>
                     </div>
                   </div>
 
@@ -150,13 +180,10 @@ export default function Header({ adminName = 'Admin' }: HeaderProps) {
                       variant="ghost" 
                       size="sm" 
                       className="w-full justify-start text-gray-600 hover:text-gray-900"
-                      onClick={() => {
-                        // Handle logout logic here
-                        console.log('Logout clicked');
-                      }}
+                      onClick={() => signOut({ callbackUrl: '/' })}
                     >
                       <LogOut className="w-4 h-4 mr-2" />
-                      Sign out
+                      {t('signOutButton')}
                     </Button>
                   </div>
                 </div>
