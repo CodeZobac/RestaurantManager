@@ -1,7 +1,9 @@
 import logging
 from fastapi import APIRouter, Request, HTTPException
+from datetime import datetime
 from app.services.telegram_service import telegram_service, is_telegram_admin
-from app.services.reservation_service import reservation_service 
+from app.services.reservation_service import reservation_service
+from app.services.restaurant_service import restaurant_service
 from app.core.config import settings
 import httpx
 import os
@@ -90,10 +92,7 @@ async def telegram_webhook(request: Request):
                     id_column="id"
                 )
                 if telegram_service:
-                    await telegram_service.bot.send_message(
-                        chat_id=user_id,
-                        text="Welcome, Admin! Use /pending_reservations to view reservations for your associated restaurant."
-                    )
+                    await telegram_service.send_start_message(user_id, first_name)
             else:
                 if telegram_service:
                     await telegram_service.bot.send_message(
@@ -101,6 +100,11 @@ async def telegram_webhook(request: Request):
                         text="Unauthorized: You are not registered as an admin."
                     )
                 return {"ok": True}
+            return {"ok": True}
+
+        elif text.strip() == "/help":
+            if telegram_service:
+                await telegram_service.send_help_menu(user_id)
             return {"ok": True}
         
         elif text.strip() == "/pending_reservations":
@@ -114,39 +118,42 @@ async def telegram_webhook(request: Request):
                     )
                     return {"ok": True}
 
+                restaurant = await restaurant_service.get_restaurant_by_id(current_admin.restaurant_id)
+                if not restaurant:
+                    await telegram_service.bot.send_message(
+                        chat_id=user_id,
+                        text="Could not find the restaurant associated with your account. Please contact support."
+                    )
+                    return {"ok": True}
+                
+                restaurant_name = restaurant.name
+
                 pending_reservations = await reservation_service.get_pending_reservations(current_admin.restaurant_id)
                 if pending_reservations:
+                    response_text = f"<b>Pending Reservations for {restaurant_name}:</b>\n\n"
                     for reservation in pending_reservations:
-                        reservation_info = (
-                            f"<b>Reservation ID:</b> {reservation.reservation_id}\n"
+                        reservation_datetime = datetime.combine(reservation.reservation_date, reservation.reservation_time)
+                        response_text += (
+                            f"<b>Reservation ID:</b> {reservation.id}\n"
                             f"<b>Client Name:</b> {reservation.client_name}\n"
                             f"<b>Contact:</b> {reservation.client_contact}\n"
-                            f"<b>Time:</b> {reservation.reservation_time.strftime('%Y-%m-%d %H:%M')}\n"
+                            f"<b>Time:</b> {reservation_datetime.strftime('%Y-%m-%d %H:%M')}\n"
                             f"<b>Party Size:</b> {reservation.party_size}\n"
-                            f"<b>Status:</b> {reservation.status}\n"
-                            f"<b>Restaurant ID:</b> {reservation.restaurant_id}"
+                            f"<b>Status:</b> {reservation.status}\n\n"
                         )
-                        keyboard = [
-                            [
-                                InlineKeyboardButton("Confirm", callback_data=f"confirm:{reservation.reservation_id}"),
-                                InlineKeyboardButton("Discard", callback_data=f"discard:{reservation.reservation_id}")
-                            ]
-                        ]
-                        reply_markup = InlineKeyboardMarkup(keyboard)
-                        await telegram_service.bot.send_message(
-                            chat_id=user_id,
-                            text=f"New pending reservation:\n{reservation_info}",
-                            reply_markup=reply_markup,
-                            parse_mode="HTML"
-                        )
+                    await telegram_service.bot.send_message(
+                        chat_id=user_id,
+                        text=response_text,
+                        parse_mode="HTML"
+                    )
                 else:
                     await telegram_service.bot.send_message(
                         chat_id=user_id,
-                        text=f"No pending reservations for restaurant {current_admin.restaurant_id} at the moment."
+                        text=f"There are no new pending reservations for {restaurant_name} that have not yet been notified."
                     )
             return {"ok": True}
 
-        # If admin replies with an email address (this part might be less relevant now with restaurant association)
+
         email_regex = r"^[\w\.-]+@[\w\.-]+\.\w+$"
         if re.match(email_regex, text.strip()):
             await supabase_patch(
@@ -221,4 +228,4 @@ async def telegram_webhook(request: Request):
 
         return {"ok": True}
     
-    return {"ok": True} 
+    return {"ok": True}
