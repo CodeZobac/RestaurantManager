@@ -49,8 +49,9 @@ async function fetchApi<T>(
 
 export const tableApi = {
   // Get all tables
-  getTables: (): Promise<Table[]> => {
-    return fetchApi<Table[]>("/api/tables");
+  getTables: (restaurantId?: string): Promise<Table[]> => {
+    const endpoint = restaurantId ? `/api/tables?restaurantId=${restaurantId}` : "/api/tables";
+    return fetchApi<Table[]>(endpoint);
   },
 
   // Create a single table

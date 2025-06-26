@@ -4,7 +4,7 @@ export const tableSchema = z.object({
   name: z.string().min(1, 'nameRequired').max(100),
   capacity: z.number().min(1, 'capacityMin').max(50),
   location: z.string().optional().or(z.literal('')),
-  status: z.enum(['available', 'maintenance', 'pending', 'occupied'])
+  status: z.enum(['available', 'maintenance', 'pending', 'confirmed', 'occupied'])
 });
 
 export const onboardingSchema = z.object({
