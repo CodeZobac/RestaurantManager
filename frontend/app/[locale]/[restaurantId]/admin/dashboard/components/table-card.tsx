@@ -1,14 +1,15 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { DashboardTable } from '@/lib/types';
+import { DisplayTable, DashboardTable, TableGroup } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import { GripVertical } from 'lucide-react';
 import { ReservationInfoPopover } from './reservation-info-popover';
 import { NewReservationPopover } from './new-reservation-popover';
 
 interface TableCardProps {
-  table: DashboardTable;
+  table: DisplayTable;
   onEditReservation?: (table: DashboardTable) => void;
   onDeleteReservation?: (table: DashboardTable) => void;
   onCreateReservation?: (reservationData: {
@@ -21,10 +22,14 @@ interface TableCardProps {
     table_id: string;
     reservation_date: string;
   }) => void;
+  onUnmerge?: (groupId: string) => void;
 }
 
-export function TableCard({ table, onEditReservation, onDeleteReservation, onCreateReservation }: TableCardProps) {
+
+export function TableCard({ table, onEditReservation, onDeleteReservation, onCreateReservation, onUnmerge }: TableCardProps) {
   const t = useTranslations('Dashboard');
+
+  const isGroup = 'isGroup' in table;
 
   const getStatusColors = (status: DashboardTable['status']) => {
     switch (status) {
@@ -63,29 +68,59 @@ export function TableCard({ table, onEditReservation, onDeleteReservation, onCre
         
         <div className="flex-1" />
         
-        {table.reservation ? (
+        {!isGroup && (table as DashboardTable).reservation ? (
           <div className="text-xs space-y-1">
             <div className="font-medium truncate">
-              {table.reservation.customer_name}
+              {(table as DashboardTable).reservation!.customer_name}
             </div>
             <div className="opacity-75">
-              {t('at')} {table.reservation.reservation_time}
+              {t('at')} {(table as DashboardTable).reservation!.reservation_time}
             </div>
             <div className="opacity-60">
-              {table.reservation.party_size} {t('guests')}
+              {(table as DashboardTable).reservation!.party_size} {t('guests')}
             </div>
           </div>
-        ) : (
+        ) : !isGroup ? (
           <div className="text-xs opacity-75">
             {t('noReservations')}
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );
 
-  // Wrap with appropriate popover based on reservation status
-  if (table.reservation) {
+  // If it's a group, render a simplified card with an unmerge button
+  if (isGroup) {
+    const group = table as TableGroup;
+    return (
+      <div
+        className={cn(
+          'aspect-square rounded-lg border-2 p-3 transition-all hover:shadow-md relative group',
+          'bg-blue-100 border-blue-300 text-blue-800', // Distinct color for groups
+          'hover:scale-105'
+        )}
+      >
+        <div className="flex flex-col h-full">
+          <div className="font-semibold text-sm truncate">{group.name}</div>
+          <div className="text-xs opacity-75 mt-1">
+            {group.capacity} {t('guests')}
+          </div>
+          <div className="flex-1" />
+          <Button
+            onClick={() => onUnmerge?.(group.id)}
+            size="sm"
+            variant="outline"
+            className="w-full"
+          >
+            {t('split')}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Wrap with appropriate popover based on reservation status for single tables
+  if (!isGroup && (table as DashboardTable).reservation) {
     return (
       <ReservationInfoPopover
         table={table}
@@ -95,7 +130,7 @@ export function TableCard({ table, onEditReservation, onDeleteReservation, onCre
         {TableCardContent}
       </ReservationInfoPopover>
     );
-  } else {
+  } else if (!isGroup) {
     return (
       <NewReservationPopover
         table={table}

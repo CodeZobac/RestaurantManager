@@ -3,8 +3,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
+import { DragEndEvent } from '@dnd-kit/core';
+import { arrayMove } from '@dnd-kit/sortable';
 import { dashboardApi, ApiError } from '@/lib/api';
-import { CreateReservationData, DashboardTable } from '@/lib/types';
+import { CreateReservationData, DashboardTable, DisplayTable, TableGroup } from '@/lib/types';
 import { DashboardHeader } from './dashboard-header';
 import { TableGrid } from './table-grid';
 import { Button } from '@/components/ui/button';
@@ -16,7 +18,7 @@ interface DashboardContentProps {
 export function DashboardContent({ restaurantId }: DashboardContentProps) {
   const t = useTranslations('Dashboard');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [tables, setTables] = useState<DashboardTable[]>([]);
+  const [tables, setTables] = useState<DisplayTable[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -104,6 +106,58 @@ export function DashboardContent({ restaurantId }: DashboardContentProps) {
     fetchDashboardData(selectedDate);
   };
 
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over) return;
+
+    const activeId = active.id;
+    const overId = over.id;
+
+    setTables((currentTables) => {
+      const activeItem = currentTables.find((t) => t.id === activeId);
+      const overItem = currentTables.find((t) => t.id === overId);
+
+      // Handle merging
+      if (activeItem && overItem && activeId !== overId && !('isGroup' in activeItem) && !('isGroup' in overItem)) {
+        const activeTable = activeItem as DashboardTable;
+        const overTable = overItem as DashboardTable;
+
+        const newGroup: TableGroup = {
+          id: `group-${activeTable.id}-${overTable.id}`,
+          isGroup: true,
+          name: `${activeTable.name} + ${overTable.name}`,
+          capacity: activeTable.capacity + overTable.capacity,
+          status: 'available',
+          tables: [activeTable, overTable],
+          location: activeTable.location,
+        };
+
+        return [
+          ...currentTables.filter((t) => t.id !== activeId && t.id !== overId),
+          newGroup,
+        ];
+      }
+
+      // Handle reordering
+      const oldIndex = currentTables.findIndex((item) => item.id === activeId);
+      const newIndex = currentTables.findIndex((item) => item.id === overId);
+      return arrayMove(currentTables, oldIndex, newIndex);
+    });
+  };
+
+  const handleUnmerge = (groupId: string) => {
+    setTables((currentTables) => {
+      const groupToUnmerge = currentTables.find((t) => t.id === groupId) as TableGroup;
+      if (!groupToUnmerge || !groupToUnmerge.isGroup) return currentTables;
+
+      return [
+        ...currentTables.filter((t) => t.id !== groupId),
+        ...groupToUnmerge.tables,
+      ];
+    });
+  };
+
   // Debug: log tables before reduce
   console.log("DASHBOARD DEBUG: tables =", tables);
 
@@ -158,11 +212,13 @@ export function DashboardContent({ restaurantId }: DashboardContentProps) {
           </Button>
         </div>
       ) : (
-        <TableGrid 
-          tables={tables ?? []} 
+        <TableGrid
+          tables={tables ?? []}
           onEditReservation={handleEditReservation}
           onDeleteReservation={handleDeleteReservation}
           onCreateReservation={handleCreateReservation}
+          onDragEnd={handleDragEnd}
+          onUnmerge={handleUnmerge}
         />
       )}
     </div>
