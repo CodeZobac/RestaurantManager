@@ -1,15 +1,16 @@
-from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends, Query
 from ..schemas.reservation import (
     ReservationCreate,
     ReservationResponse,
     ReservationErrorResponse,
+    DashboardStatusResponse,
 )
 from ..schemas.admin import Admin
 from app.services.reservation_service import reservation_service
 from app.services.telegram_service import telegram_service, get_admin_by_telegram_id
 from app.services.restaurant_service import restaurant_service
 from app.supabase_client import supabase_get
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from typing import Optional, List
 
 router = APIRouter(prefix="/reservations", tags=["reservations"])

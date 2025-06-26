@@ -75,8 +75,8 @@ class Reservation(BaseModel):
         return value
 
     class Config:
-        orm_mode = True 
-        allow_population_by_field_name = True 
+        from_attributes = True
+        validate_by_name = True
 
 class ReservationResponse(BaseModel):
     reservation_id: int
@@ -91,4 +91,3 @@ class ReservationErrorResponse(BaseModel):
 
 class ApiResponse(BaseModel):
     message: str
-
