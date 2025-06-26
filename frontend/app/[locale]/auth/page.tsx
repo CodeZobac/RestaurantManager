@@ -101,8 +101,8 @@ const LoginSignupForm = () => {
       const locale = window.location.pathname.split('/')[1];
       
       if (session?.user?.restaurant_id) {
-        // User has a restaurant, redirect to admin tables
-        window.location.href = `/${locale}/admin/tables`;
+        // User has a restaurant, redirect to admin dashboard
+        window.location.href = `/${locale}/${session.user.restaurant_id}/admin/dashboard`;
       } else {
         // User doesn't have a restaurant, redirect to onboarding
         window.location.href = `/${locale}/onboarding`;
@@ -117,17 +117,6 @@ const LoginSignupForm = () => {
       setIsLoading(false);
     }
   };
-
-  const handleSignIn = async () => {
-      setIsLoading(true);
-      try {
-        await signIn('google', { callbackUrl: '/' });
-      } catch (error) {
-        console.error('Authentication error:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
 
   return (
     <>
@@ -317,21 +306,6 @@ const LoginSignupForm = () => {
               >
                 {isLoading ? t('loggingInButton') : t('loginButton')}
               </button>
-              <p className="text-sm my-[15px]">{t('orLoginWithSocial')}</p>
-              <div className="flex justify-center">
-                <a onClick={handleSignIn} className="inline-flex p-[10px] border-2 border-[#ccc] rounded-lg text-2xl text-gray-800 mx-2">
-                  <i className='bx bxl-google'></i>
-                </a>
-                <a href="#" className="inline-flex p-[10px] border-2 border-[#ccc] rounded-lg text-2xl text-gray-800 mx-2">
-                  <i className='bx bxl-facebook'></i>
-                </a>
-                <a href="#" className="inline-flex p-[10px] border-2 border-[#ccc] rounded-lg text-2xl text-gray-800 mx-2">
-                  <i className='bx bxl-github'></i>
-                </a>
-                <a href="#" className="inline-flex p-[10px] border-2 border-[#ccc] rounded-lg text-2xl text-gray-800 mx-2">
-                  <i className='bx bxl-linkedin'></i>
-                </a>
-              </div>
             </form>
           </div>
 
