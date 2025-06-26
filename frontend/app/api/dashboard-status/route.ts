@@ -48,17 +48,29 @@ export async function GET(request: Request) {
     const tablesWithReservations = tables.map(table => {
       const reservation = reservations.find(r => r.table_id === table.id);
       
+      // Determine table status based on reservation status
+      let tableStatus = 'available';
+      if (reservation) {
+        if (reservation.status === 'pending') {
+          tableStatus = 'pending';
+        } else if (reservation.status === 'confirmed') {
+          tableStatus = 'confirmed';
+        }
+      }
+      
       return {
         id: table.id,
         name: table.name,
         capacity: table.capacity,
         location: table.location,
-        status: reservation ? reservation.status : 'available',
+        status: tableStatus,
         reservation: reservation ? {
           id: reservation.id,
           customer_name: reservation.client_name || reservation.customers?.name || '',
           reservation_time: reservation.reservation_time,
           party_size: reservation.party_size,
+          customer_email: reservation.customer_email,
+          customer_phone: reservation.client_contact,
         } : undefined
       };
     });

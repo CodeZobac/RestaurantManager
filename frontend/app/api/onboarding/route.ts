@@ -1,91 +1,75 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { auth } from '@/auth';
+import { supabaseAdmin } from '@/lib/supabase';
+import { z } from 'zod';
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
+const onboardingSchema = z.object({
+  restaurantName: z.string().min(1, 'Restaurant name is required'),
+  restaurantId: z.string().optional(),
+  tables: z.array(z.object({
+    name: z.string().min(1, 'Table name is required'),
+    capacity: z.number().min(1, 'Capacity must be at least 1'),
+  })).min(1, 'At least one table is required'),
 });
 
 export async function POST(request: Request) {
   const session = await auth();
-  
-  console.log('Session data:', JSON.stringify(session, null, 2));
 
   if (!session || !session.user || !session.user.id) {
-    console.log('No valid session found:', { session });
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const userId = session.user.id;
-  console.log('User ID from session:', userId);
-
   try {
-    const { restaurantName, phoneNumber, tableRegions } = await request.json();
+    const body = await request.json();
+    const parsed = onboardingSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.errors }, { status: 400 });
+    }
+
+    const { restaurantName, tables } = parsed.data;
 
     // 1. Create the restaurant
-    const { data: restaurant, error: restaurantError } = await supabase
+    const { data: restaurant, error: restaurantError } = await supabaseAdmin
       .from('restaurants')
-      .insert({ 
-        id: crypto.randomUUID(),
-        name: restaurantName 
-      })
+      .insert({ id: session.user.id, name: restaurantName })
       .select()
       .single();
 
     if (restaurantError) throw restaurantError;
 
-    // 2. Update the admin with the restaurant_id and phone number
-    const { error: adminError } = await supabase
+    // 2. Update the user with the new restaurant ID
+    const { error: userError } = await supabaseAdmin
       .from('admins')
-      .update({ restaurant_id: restaurant.id, phone_number: phoneNumber })
-      .eq('id', userId);
+      .update({
+        restaurant_id: restaurant.id,
+        onboarding_completed: true,
+      })
+      .eq('id', session.user.id)
+      .select()
+      .single();
 
-    if (adminError) throw adminError;
+    if (userError) throw userError;
 
-    // 3. Create the table regions
-    const regionsToInsert = tableRegions.map((region: { name: string }) => ({
+    // 3. Create the tables for the restaurant
+    const tableData = tables.map(table => ({
+      ...table,
       restaurant_id: restaurant.id,
-      name: region.name,
     }));
 
-    const { data: insertedRegions, error: regionsError } = await supabase
-      .from('table_regions')
-      .insert(regionsToInsert)
-      .select();
-
-    if (regionsError) throw regionsError;
-
-    // 4. Create the tables
-    const tablesToInsert = [];
-    for (const region of tableRegions) {
-        const correspondingRegion = insertedRegions.find((r: { name: string; }) => r.name === region.name);
-        if (correspondingRegion) {
-            for (let i = parseInt(region.startNumber); i <= parseInt(region.endNumber); i++) {
-                tablesToInsert.push({
-                    restaurant_id: restaurant.id,
-                    table_region_id: correspondingRegion.id,
-                    name: `Table ${i}`,
-                    location: region.name, // Add the location field
-                    capacity: 4, // Default capacity, can be changed later
-                    status: 'available',
-                });
-            }
-        }
-    }
-
-    const { error: tablesError } = await supabase
-        .from('tables')
-        .insert(tablesToInsert);
+    const { error: tablesError } = await supabaseAdmin
+      .from('tables')
+      .insert(tableData);
 
     if (tablesError) throw tablesError;
 
+    return NextResponse.json({
+      message: 'Onboarding completed successfully',
+      restaurant_id: restaurant.id,
+    });
 
-    return NextResponse.json({ message: 'Onboarding successful', restaurantId: restaurant.id });
   } catch (error) {
     console.error('Onboarding error:', error);
-    return NextResponse.json({ error: 'An error occurred during onboarding.' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to complete onboarding' }, { status: 500 });
   }
 }
