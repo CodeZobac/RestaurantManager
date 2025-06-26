@@ -15,7 +15,44 @@ class TelegramService:
             raise ValueError("Telegram bot token is not set in environment variables.")
         self.bot = Bot(token=token)
 
-    def send_reservation_notification(self, chat_id: int, reservation_id: str, reservation_info: str):
+    async def send_start_message(self, chat_id: int, first_name: str):
+        """
+        Sends a personalized welcome message.
+        """
+        start_text = (
+            f"Hi {first_name}, welcome to the Restaurant Management Bot!\n\n"
+            "Use /help to see the full list of commands."
+        )
+        try:
+            await self.bot.send_message(
+                chat_id=chat_id,
+                text=start_text,
+                parse_mode="HTML"
+            )
+        except TelegramError as e:
+            logger.error(f"Failed to send start message: {e}")
+
+    async def send_help_menu(self, chat_id: int):
+        """
+        Sends a help menu with available commands.
+        """
+        help_text = (
+            "<b>Welcome to the Restaurant Management Bot!</b>\n\n"
+            "Here are the available commands:\n"
+            "/start - Show this welcome message and command list\n"
+            "/pending_reservations - Manually check for any pending reservations that have not yet been notified.\n"
+            "/help - Show this help menu\n"
+        )
+        try:
+            await self.bot.send_message(
+                chat_id=chat_id,
+                text=help_text,
+                parse_mode="HTML"
+            )
+        except TelegramError as e:
+            logger.error(f"Failed to send help menu: {e}")
+
+    async def send_reservation_notification(self, chat_id: int, reservation_id: str, reservation_info: str):
         """
         Sends a reservation notification with inline Confirm/Discard buttons.
         """
@@ -28,7 +65,7 @@ class TelegramService:
         reply_markup = InlineKeyboardMarkup(keyboard)
         message_text = f"New reservation:\n{reservation_info}"
         try:
-            sent_message = self.bot.send_message(
+            sent_message = await self.bot.send_message(
                 chat_id=chat_id,
                 text=message_text,
                 reply_markup=reply_markup,
