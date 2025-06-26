@@ -4,12 +4,16 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
 import { dashboardApi, ApiError } from '@/lib/api';
-import { DashboardTable } from '@/lib/types';
+import { CreateReservationData, DashboardTable } from '@/lib/types';
 import { DashboardHeader } from './dashboard-header';
 import { TableGrid } from './table-grid';
 import { Button } from '@/components/ui/button';
 
-export function DashboardContent() {
+interface DashboardContentProps {
+  restaurantId: string;
+}
+
+export function DashboardContent({ restaurantId }: DashboardContentProps) {
   const t = useTranslations('Dashboard');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [tables, setTables] = useState<DashboardTable[]>([]);
@@ -25,7 +29,7 @@ export function DashboardContent() {
       const response = await dashboardApi.getDashboardStatus(dateString);
       
       // Sort tables by location
-      const sortedTables = response.tables.sort((a, b) => {
+      const sortedTables = response.tables.sort((a: DashboardTable, b: DashboardTable) => {
         const locationA = a.location || '';
         const locationB = b.location || '';
         return locationA.localeCompare(locationB);
@@ -34,6 +38,13 @@ export function DashboardContent() {
       setTables(sortedTables);
     } catch (err) {
       if (err instanceof ApiError) {
+        // Special handling for users without restaurant (403 error)
+        if (err.status === 403 && err.message.includes('No restaurant associated')) {
+          // Redirect to onboarding if user doesn't have a restaurant
+          const locale = window.location.pathname.split('/')[1];
+          window.location.href = `/${locale}/onboarding`;
+          return;
+        }
         setError(err.message);
       } else {
         setError(t('error'));
@@ -54,9 +65,39 @@ export function DashboardContent() {
     }
   };
 
-  const handleTableClick = (table: DashboardTable) => {
-    // TODO: Handle table click - could show reservation details, etc.
-    console.log('Table clicked:', table);
+  const handleEditReservation = (table: DashboardTable) => {
+    // TODO: Implement edit reservation functionality
+    console.log('Edit reservation for table:', table);
+  };
+
+  const handleDeleteReservation = async (table: DashboardTable) => {
+    // TODO: Implement delete reservation functionality
+    console.log('Delete reservation for table:', table);
+    // For now, just refresh data
+    fetchDashboardData(selectedDate);
+  };
+
+  const handleCreateReservation = async (
+    reservationData: Omit<CreateReservationData, 'restaurant_id'>
+  ) => {
+    try {
+      const response = await fetch('/api/reservations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ...reservationData, restaurant_id: restaurantId }),
+      });
+
+      if (response.ok) {
+        // Refresh dashboard data after successful creation
+        fetchDashboardData(selectedDate);
+      } else {
+        console.error('Failed to create reservation');
+      }
+    } catch (error) {
+      console.error('Error creating reservation:', error);
+    }
   };
 
   const handleRetry = () => {
@@ -117,7 +158,12 @@ export function DashboardContent() {
           </Button>
         </div>
       ) : (
-        <TableGrid tables={tables ?? []} onTableClick={handleTableClick} />
+        <TableGrid 
+          tables={tables ?? []} 
+          onEditReservation={handleEditReservation}
+          onDeleteReservation={handleDeleteReservation}
+          onCreateReservation={handleCreateReservation}
+        />
       )}
     </div>
   );

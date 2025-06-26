@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, { useState } from 'react';
@@ -25,11 +26,23 @@ import { TableCard } from './table-card';
 
 interface TableGridProps {
   tables: DashboardTable[];
-  onTableClick?: (table: DashboardTable) => void;
+  onEditReservation?: (table: DashboardTable) => void;
+  onDeleteReservation?: (table: DashboardTable) => void;
+  onCreateReservation?: (reservationData: any) => void;
 }
 
 // Draggable Table Card Component
-function DraggableTableCard({ table, onTableClick }: { table: DashboardTable; onTableClick?: (table: DashboardTable) => void }) {
+function DraggableTableCard({ 
+  table, 
+  onEditReservation, 
+  onDeleteReservation, 
+  onCreateReservation 
+}: { 
+  table: DashboardTable; 
+  onEditReservation?: (table: DashboardTable) => void;
+  onDeleteReservation?: (table: DashboardTable) => void;
+  onCreateReservation?: (reservationData: any) => void;
+}) {
   const {
     attributes,
     listeners,
@@ -55,13 +68,15 @@ function DraggableTableCard({ table, onTableClick }: { table: DashboardTable; on
     >
       <TableCard
         table={table}
-        onClick={onTableClick ? () => onTableClick(table) : undefined}
+        onEditReservation={onEditReservation}
+        onDeleteReservation={onDeleteReservation}
+        onCreateReservation={onCreateReservation}
       />
     </div>
   );
 }
 
-export function TableGrid({ tables, onTableClick }: TableGridProps) {
+export function TableGrid({ tables, onEditReservation, onDeleteReservation, onCreateReservation }: TableGridProps) {
   const [sortedTables, setSortedTables] = useState(tables);
   
   const sensors = useSensors(
@@ -135,7 +150,9 @@ export function TableGrid({ tables, onTableClick }: TableGridProps) {
                   <DraggableTableCard
                     key={table.id}
                     table={table}
-                    onTableClick={onTableClick}
+                    onEditReservation={onEditReservation}
+                    onDeleteReservation={onDeleteReservation}
+                    onCreateReservation={onCreateReservation}
                   />
                 ))}
               </div>
