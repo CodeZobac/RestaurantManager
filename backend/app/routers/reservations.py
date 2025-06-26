@@ -103,17 +103,20 @@ async def create_reservation(reservation: ReservationCreate, background_tasks: B
 
 
     if created_res.status == "pending" and telegram_service:
+        restaurant = await restaurant_service.get_restaurant_by_id(created_res.restaurant_id)
+        restaurant_name = restaurant.name if restaurant else "Unknown Restaurant"
         reservation_datetime = datetime.combine(created_res.reservation_date, created_res.reservation_time)
         reservation_info = (
             f"<b>New pending reservation:</b>\n"
+            f"Restaurant: {restaurant_name}\n"
             f"Reservation ID: {created_res.id}\n"
             f"Client Name: {created_res.client_name}\n"
             f"Contact: {created_res.client_contact}\n"
             f"Time: {reservation_datetime.strftime('%Y-%m-%d %H:%M')}\n"
             f"Party Size: {created_res.party_size}\n"
-            f"Status: {created_res.status}\n"
-            f"Restaurant ID: {created_res.restaurant_id}"
+            f"Status: {created_res.status}"
         )
+
         try:
             admins_params = {
                 "restaurant_id": f"eq.{created_res.restaurant_id}",

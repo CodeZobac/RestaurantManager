@@ -2,7 +2,8 @@ import logging
 from fastapi import APIRouter, Request, HTTPException
 from datetime import datetime
 from app.services.telegram_service import telegram_service, is_telegram_admin
-from app.services.reservation_service import reservation_service 
+from app.services.reservation_service import reservation_service
+from app.services.restaurant_service import restaurant_service
 from app.core.config import settings
 import httpx
 import os
@@ -117,9 +118,12 @@ async def telegram_webhook(request: Request):
 
                 pending_reservations = await reservation_service.get_pending_reservations(current_admin.restaurant_id)
                 if pending_reservations:
+                    restaurant = await restaurant_service.get_restaurant_by_id(current_admin.restaurant_id)
+                    restaurant_name = restaurant.name if restaurant else "Unknown Restaurant"
                     for reservation in pending_reservations:
                         reservation_datetime = datetime.combine(reservation.reservation_date, reservation.reservation_time)
                         reservation_info = (
+                            f"<b>Restaurant:</b> {restaurant_name}\n"
                             f"<b>Reservation ID:</b> {reservation.id}\n"
                             f"<b>Client Name:</b> {reservation.client_name}\n"
                             f"<b>Contact:</b> {reservation.client_contact}\n"
@@ -140,6 +144,7 @@ async def telegram_webhook(request: Request):
                             reply_markup=reply_markup,
                             parse_mode="HTML"
                         )
+
 
 
                 else:
