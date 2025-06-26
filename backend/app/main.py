@@ -85,6 +85,8 @@ app.include_router(tables_router, prefix="/api/v1")
 app.include_router(reservations_router, prefix="/api/v1")
 app.include_router(telegram_router, prefix="/api/v1")
 
+
+
 # Root endpoint
 @app.get("/", tags=["root"])
 async def root():

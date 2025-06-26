@@ -1,27 +1,46 @@
-import { Table, CreateTableData, UpdateTableData, TempTable, CreateReservationData, ReservationResponse, DashboardStatusResponse } from './types';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+import {
+  Table,
+  CreateTableData,
+  UpdateTableData,
+  TempTable,
+  CreateReservationData,
+  ReservationResponse,
+  DashboardStatusResponse,
+} from "./types";
 
 class ApiError extends Error {
   constructor(public status: number, message: string) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
   }
 }
 
-async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
-  
+async function fetchApi<T>(
+  endpoint: string,
+  options?: RequestInit
+): Promise<T> {
+  // Use internal Next.js API routes
+  const url = endpoint.startsWith('/api') ? endpoint : `/api${endpoint}`;
+
   const response = await fetch(url, {
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...options?.headers,
     },
+    credentials: 'include', // Include cookies for session
     ...options,
   });
 
   if (!response.ok) {
-    throw new ApiError(response.status, `API Error: ${response.statusText}`);
+    const errorText = await response.text();
+    let errorMessage;
+    try {
+      const errorJson = JSON.parse(errorText);
+      errorMessage = errorJson.error || response.statusText;
+    } catch {
+      errorMessage = errorText || response.statusText;
+    }
+    throw new ApiError(response.status, errorMessage);
   }
 
   return response.json();
@@ -30,58 +49,65 @@ async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> 
 export const tableApi = {
   // Get all tables
   getTables: (): Promise<Table[]> => {
-    return fetchApi<Table[]>('/tables');
+    return fetchApi<Table[]>("/api/tables");
   },
 
   // Create a single table
   createTable: (data: CreateTableData): Promise<Table> => {
-    return fetchApi<Table>('/tables', {
-      method: 'POST',
+    return fetchApi<Table>("/api/tables", {
+      method: "POST",
       body: JSON.stringify(data),
     });
   },
 
   // Create multiple tables (for onboarding)
-  createTablesBulk: (tables: TempTable[]): Promise<Table[]> => {
-    return fetchApi<Table[]>('/tables/bulk', {
-      method: 'POST',
-      body: JSON.stringify({ tables }),
-    });
+  createTablesBulk: async (tables: TempTable[]): Promise<Table[]> => {
+    const createdTables: Table[] = [];
+    for (const table of tables) {
+      const createdTable = await fetchApi<Table>("/api/tables", {
+        method: "POST",
+        body: JSON.stringify(table),
+      });
+      createdTables.push(createdTable);
+    }
+    return createdTables;
   },
 
   // Update a table
   updateTable: (id: number, data: UpdateTableData): Promise<Table> => {
-    return fetchApi<Table>(`/tables/${id}`, {
-      method: 'PUT',
+    return fetchApi<Table>(`/api/tables/${id}`, {
+      method: "PUT",
       body: JSON.stringify(data),
     });
   },
 
   // Delete a table
   deleteTable: (id: number): Promise<void> => {
-    return fetchApi<void>(`/tables/${id}`, {
-      method: 'DELETE',
+    return fetchApi<void>(`/api/tables/${id}`, {
+      method: "DELETE",
     });
   },
 
   // Check onboarding status
   getOnboardingStatus: (): Promise<{ completed: boolean }> => {
-    return fetchApi<{ completed: boolean }>('/onboarding/status');
+    return fetchApi<{ completed: boolean }>("/onboarding/status");
   },
 
   // Mark onboarding as complete
   completeOnboarding: (): Promise<void> => {
-    return fetchApi<void>('/onboarding/complete', {
-      method: 'POST',
+    return fetchApi<void>("/onboarding/complete", {
+      method: "POST",
     });
   },
 };
 
 export const reservationApi = {
   // Create a new reservation
-  createReservation: (data: CreateReservationData): Promise<ReservationResponse> => {
-    return fetchApi<ReservationResponse>('/reservations', {
-      method: 'POST',
+  createReservation: (
+    data: CreateReservationData
+  ): Promise<ReservationResponse> => {
+    return fetchApi<ReservationResponse>("/reservations", {
+      method: "POST",
       body: JSON.stringify(data),
     });
   },
@@ -89,8 +115,11 @@ export const reservationApi = {
 
 export const dashboardApi = {
   // Get dashboard status for a specific date
-  getDashboardStatus: (date: string): Promise<DashboardStatusResponse> => {
-    return fetchApi<DashboardStatusResponse>(`/dashboard-status?date=${date}`);
+  getDashboardStatus: async (
+    date: string
+  ): Promise<DashboardStatusResponse> => {
+    const response = await fetchApi<DashboardStatusResponse>(`/api/dashboard-status?date=${date}`);
+    return response;
   },
 };
 

@@ -3,7 +3,7 @@ export interface Table {
   name: string;
   capacity: number;
   location?: string;
-  status: 'available' | 'maintenance' | 'reserved';
+  status: 'available' | 'maintenance' | 'pending' | 'occupied';
   created_at: string;
   updated_at: string;
 }
@@ -12,21 +12,21 @@ export interface CreateTableData {
   name: string;
   capacity: number;
   location?: string;
-  status: 'available' | 'maintenance' | 'reserved';
+  status: 'available' | 'maintenance' | 'pending' | 'occupied';
 }
 
 export interface UpdateTableData {
   name?: string;
   capacity?: number;
   location?: string;
-  status?: 'available' | 'maintenance' | 'reserved';
+  status?: 'available' | 'maintenance' | 'pending' | 'occupied';
 }
 
 export interface TempTable {
   name: string;
   capacity: number;
   location?: string;
-  status: 'available' | 'maintenance' | 'reserved';
+  status: 'available' | 'maintenance' | 'pending' | 'occupied';
 }
 
 export interface OnboardingData {
