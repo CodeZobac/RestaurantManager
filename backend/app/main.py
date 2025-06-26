@@ -7,12 +7,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from .core.config import settings
-from .routers import tables_router
-from .routers.reservations import router as reservations_router
+from .routers import tables_router, reservations_router, telegram_router
 
 # Load environment variables from .env file
 load_dotenv()
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -24,7 +22,6 @@ async def lifespan(app: FastAPI):
     yield
     # Shutdown
     print("🛑 No database connections to close (using Supabase REST API)")
-
 
 # Create FastAPI application
 app = FastAPI(
@@ -85,8 +82,9 @@ app.add_middleware(
 
 # Include routers
 app.include_router(tables_router, prefix="/api/v1")
+app.include_router(reservations_router, prefix="/api/v1")
+app.include_router(telegram_router, prefix="/api/v1")
 
-app.include_router(reservations_router)
 
 
 # Root endpoint
@@ -122,7 +120,6 @@ async def root():
         ],
     }
 
-
 # Health check endpoint
 @app.get("/health", tags=["health"])
 async def health_check():
@@ -132,7 +129,6 @@ async def health_check():
         "message": "API is running",
         "version": settings.app_version,
     }
-
 
 # Global exception handler
 @app.exception_handler(Exception)
@@ -146,7 +142,6 @@ async def global_exception_handler(request, exc):
             "type": "internal_error",
         },
     )
-
 
 if __name__ == "__main__":
     import uvicorn

@@ -4,10 +4,13 @@ from typing import Optional
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
-
 class Settings(BaseSettings):
     """Application settings loaded from environment variables"""
     
+    class Config:
+        env_file = ".env"
+        case_sensitive = False
+
     # API Configuration
     app_name: str = "Restaurant Manager API"
     app_version: str = "0.1.0"
@@ -46,11 +49,16 @@ class Settings(BaseSettings):
         default="your-secret-key-change-in-production",
         description="Secret key for JWT tokens"
     )
+
+    # Telegram Bot
+    telegram_bot_token: Optional[str] = Field(
+        default=None,
+        description="Telegram Bot API token"
+    )
+    telegram_webhook_secret: Optional[str] = Field(
+        default=None,
+        description="Secret token for validating Telegram webhook requests"
+    )
     
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
-
-
 # Global settings instance
 settings = Settings()
