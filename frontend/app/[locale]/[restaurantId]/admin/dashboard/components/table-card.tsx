@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { DashboardTable } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { GripVertical } from 'lucide-react';
 
 interface TableCardProps {
   table: DashboardTable;
@@ -28,12 +29,17 @@ export function TableCard({ table, onClick }: TableCardProps) {
   return (
     <div
       className={cn(
-        'aspect-square rounded-lg border-2 p-3 cursor-pointer transition-all hover:shadow-md',
+        'aspect-square rounded-lg border-2 p-3 cursor-pointer transition-all hover:shadow-md relative group',
         getStatusColors(table.status),
         onClick && 'hover:scale-105'
       )}
       onClick={onClick}
     >
+      {/* Drag handle indicator */}
+      <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-60 transition-opacity">
+        <GripVertical className="h-3 w-3" />
+      </div>
+      
       <div className="flex flex-col h-full">
         <div className="font-semibold text-sm truncate">{table.name}</div>
         <div className="text-xs opacity-75 mt-1">

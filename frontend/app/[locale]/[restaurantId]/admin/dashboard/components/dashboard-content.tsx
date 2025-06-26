@@ -23,7 +23,15 @@ export function DashboardContent() {
     try {
       const dateString = format(date, 'yyyy-MM-dd');
       const response = await dashboardApi.getDashboardStatus(dateString);
-      setTables(response.tables);
+      
+      // Sort tables by location
+      const sortedTables = response.tables.sort((a, b) => {
+        const locationA = a.location || '';
+        const locationB = b.location || '';
+        return locationA.localeCompare(locationB);
+      });
+      
+      setTables(sortedTables);
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);

@@ -20,7 +20,7 @@ export function TablesManagement() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
 
-  const { tables, loading, error, fetchTables, clearError } = useTableStore();
+  const { tables, loading, error, fetchTables, clearError, setSelectedTable: setSelectedTableForDelete } = useTableStore();
 
   useEffect(() => {
     fetchTables();
@@ -45,6 +45,10 @@ export function TablesManagement() {
   const handleEditSuccess = () => {
     // Optionally refresh the tables list or show a success message
     fetchTables();
+  };
+
+  const handleDeleteClick = (table: Table) => {
+    setSelectedTableForDelete(table);
   };
 
   return (
@@ -94,6 +98,7 @@ export function TablesManagement() {
         tables={filteredTables}
         loading={loading}
         onEditClick={handleEditClick}
+        onDeleteClick={handleDeleteClick}
       />
 
       {/* Dialogs */}
