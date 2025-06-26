@@ -18,6 +18,7 @@ declare module "next-auth" {
     role?: string | null;
     restaurant_id?: string | null;
     restaurant_name?: string | null;
+    onboarding_completed?: boolean;
   }
 }
 
@@ -27,5 +28,6 @@ declare module "next-auth/jwt" {
     role?: string | null;
     restaurant_id?: string | null;
     restaurant_name?: string | null;
+    onboarding_completed?: boolean;
   }
 }
