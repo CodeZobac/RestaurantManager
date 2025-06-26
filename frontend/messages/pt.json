@@ -49,6 +49,33 @@
     "delete": "Eliminar"
   },
 
+  "Menu": {
+    "loading": "A carregar menus deliciosos...",
+    "culinaryExcellence": "Excelência Culinária",
+    "discoverOur": "Descubra os Nossos",
+    "exquisiteMenus": "Menus Requintados",
+    "exploreDishes": "Explore pratos cuidadosamente elaborados dos nossos restaurantes parceiros, cada um contando uma história culinária única.",
+    "premiumQuality": "Qualidade Premium",
+    "freshDaily": "Fresco Diariamente",
+    "expertChefs": "Chefs Especialistas",
+    "restaurantPartners": "Os Nossos Restaurantes Parceiros",
+    "restaurantPartnersDescription": "Cada restaurante traz os seus próprios sabores e conhecimentos culinários únicos para a sua mesa.",
+    "noMenusAvailable": "Nenhum Menu Disponível",
+    "noMenusAvailableDescription": "Estamos a trabalhar para adicionar menus deliciosos para si. Por favor, volte em breve!",
+    "itemCount": "{count, plural, one {# item} other {# itens}}",
+    "hideMenu": "Esconder Menu",
+    "viewMenu": "Ver Menu",
+    "readyToExperience": "Pronto para Viver Estes Sabores?",
+    "bookYourTable": "Reserve já a sua mesa e embarque numa viagem culinária que irá deliciar os seus sentidos.",
+    "makeReservation": "Fazer uma Reserva",
+    "categories": {
+      "appetizer": "Entradas",
+      "main": "Pratos Principais",
+      "dessert": "Sobremesas",
+      "beverage": "Bebidas"
+    }
+  },
+
   "LanguageSelector": {
     "selectLanguage": "Selecionar Idioma",
     "english": "English",
@@ -63,6 +90,7 @@
     "title": "Fazer uma Reserva",
     "subtitle": "Reserve a sua mesa no nosso restaurante",
     "form": {
+      "selectRestaurant": "Selecionar Restaurante",
       "customerName": "Nome Completo",
       "customerNamePlaceholder": "Introduza o seu nome completo",
       "customerEmail": "Endereço de Email",
@@ -82,7 +110,8 @@
       "dateTimeInfo": "Data e Hora",
       "partyInfo": "Detalhes do Grupo",
       "submitButton": "Solicitar Reserva",
-      "submitting": "A submeter..."
+      "submitting": "A submeter...",
+      "restaurant": "Restaurante"
     },
     "validation": {
       "nameMinLength": "O nome deve ter pelo menos 2 caracteres",
@@ -104,8 +133,16 @@
       "error": "Falha ao Submeter Reserva",
       "noTablesAvailable": "Desculpe, não há mesas disponíveis para a data e hora selecionadas. Por favor tente outro horário.",
       "serverError": "Ocorreu um erro ao processar o seu pedido. Por favor tente novamente.",
-      "makeAnother": "Fazer Outra Reserva"
-    }
+      "makeAnother": "Fazer Outra Reserva",
+      "goHome": "Ir para a página inicial"
+    },
+    "backToHome": "Voltar à página inicial",
+    "reserveYourTable": "Reserve a sua mesa",
+    "experience": "Experiência",
+    "reservationDetails": "Detalhes da Reserva",
+    "fillInDetails": "Preencha os detalhes abaixo para garantir a sua mesa",
+    "needHelp": "Precisa de ajuda?",
+    "specialOccasions": "Para ocasiões especiais ou grupos grandes, por favor ligue diretamente para (555) 123-4567"
   },
   "Dashboard": {
     "title": "Painel do Restaurante",
@@ -122,6 +159,38 @@
     "retry": "Tentar novamente",
     "guests": "convidados",
     "at": "às"
+  },
+  "NewReservationPopover": {
+    "title": "Nova Reserva",
+    "seats": "lugares",
+    "customerNameLabel": "Nome do Cliente *",
+    "customerNamePlaceholder": "Introduza o nome do cliente",
+    "emailLabel": "Email",
+    "emailPlaceholder": "email@exemplo.com",
+    "phoneLabel": "Telefone",
+    "phonePlaceholder": "+351123456789",
+    "partySizeLabel": "Tamanho do Grupo *",
+    "partySizePlaceholder": "Selecione o tamanho",
+    "guest": "convidado",
+    "guests": "convidados",
+    "timeLabel": "Hora *",
+    "timePlaceholder": "Selecione a hora",
+    "specialRequestsLabel": "Pedidos Especiais",
+    "specialRequestsPlaceholder": "Quaisquer requisitos especiais...",
+    "cancelButton": "Cancelar",
+    "createButton": "Criar Reserva",
+    "creatingButton": "A criar..."
+  },
+  "ReservationInfoPopover": {
+    "confirmed": "Confirmado",
+    "pending": "Pendente",
+    "seats": "lugares",
+    "partyOf": "Grupo de",
+    "reservationTime": "Hora da reserva",
+    "email": "Email",
+    "phone": "Telefone",
+    "editButton": "Editar",
+    "cancelButton": "Cancelar"
   },
   "LandingPage": {
     "brandName": "Gerente de Reservas",

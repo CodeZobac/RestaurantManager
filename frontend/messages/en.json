@@ -82,7 +82,9 @@
       "dateTimeInfo": "Date & Time",
       "partyInfo": "Party Details",
       "submitButton": "Request Reservation",
-      "submitting": "Submitting..."
+      "submitting": "Submitting...",
+      "selectRestaurant": "Select a Restaurant",
+      "restaurant": "Restaurant"
     },
     "validation": {
       "nameMinLength": "Name must be at least 2 characters",
@@ -104,8 +106,16 @@
       "error": "Failed to Submit Reservation",
       "noTablesAvailable": "Sorry, no tables are available for the selected date and time. Please try a different time slot.",
       "serverError": "An error occurred while processing your request. Please try again.",
-      "makeAnother": "Make Another Reservation"
-    }
+      "makeAnother": "Make Another Reservation",
+      "goHome": "Go home"
+    },
+    "backToHome": "Back to Home",
+    "reserveYourTable": "Reserve Your Table",
+    "experience": "Experience",
+    "reservationDetails": "Reservation Details",
+    "fillInDetails": "Fill in the details below to secure your table",
+    "needHelp": "Need Help?",
+    "specialOccasions": "For special occasions or large groups, please call us directly at (555) 123-4567"
   },
   "Dashboard": {
     "title": "Restaurant Dashboard",
@@ -122,6 +132,38 @@
     "retry": "Try again",
     "guests": "guests",
     "at": "at"
+  },
+  "NewReservationPopover": {
+    "title": "New Reservation",
+    "seats": "seats",
+    "customerNameLabel": "Customer Name *",
+    "customerNamePlaceholder": "Enter customer name",
+    "emailLabel": "Email",
+    "emailPlaceholder": "email@example.com",
+    "phoneLabel": "Phone",
+    "phonePlaceholder": "+1234567890",
+    "partySizeLabel": "Party Size *",
+    "partySizePlaceholder": "Select size",
+    "guest": "guest",
+    "guests": "guests",
+    "timeLabel": "Time *",
+    "timePlaceholder": "Select time",
+    "specialRequestsLabel": "Special Requests",
+    "specialRequestsPlaceholder": "Any special requirements...",
+    "cancelButton": "Cancel",
+    "createButton": "Create Reservation",
+    "creatingButton": "Creating..."
+  },
+  "ReservationInfoPopover": {
+    "confirmed": "Confirmed",
+    "pending": "Pending",
+    "seats": "seats",
+    "partyOf": "Party of",
+    "reservationTime": "Reservation time",
+    "email": "Email",
+    "phone": "Phone",
+    "editButton": "Edit",
+    "cancelButton": "Cancel"
   },
   "LandingPage": {
     "brandName": "Reservation Manager",
@@ -270,6 +312,32 @@
       "lowercase": "Contains at least one lowercase letter",
       "number": "Contains at least one number",
       "specialChar": "Contains at least one special character (!@#$%^&*)"
+    }
+  },
+  "Menu": {
+    "loading": "Loading delicious menus...",
+    "culinaryExcellence": "Culinary Excellence",
+    "discoverOur": "Discover Our",
+    "exquisiteMenus": "Exquisite Menus",
+    "exploreDishes": "Explore carefully crafted dishes from our partner restaurants, each telling a unique culinary story",
+    "premiumQuality": "Premium Quality",
+    "freshDaily": "Fresh Daily",
+    "expertChefs": "Expert Chefs",
+    "restaurantPartners": "Our Restaurant Partners",
+    "restaurantPartnersDescription": "Each restaurant brings its own unique flavors and culinary expertise to your table",
+    "noMenusAvailable": "No Menus Available",
+    "noMenusAvailableDescription": "We're working on adding delicious menus for you. Please check back soon!",
+    "itemCount": "{count, plural, one {# item} other {# items}}",
+    "hideMenu": "Hide Menu",
+    "viewMenu": "View Menu",
+    "readyToExperience": "Ready to Experience These Flavors?",
+    "bookYourTable": "Book your table now and embark on a culinary journey that will delight your senses",
+    "makeReservation": "Make a Reservation",
+    "categories": {
+      "appetizer": "Appetizers",
+      "main": "Main Courses",
+      "dessert": "Desserts",
+      "beverage": "Beverages"
     }
   }
 }
