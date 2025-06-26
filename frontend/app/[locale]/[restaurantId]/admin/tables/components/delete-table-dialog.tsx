@@ -29,7 +29,7 @@ export function DeleteTableDialog() {
   const handleDelete = async () => {
     if (selectedTable) {
       try {
-        await deleteTable(selectedTable.id);
+        await deleteTable(parseInt(selectedTable.id, 10));
         setSelectedTable(null);
       } catch (error) {
         console.error('Failed to delete table:', error);

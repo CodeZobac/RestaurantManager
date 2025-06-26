@@ -13,7 +13,11 @@ import { LanguageSelector } from "@/components/language-selector";
 import EditForm from "@/components/EditForm";
 import { Table } from "@/lib/types";
 
-export function TablesManagement() {
+interface Props {
+  restaurantId: string;
+}
+
+export function TablesManagement({ restaurantId }: Props) {
   const t = useTranslations("TableManagement");
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -23,8 +27,8 @@ export function TablesManagement() {
   const { tables, loading, error, fetchTables, clearError, setSelectedTable: setSelectedTableForDelete } = useTableStore();
 
   useEffect(() => {
-    fetchTables();
-  }, [fetchTables]);
+    fetchTables(restaurantId);
+  }, [fetchTables, restaurantId]);
 
   const filteredTables = tables.filter(
     (table) =>
@@ -44,7 +48,7 @@ export function TablesManagement() {
 
   const handleEditSuccess = () => {
     // Optionally refresh the tables list or show a success message
-    fetchTables();
+    fetchTables(restaurantId);
   };
 
   const handleDeleteClick = (table: Table) => {

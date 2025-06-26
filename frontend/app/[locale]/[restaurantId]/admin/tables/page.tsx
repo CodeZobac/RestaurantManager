@@ -3,17 +3,20 @@ import { TablesManagement } from "./components/tables-management";
 import Header from "@/components/Header";
 
 interface PageProps {
-  params: Promise<{ locale: string }>;
+  params: Promise<{
+    locale: string;
+    restaurantId: string;
+  }>;
 }
 
 export default async function TablesPage({ params }: PageProps) {
-  const { locale } = await params;
+  const { locale, restaurantId } = await params;
   setRequestLocale(locale);
 
   return (
     <>
       <Header />
-      <TablesManagement />
+      <TablesManagement restaurantId={restaurantId} />
     </>
   );
 }
