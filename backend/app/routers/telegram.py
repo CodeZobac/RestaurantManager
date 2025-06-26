@@ -1,5 +1,6 @@
 import logging
 from fastapi import APIRouter, Request, HTTPException
+from datetime import datetime
 from app.services.telegram_service import telegram_service, is_telegram_admin
 from app.services.reservation_service import reservation_service 
 from app.core.config import settings
@@ -117,28 +118,30 @@ async def telegram_webhook(request: Request):
                 pending_reservations = await reservation_service.get_pending_reservations(current_admin.restaurant_id)
                 if pending_reservations:
                     for reservation in pending_reservations:
+                        reservation_datetime = datetime.combine(reservation.reservation_date, reservation.reservation_time)
                         reservation_info = (
-                            f"<b>Reservation ID:</b> {reservation.reservation_id}\n"
+                            f"<b>Reservation ID:</b> {reservation.id}\n"
                             f"<b>Client Name:</b> {reservation.client_name}\n"
                             f"<b>Contact:</b> {reservation.client_contact}\n"
-                            f"<b>Time:</b> {reservation.reservation_time.strftime('%Y-%m-%d %H:%M')}\n"
+                            f"<b>Time:</b> {reservation_datetime.strftime('%Y-%m-%d %H:%M')}\n"
                             f"<b>Party Size:</b> {reservation.party_size}\n"
-                            f"<b>Status:</b> {reservation.status}\n"
-                            f"<b>Restaurant ID:</b> {reservation.restaurant_id}"
+                            f"<b>Status:</b> {reservation.status}"
                         )
                         keyboard = [
                             [
-                                InlineKeyboardButton("Confirm", callback_data=f"confirm:{reservation.reservation_id}"),
-                                InlineKeyboardButton("Discard", callback_data=f"discard:{reservation.reservation_id}")
+                                InlineKeyboardButton("Confirm", callback_data=f"confirm:{reservation.id}"),
+                                InlineKeyboardButton("Discard", callback_data=f"discard:{reservation.id}")
                             ]
                         ]
                         reply_markup = InlineKeyboardMarkup(keyboard)
                         await telegram_service.bot.send_message(
                             chat_id=user_id,
-                            text=f"New pending reservation:\n{reservation_info}",
+                            text=f"Pending reservation:\n{reservation_info}",
                             reply_markup=reply_markup,
                             parse_mode="HTML"
                         )
+
+
                 else:
                     await telegram_service.bot.send_message(
                         chat_id=user_id,
@@ -146,7 +149,7 @@ async def telegram_webhook(request: Request):
                     )
             return {"ok": True}
 
-        # If admin replies with an email address (this part might be less relevant now with restaurant association)
+
         email_regex = r"^[\w\.-]+@[\w\.-]+\.\w+$"
         if re.match(email_regex, text.strip()):
             await supabase_patch(
@@ -221,4 +224,4 @@ async def telegram_webhook(request: Request):
 
         return {"ok": True}
     
-    return {"ok": True} 
+    return {"ok": True}

@@ -14,23 +14,23 @@ class ReservationService:
         Fetches all pending reservations from the database, optionally filtered by restaurant.
         """
         try:
-            params = {"status": "eq.pending"}
+            params = {"status": "eq.pending", "select": "*,reservation_date"}
             if restaurant_id:
-
                 tables_params = {"restaurant_id": f"eq.{restaurant_id}"}
                 tables_data = await supabase_get("tables", params=tables_params)
                 table_ids = [table["id"] for table in tables_data]
 
                 if not table_ids:
-                    return [] 
-
+                    return []
 
                 params["table_id"] = f"in.({','.join(map(str, table_ids))})"
-            
+
             pending_reservations_data = await supabase_get("reservations", params=params)
+            
             
             pending_reservations = [Reservation(**data) for data in pending_reservations_data]
             return pending_reservations
+
         except Exception as e:
             logger.error(f"Error fetching pending reservations: {e}", exc_info=True)
             return []
@@ -40,26 +40,16 @@ class ReservationService:
         Creates a new reservation in the database.
         """
         try:
-            data = reservation_data.model_dump(by_alias=True, exclude_unset=True)
-            if 'reservation_time' in data and isinstance(data['reservation_time'], datetime):
-                data['reservation_date'] = data['reservation_time'].date().isoformat()
-                data['reservation_time'] = data['reservation_time'].time().isoformat()
-
-            # Fetch available tables for the restaurant
-            tables_params = {"restaurant_id": f"eq.{reservation_data.restaurant_id}"}
-            available_tables = await supabase_get("tables", params=tables_params)
-
-            if not available_tables:
-                logger.error(f"No available tables found for restaurant ID: {reservation_data.restaurant_id}")
-                return None
+            data_to_insert = reservation_data.model_dump()
+            data_to_insert["status"] = "pending"
             
-            # Assign the first available table
-            data['table_id'] = available_tables[0]['id']
+            created_reservation = await supabase_post("reservations", data=data_to_insert)
 
-            new_reservation_data = await supabase_post("reservations", data=data)
-            if new_reservation_data:
-                return Reservation(**new_reservation_data[0])
+            if created_reservation:
+                return Reservation(**created_reservation[0])
+            
             return None
+
         except Exception as e:
             logger.error(f"Error creating reservation: {e}", exc_info=True)
             return None

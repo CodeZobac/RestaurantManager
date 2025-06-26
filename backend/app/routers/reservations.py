@@ -48,9 +48,7 @@ async def create_reservation(reservation: ReservationCreate, background_tasks: B
         reservations_params = {"table_id": f"in.({','.join(map(str, table_ids_for_reservations))})"}
         reservations = await supabase_get("reservations", params=reservations_params)
 
-    requested_datetime = datetime.combine(reservation.reservation_date.date(), reservation.reservation_time)
-    if requested_datetime.tzinfo is not None:
-        requested_datetime = requested_datetime.replace(tzinfo=None)
+    requested_datetime = datetime.combine(reservation.reservation_date, reservation.reservation_time)
 
     slot_start = requested_datetime
     slot_end = requested_datetime + timedelta(hours=2)
@@ -90,11 +88,12 @@ async def create_reservation(reservation: ReservationCreate, background_tasks: B
     reservation_data_for_service = ReservationCreate(
         client_name=reservation.client_name,
         client_contact=reservation.client_contact,
+        reservation_date=reservation.reservation_date,
         reservation_time=reservation.reservation_time,
         party_size=reservation.party_size,
         customer_id=reservation.customer_id,
         restaurant_id=reservation.restaurant_id,
-        table_id=available_table_id 
+        table_id=available_table_id
     )
     
     created_res = await reservation_service.create_reservation(reservation_data_for_service)
@@ -104,17 +103,18 @@ async def create_reservation(reservation: ReservationCreate, background_tasks: B
 
 
     if created_res.status == "pending" and telegram_service:
+        reservation_datetime = datetime.combine(created_res.reservation_date, created_res.reservation_time)
         reservation_info = (
-            f"Name: {created_res.client_name}\n"
+            f"<b>New pending reservation:</b>\n"
+            f"Reservation ID: {created_res.id}\n"
+            f"Client Name: {created_res.client_name}\n"
             f"Contact: {created_res.client_contact}\n"
-            f"Date: {created_res.reservation_time.date().isoformat()}\n"
-            f"Time: {created_res.reservation_time.time().isoformat()}\n"
+            f"Time: {reservation_datetime.strftime('%Y-%m-%d %H:%M')}\n"
             f"Party Size: {created_res.party_size}\n"
-            f"Table: {created_res.table_id}\n"
+            f"Status: {created_res.status}\n"
             f"Restaurant ID: {created_res.restaurant_id}"
         )
         try:
-
             admins_params = {
                 "restaurant_id": f"eq.{created_res.restaurant_id}",
                 "telegram_chat_id": "not.is.null"
@@ -127,19 +127,21 @@ async def create_reservation(reservation: ReservationCreate, background_tasks: B
                     background_tasks.add_task(
                         telegram_service.send_reservation_notification,
                         chat_id,
-                        str(created_res.reservation_id),
+                        str(created_res.id),
                         reservation_info
                     )
+
         except Exception as e:
             import logging
             logging.getLogger(__name__).error(f"Failed to send Telegram notification to admins for restaurant {created_res.restaurant_id}: {e}")
 
     return ReservationResponse(
-        reservation_id=created_res.reservation_id,
+        reservation_id=created_res.id,
         status=created_res.status,
         table_id=created_res.table_id,
         message="Reservation created",
     )
+
 
 @router.get(
     "/pending",
@@ -162,12 +164,13 @@ async def get_pending_reservations(
     
     return [
         ReservationResponse(
-            reservation_id=res.reservation_id,
+            reservation_id=res.id,
             status=res.status,
             table_id=res.table_id,
             message="Pending reservation details"
         ) for res in reservations
     ]
+
 
 @router.get("/api/v1/dashboard-status", response_model=DashboardStatusResponse)
 async def dashboard_status(date: date = Query(...)):
