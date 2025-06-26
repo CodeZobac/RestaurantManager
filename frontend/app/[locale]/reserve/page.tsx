@@ -16,20 +16,20 @@ export default function ReservePage() {
           <Link href="/">
             <Button variant="ghost" className="mb-4 text-gray-600 hover:text-gray-900">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Home
+              {t('backToHome')}
             </Button>
           </Link>
           
           <div className="text-center">
             <Badge className="mb-4 bg-orange-100 text-orange-800 border-orange-200">
               <Sparkles className="w-4 h-4 mr-2" />
-              Reserve Your Table
+              {t('reserveYourTable')}
             </Badge>
             
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
               {t("title")}
               <span className="block text-3xl md:text-4xl bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
-                Experience
+                {t('experience')}
               </span>
             </h1>
             
@@ -52,10 +52,10 @@ export default function ReservePage() {
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-white">
-                    Reservation Details
+                    {t('reservationDetails')}
                   </h2>
                   <p className="text-orange-100 text-sm">
-                    Fill in the details below to secure your table
+                    {t('fillInDetails')}
                   </p>
                 </div>
               </div>
@@ -71,11 +71,10 @@ export default function ReservePage() {
           <div className="mt-8 text-center">
             <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-orange-200">
               <h3 className="font-semibold text-gray-900 mb-2">
-                Need Help?
+                {t('needHelp')}
               </h3>
               <p className="text-gray-600 text-sm">
-                For special occasions or large groups, please call us directly at{" "}
-                <span className="font-medium text-orange-600">(555) 123-4567</span>
+                {t('specialOccasions')}
               </p>
             </div>
           </div>
