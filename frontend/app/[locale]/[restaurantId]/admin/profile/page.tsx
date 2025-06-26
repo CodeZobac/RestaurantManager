@@ -1,15 +1,17 @@
+/* eslint-disable react/no-unescaped-entities */
 'use client';
 
 import { useState, useEffect } from 'react';
+import Header from '@/components/Header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { LanguageSelector } from '@/components/language-selector';
-import { Users, Plus, Edit, Trash2, MenuIcon, DollarSign, User as UserIcon, Mail, Phone, Utensils } from 'lucide-react';
+import { Users, Plus, Edit, Trash2, MenuIcon, DollarSign, User as UserIcon, Mail, Phone, Utensils, Clock, Settings } from 'lucide-react';
 import { User, MenuItem } from '@/lib/types';
+import { useParams } from 'next/navigation';
 
 
 const userRoles = [
@@ -26,6 +28,8 @@ const menuCategories = [
 ];
 
 export default function ProfilePage() {
+  const params = useParams();
+  const restaurantId = params.restaurantId as string;
   // Users state
   const [users, setUsers] = useState<User[]>([]);
   const [showAddUser, setShowAddUser] = useState(false);
@@ -114,7 +118,7 @@ export default function ProfilePage() {
       const response = await fetch('/api/menu-items', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...newMenuItem, price: parseFloat(newMenuItem.price) }),
+        body: JSON.stringify({ ...newMenuItem, price: parseFloat(newMenuItem.price), restaurant_id: restaurantId }),
       });
       if (response.ok) {
         fetchMenuItems();
@@ -175,35 +179,61 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4 space-y-8">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Profile & Management</h1>
-          <p className="text-muted-foreground mt-2">
-            Manage users and menu items for your restaurant
-          </p>
-        </div>
-        <LanguageSelector />
-      </div>
-
-      {/* Manage Users Section */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Users className="h-5 w-5" />
-              <div>
-                <CardTitle>Manage Users</CardTitle>
-                <CardDescription>Add, edit, and manage restaurant staff members</CardDescription>
+    <>
+      <Header />
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <div className="container mx-auto py-8 px-4 space-y-8">
+          {/* Enhanced Header */}
+          <div className="text-center space-y-4 mb-12">
+            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-medium">
+              <Settings className="h-4 w-4" />
+              <span>Admin Dashboard</span>
+            </div>
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
+              Profile & Management
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Orchestrate your restaurant's workforce and culinary offerings with precision and style
+            </p>
+            <div className="flex items-center justify-center space-x-8 mt-6">
+              <div className="flex items-center space-x-2 text-sm text-gray-500">
+                <Users className="h-4 w-4" />
+                <span>{users.length} Team Members</span>
+              </div>
+              <div className="flex items-center space-x-2 text-sm text-gray-500">
+                <Utensils className="h-4 w-4" />
+                <span>{menuItems.length} Menu Items</span>
+              </div>
+              <div className="flex items-center space-x-2 text-sm text-gray-500">
+                <Clock className="h-4 w-4" />
+                <span>Real-time Updates</span>
               </div>
             </div>
-            <Button onClick={() => setShowAddUser(true)} className="flex items-center space-x-2">
-              <Plus className="h-4 w-4" />
-              <span>Add User</span>
-            </Button>
           </div>
-        </CardHeader>
+
+          {/* Manage Users Section */}
+          <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+            <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-t-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-white/20 rounded-lg">
+                    <Users className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl text-white">Team Management</CardTitle>
+                    <CardDescription className="text-blue-100">
+                      Build and manage your restaurant's dream team
+                    </CardDescription>
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => setShowAddUser(true)} 
+                  className="bg-white text-blue-600 hover:bg-gray-50 transition-colors duration-200 shadow-lg">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Team Member
+                </Button>
+              </div>
+            </CardHeader>
         <CardContent>
           {/* Add/Edit User Form */}
           {showAddUser && (
@@ -472,5 +502,7 @@ export default function ProfilePage() {
         </CardContent>
       </Card>
     </div>
+    </div>
+    </>
   );
 }
