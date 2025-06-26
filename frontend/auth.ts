@@ -72,7 +72,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     signIn: "/auth/signin",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
+      if (trigger === "update" && session?.restaurant_id) {
+        token.restaurant_id = session.restaurant_id;
+        token.restaurant_name = session.restaurant_name;
+      }
       if (user) {
         token.id = user.id;
         token.role = user.role;

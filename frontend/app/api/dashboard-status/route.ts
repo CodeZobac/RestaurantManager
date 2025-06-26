@@ -1,13 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { auth } from '@/auth';
-
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
-});
+import { supabaseAdmin } from '@/lib/supabase';
 
 export async function GET(request: Request) {
   const session = await auth();
@@ -25,7 +18,7 @@ export async function GET(request: Request) {
     const date = searchParams.get('date') || new Date().toISOString().split('T')[0];
 
     // Get all tables for the restaurant
-    const { data: tables, error: tablesError } = await supabase
+    const { data: tables, error: tablesError } = await supabaseAdmin
       .from('tables')
       .select('*')
       .eq('restaurant_id', session.user.restaurant_id)
@@ -34,7 +27,7 @@ export async function GET(request: Request) {
     if (tablesError) throw tablesError;
 
     // Get reservations for the specified date
-    const { data: reservations, error: reservationsError } = await supabase
+    const { data: reservations, error: reservationsError } = await supabaseAdmin
       .from('reservations')
       .select(`
         *,
