@@ -10,7 +10,7 @@ interface TableStore {
   selectedTable: Table | null;
 
   // Actions
-  fetchTables: () => Promise<void>;
+  fetchTables: (restaurantId: string) => Promise<void>;
   createTable: (data: CreateTableData) => Promise<void>;
   createTablesBulk: (tables: TempTable[]) => Promise<void>;
   updateTable: (id: number, data: UpdateTableData) => Promise<void>;
@@ -45,10 +45,10 @@ export const useTableStore = create<TableStore>((set) => ({
   selectedTable: null,
 
   // Actions
-  fetchTables: async () => {
+  fetchTables: async (restaurantId: string) => {
     set({ loading: true, error: null });
     try {
-      const tables = await tableApi.getTables();
+      const tables = await tableApi.getTables(restaurantId);
       set({ tables, loading: false });
     } catch (error) {
       const errorMessage = error instanceof ApiError ? error.message : 'Failed to fetch tables';
@@ -91,11 +91,11 @@ export const useTableStore = create<TableStore>((set) => ({
     try {
       const updatedTable = await tableApi.updateTable(id, data);
       set(state => ({
-        tables: state.tables.map(table => 
-          table.id === id ? updatedTable : table
+        tables: state.tables.map(table =>
+          parseInt(table.id, 10) === id ? updatedTable : table
         ),
         loading: false,
-        selectedTable: state.selectedTable?.id === id ? updatedTable : state.selectedTable
+        selectedTable: state.selectedTable?.id === id.toString() ? updatedTable : state.selectedTable
       }));
     } catch (error) {
       const errorMessage = error instanceof ApiError ? error.message : 'Failed to update table';
@@ -109,9 +109,9 @@ export const useTableStore = create<TableStore>((set) => ({
     try {
       await tableApi.deleteTable(id);
       set(state => ({
-        tables: state.tables.filter(table => table.id !== id),
+        tables: state.tables.filter(table => parseInt(table.id, 10) !== id),
         loading: false,
-        selectedTable: state.selectedTable?.id === id ? null : state.selectedTable
+        selectedTable: state.selectedTable?.id === id.toString() ? null : state.selectedTable
       }));
     } catch (error) {
       const errorMessage = error instanceof ApiError ? error.message : 'Failed to delete table';

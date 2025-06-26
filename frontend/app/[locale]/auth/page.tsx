@@ -5,6 +5,9 @@ import Head from 'next/head';
 import { signIn } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import ValidationRequirements from '@/components/ValidationRequirements';
+import { Link } from '@/i18n/navigation';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 import {
   Popover,
   PopoverContent,
@@ -98,8 +101,8 @@ const LoginSignupForm = () => {
       const locale = window.location.pathname.split('/')[1];
       
       if (session?.user?.restaurant_id) {
-        // User has a restaurant, redirect to admin tables
-        window.location.href = `/${locale}/admin/tables`;
+        // User has a restaurant, redirect to admin dashboard
+        window.location.href = `/${locale}/${session.user.restaurant_id}/admin/dashboard`;
       } else {
         // User doesn't have a restaurant, redirect to onboarding
         window.location.href = `/${locale}/onboarding`;
@@ -114,17 +117,6 @@ const LoginSignupForm = () => {
       setIsLoading(false);
     }
   };
-
-  const handleSignIn = async () => {
-      setIsLoading(true);
-      try {
-        await signIn('google', { callbackUrl: '/' });
-      } catch (error) {
-        console.error('Authentication error:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
 
   return (
     <>
@@ -195,7 +187,7 @@ const LoginSignupForm = () => {
           left: -250%;
           width: 300%;
           height: 100%;
-          background: #7494ec;
+          background: linear-gradient(135deg, #ea580c, #dc2626);
           border-radius: 150px;
           z-index: 2;
           transition: 1.8s ease-in-out;
@@ -261,7 +253,18 @@ const LoginSignupForm = () => {
         }
       `}</style>
       
-      <div className="flex justify-center items-center min-h-screen bg-gradient-to-r from-[#e2e2e2] to-[#c9d6ff]">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-orange-50 to-red-50">
+        {/* Back to Home Button */}
+        <div className="absolute top-6 left-6 z-50">
+          <Link href="/">
+            <Button variant="ghost" className="text-gray-600 hover:text-gray-900 bg-white/80 backdrop-blur-sm hover:bg-white/90 transition-all duration-300">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Home
+            </Button>
+          </Link>
+        </div>
+        
+        <div className="flex justify-center items-center min-h-screen">
         <div 
           ref={containerRef}
           className={`relative w-[850px] h-[550px] bg-white mx-5 rounded-[30px] shadow-md overflow-hidden container ${isActive ? 'active' : ''}`}
@@ -298,26 +301,11 @@ const LoginSignupForm = () => {
               </div>
               <button 
                 type="submit" 
-                className="w-full h-12 bg-[#7494ec] rounded-lg shadow-sm border-none cursor-pointer text-base text-white font-semibold"
+                className="w-full h-12 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 rounded-lg shadow-sm border-none cursor-pointer text-base text-white font-semibold transition-all duration-300"
                 disabled={isLoading}
               >
                 {isLoading ? t('loggingInButton') : t('loginButton')}
               </button>
-              <p className="text-sm my-[15px]">{t('orLoginWithSocial')}</p>
-              <div className="flex justify-center">
-                <a onClick={handleSignIn} className="inline-flex p-[10px] border-2 border-[#ccc] rounded-lg text-2xl text-gray-800 mx-2">
-                  <i className='bx bxl-google'></i>
-                </a>
-                <a href="#" className="inline-flex p-[10px] border-2 border-[#ccc] rounded-lg text-2xl text-gray-800 mx-2">
-                  <i className='bx bxl-facebook'></i>
-                </a>
-                <a href="#" className="inline-flex p-[10px] border-2 border-[#ccc] rounded-lg text-2xl text-gray-800 mx-2">
-                  <i className='bx bxl-github'></i>
-                </a>
-                <a href="#" className="inline-flex p-[10px] border-2 border-[#ccc] rounded-lg text-2xl text-gray-800 mx-2">
-                  <i className='bx bxl-linkedin'></i>
-                </a>
-              </div>
             </form>
           </div>
 
@@ -370,7 +358,7 @@ const LoginSignupForm = () => {
               </div>
               <button
                 type="submit"
-                className="w-full h-12 bg-[#7494ec] rounded-lg shadow-sm border-none cursor-pointer text-base text-white font-semibold"
+                className="w-full h-12 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 rounded-lg shadow-sm border-none cursor-pointer text-base text-white font-semibold transition-all duration-300"
                 disabled={isLoading}
               >
                 {isLoading ? t('registeringButton') : t('registerButton')}
@@ -429,6 +417,7 @@ const LoginSignupForm = () => {
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
       

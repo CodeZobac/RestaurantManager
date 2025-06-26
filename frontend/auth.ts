@@ -57,6 +57,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               role: admin.role,
               restaurant_id: admin.restaurant_id,
               restaurant_name: restaurantName,
+              onboarding_completed: admin.onboarding_completed,
             };
           } else {
             return null;
@@ -72,12 +73,43 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     signIn: "/auth/signin",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
+      if (trigger === "update") {
+        // Fetch fresh user data from database on session update
+        try {
+          const { data: admin, error } = await supabaseAdmin
+            .from('admins')
+            .select('*')
+            .eq('id', token.id)
+            .single();
+
+          if (!error && admin) {
+            token.restaurant_id = admin.restaurant_id;
+            token.onboarding_completed = admin.onboarding_completed;
+            
+            // Fetch restaurant name if restaurant_id exists
+            if (admin.restaurant_id) {
+              const { data: restaurant } = await supabaseAdmin
+                .from('restaurants')
+                .select('name')
+                .eq('id', admin.restaurant_id)
+                .single();
+              
+              if (restaurant) {
+                token.restaurant_name = restaurant.name;
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching fresh user data:', error);
+        }
+      }
       if (user) {
         token.id = user.id;
         token.role = user.role;
         token.restaurant_id = user.restaurant_id;
         token.restaurant_name = user.restaurant_name;
+        token.onboarding_completed = user.onboarding_completed;
       }
       return token;
     },
@@ -87,6 +119,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.role = token.role as string;
         session.user.restaurant_id = token.restaurant_id as string | null;
         session.user.restaurant_name = token.restaurant_name as string | null;
+        session.user.onboarding_completed = token.onboarding_completed as boolean;
       }
       return session;
     },

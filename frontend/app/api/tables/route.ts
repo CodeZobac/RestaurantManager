@@ -9,27 +9,73 @@ const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env
   }
 });
 
-export async function GET() {
+import { NextRequest } from "next/server";
+
+export async function GET(request: NextRequest) {
   const session = await auth();
+  const searchParams = request.nextUrl.searchParams;
+  const restaurantId = searchParams.get('restaurantId');
   
   if (!session || !session.user || !session.user.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  if (!session.user.restaurant_id) {
+  const restaurantIdToUse = restaurantId || session.user.restaurant_id;
+
+  if (!restaurantIdToUse) {
     return NextResponse.json({ error: 'No restaurant associated with user' }, { status: 403 });
   }
 
   try {
-    const { data: tables, error } = await supabase
+    // Get today's date for reservation lookup
+    const today = new Date().toISOString().split('T')[0];
+
+    // Get tables with their reservations for today
+    const { data: tables, error: tablesError } = await supabase
       .from('tables')
       .select('*')
-      .eq('restaurant_id', session.user.restaurant_id)
+      .eq('restaurant_id', restaurantIdToUse)
       .order('name');
 
-    if (error) throw error;
+    if (tablesError) throw tablesError;
 
-    return NextResponse.json(tables);
+    // Get today's reservations for this restaurant
+    const { data: reservations, error: reservationsError } = await supabase
+      .from('reservations')
+      .select(`
+        *,
+        tables!inner (
+          id,
+          restaurant_id
+        )
+      `)
+      .eq('tables.restaurant_id', restaurantIdToUse)
+      .eq('reservation_date', today);
+
+    if (reservationsError) throw reservationsError;
+
+    // Combine tables with their current reservation status
+    const tablesWithStatus = tables.map(table => {
+      const reservation = reservations?.find(r => r.table_id === table.id);
+      
+      // Determine actual status based on reservations
+      let actualStatus = 'available';
+      if (reservation) {
+        if (reservation.status === 'pending') {
+          actualStatus = 'pending';
+        } else if (reservation.status === 'confirmed') {
+          actualStatus = 'confirmed';
+        }
+      }
+      
+      return {
+        ...table,
+        status: actualStatus, // Override the table status with reservation status
+        reservation: reservation || null
+      };
+    });
+
+    return NextResponse.json(tablesWithStatus);
   } catch (error) {
     console.error('Error fetching tables:', error);
     return NextResponse.json({ error: 'Failed to fetch tables' }, { status: 500 });

@@ -5,6 +5,9 @@ declare module "next-auth" {
   interface Session {
     user: {
       id: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
       role?: string | null;
       restaurant_id?: string | null;
       restaurant_name?: string | null;
@@ -15,6 +18,7 @@ declare module "next-auth" {
     role?: string | null;
     restaurant_id?: string | null;
     restaurant_name?: string | null;
+    onboarding_completed?: boolean;
   }
 }
 
@@ -24,5 +28,6 @@ declare module "next-auth/jwt" {
     role?: string | null;
     restaurant_id?: string | null;
     restaurant_name?: string | null;
+    onboarding_completed?: boolean;
   }
 }

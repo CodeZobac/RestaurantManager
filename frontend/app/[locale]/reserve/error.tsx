@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { AlertTriangleIcon } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export default function ReserveError({
   error,
@@ -11,6 +12,9 @@ export default function ReserveError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations('Reservation.status');
+  const tCommon = useTranslations('Common');
+
   useEffect(() => {
     // Log the error to an error reporting service
     console.error('Reservation page error:', error);
@@ -26,23 +30,23 @@ export default function ReserveError({
             </div>
             
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Something went wrong
+              {t('error')}
             </h1>
             
             <p className="text-gray-600 mb-6">
-              We encountered an error while loading the reservation form. Please try again.
+              {t('serverError')}
             </p>
             
             <div className="space-x-4">
               <Button onClick={reset}>
-                Try again
+                {tCommon('retry')}
               </Button>
               
               <Button 
                 variant="outline" 
                 onClick={() => window.location.href = '/'}
               >
-                Go home
+                {t('goHome')}
               </Button>
             </div>
           </div>

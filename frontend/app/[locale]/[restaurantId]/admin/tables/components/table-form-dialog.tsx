@@ -83,7 +83,7 @@ export function TableFormDialog({ open, onOpenChange, mode }: TableFormDialogPro
   const onSubmit = async (data: TableFormData) => {
     try {
       if (isEdit && selectedTable) {
-        await updateTable(selectedTable.id, data);
+        await updateTable(parseInt(selectedTable.id, 10), data);
       } else {
         await createTable(data);
       }
@@ -178,7 +178,8 @@ export function TableFormDialog({ open, onOpenChange, mode }: TableFormDialogPro
                     <SelectContent>
                       <SelectItem value="available">{tStatus('available')}</SelectItem>
                       <SelectItem value="maintenance">{tStatus('maintenance')}</SelectItem>
-                      <SelectItem value="reserved">{tStatus('reserved')}</SelectItem>
+                      <SelectItem value="pending">{tStatus('pending')}</SelectItem>
+                      <SelectItem value="confirmed">{tStatus('confirmed')}</SelectItem>
                       <SelectItem value="occupied">{tStatus('occupied')}</SelectItem>
                     </SelectContent>
                   </Select>

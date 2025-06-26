@@ -6,6 +6,7 @@ import {
   CreateReservationData,
   ReservationResponse,
   DashboardStatusResponse,
+  Restaurant,
 } from "./types";
 
 class ApiError extends Error {
@@ -48,8 +49,9 @@ async function fetchApi<T>(
 
 export const tableApi = {
   // Get all tables
-  getTables: (): Promise<Table[]> => {
-    return fetchApi<Table[]>("/api/tables");
+  getTables: (restaurantId?: string): Promise<Table[]> => {
+    const endpoint = restaurantId ? `/api/tables?restaurantId=${restaurantId}` : "/api/tables";
+    return fetchApi<Table[]>(endpoint);
   },
 
   // Create a single table
@@ -120,6 +122,13 @@ export const dashboardApi = {
   ): Promise<DashboardStatusResponse> => {
     const response = await fetchApi<DashboardStatusResponse>(`/api/dashboard-status?date=${date}`);
     return response;
+  },
+};
+
+export const restaurantApi = {
+  // Get all restaurants
+  getRestaurants: (): Promise<Restaurant[]> => {
+    return fetchApi<Restaurant[]>("/api/restaurants");
   },
 };
 

@@ -3,13 +3,27 @@
 import { useTranslations } from 'next-intl';
 import { DashboardTable } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { GripVertical } from 'lucide-react';
+import { ReservationInfoPopover } from './reservation-info-popover';
+import { NewReservationPopover } from './new-reservation-popover';
 
 interface TableCardProps {
   table: DashboardTable;
-  onClick?: () => void;
+  onEditReservation?: (table: DashboardTable) => void;
+  onDeleteReservation?: (table: DashboardTable) => void;
+  onCreateReservation?: (reservationData: {
+    customer_name: string;
+    customer_email: string;
+    customer_phone: string;
+    party_size: number;
+    reservation_time: string;
+    special_requests: string;
+    table_id: string;
+    reservation_date: string;
+  }) => void;
 }
 
-export function TableCard({ table, onClick }: TableCardProps) {
+export function TableCard({ table, onEditReservation, onDeleteReservation, onCreateReservation }: TableCardProps) {
   const t = useTranslations('Dashboard');
 
   const getStatusColors = (status: DashboardTable['status']) => {
@@ -25,15 +39,19 @@ export function TableCard({ table, onClick }: TableCardProps) {
     }
   };
 
-  return (
+  const TableCardContent = (
     <div
       className={cn(
-        'aspect-square rounded-lg border-2 p-3 cursor-pointer transition-all hover:shadow-md',
+        'aspect-square rounded-lg border-2 p-3 cursor-pointer transition-all hover:shadow-md relative group',
         getStatusColors(table.status),
-        onClick && 'hover:scale-105'
+        'hover:scale-105'
       )}
-      onClick={onClick}
     >
+      {/* Drag handle indicator */}
+      <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-60 transition-opacity">
+        <GripVertical className="h-3 w-3" />
+      </div>
+      
       <div className="flex flex-col h-full">
         <div className="font-semibold text-sm truncate">{table.name}</div>
         <div className="text-xs opacity-75 mt-1">
@@ -65,4 +83,26 @@ export function TableCard({ table, onClick }: TableCardProps) {
       </div>
     </div>
   );
+
+  // Wrap with appropriate popover based on reservation status
+  if (table.reservation) {
+    return (
+      <ReservationInfoPopover
+        table={table}
+        onEdit={onEditReservation}
+        onDelete={onDeleteReservation}
+      >
+        {TableCardContent}
+      </ReservationInfoPopover>
+    );
+  } else {
+    return (
+      <NewReservationPopover
+        table={table}
+        onCreateReservation={onCreateReservation}
+      >
+        {TableCardContent}
+      </NewReservationPopover>
+    );
+  }
 }

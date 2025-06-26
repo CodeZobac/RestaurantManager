@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -30,7 +30,7 @@ interface Errors {
 
 export default function RestaurantOnboarding() {
   const t = useTranslations('Onboarding');
-  const router = useRouter();
+  const { update } = useSession();
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<FormData>({
     phoneNumber: '',
@@ -93,22 +93,46 @@ export default function RestaurantOnboarding() {
   const handleOnboardingSubmit = async () => {
     setIsLoading(true);
     try {
+      // Transform the tableRegions data into the format expected by the backend
+      const tables = tableRegions.flatMap(region => {
+        const regionTables = [];
+        for (let i = parseInt(region.startNumber); i <= parseInt(region.endNumber); i++) {
+          regionTables.push({
+            name: `${region.name} ${i}`,
+            capacity: 2, // Default capacity
+          });
+        }
+        return regionTables;
+      });
+
       const response = await fetch('/api/onboarding', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify({ ...formData, tableRegions }),
+        body: JSON.stringify({
+          restaurantName: formData.restaurantName,
+          tables,
+        }),
       });
 
       if (response.ok) {
-        const { restaurantId } = await response.json();
+        const { restaurant_id: restaurantId } = await response.json();
         setShowSuccess(true);
+        
+        // Update the session with the new restaurant_id
+        if (update) {
+          await update({
+            restaurant_id: restaurantId,
+            onboarding_completed: true,
+          });
+        }
+        
         // Redirect to the admin page after a short delay
         setTimeout(() => {
           const locale = window.location.pathname.split('/')[1];
-          router.push(`/${locale}/${restaurantId}/admin/dashboard`);
+          window.location.href = `/${locale}/${restaurantId}/admin/dashboard`;
         }, 2000);
       } else {
         // Handle error

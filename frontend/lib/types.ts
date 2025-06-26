@@ -1,69 +1,64 @@
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  phone: string;
+  password?: string;
+}
+
+export interface MenuItem {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  image_url?: string;
+  restaurant_id?: string;
+}
+
+export interface DashboardTable {
+  id: string;
+  name: string;
+  status: 'available' | 'pending' | 'confirmed';
+  capacity: number;
+  location?: string;
+  reservation?: {
+    customer_name: string;
+    reservation_time: string;
+    party_size: number;
+    customer_email?: string;
+    customer_phone?: string;
+  };
+}
+
 export interface Table {
-  id: number;
+  id: string;
   name: string;
   capacity: number;
   location?: string;
-  status: 'available' | 'maintenance' | 'pending' | 'occupied';
-  created_at: string;
-  updated_at: string;
+  status: 'available' | 'maintenance' | 'pending' | 'confirmed' | 'occupied';
+  reservation?: {
+    customer_name: string;
+    reservation_time: string;
+    party_size: number;
+    customer_email?: string;
+    customer_phone?: string;
+  }; // Optional reservation data for enhanced table management
 }
 
-export interface CreateTableData {
+export interface Restaurant {
+  id: string;
   name: string;
-  capacity: number;
   location?: string;
-  status: 'available' | 'maintenance' | 'pending' | 'occupied';
 }
 
-export interface UpdateTableData {
-  name?: string;
-  capacity?: number;
-  location?: string;
-  status?: 'available' | 'maintenance' | 'pending' | 'occupied';
-}
-
-export interface TempTable {
-  name: string;
-  capacity: number;
-  location?: string;
-  status: 'available' | 'maintenance' | 'pending' | 'occupied';
-}
-
-export interface OnboardingData {
-  tableCount: number;
-  tables: TempTable[];
-}
-
-// Reservation related types
-export interface Customer {
-  id: number;
-  name: string;
-  email?: string;
-  phone?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Reservation {
-  id: number;
-  customer_id: number;
-  table_id: number;
-  reservation_date: string; // ISO date string
-  reservation_time: string; // Time string (HH:MM format)
-  party_size: number;
-  status: 'pending' | 'confirmed' | 'discarded' | 'completed' | 'no_show';
-  special_requests?: string;
-  reminder_sent: boolean;
-  telegram_message_id?: number;
-  confirmed_by?: number;
-  confirmed_at?: string;
-  created_at: string;
-  updated_at: string;
-  customer?: Customer;
-  table?: Table;
-}
+export type CreateTableData = Omit<Table, 'id'>;
+export type UpdateTableData = Partial<CreateTableData>;
+export type TempTable = Omit<Table, 'id'>;
 
 export interface CreateReservationData {
+  restaurant_id: string;
   customer_name: string;
   customer_email?: string;
   customer_phone?: string;
@@ -75,27 +70,15 @@ export interface CreateReservationData {
 
 export interface ReservationResponse {
   success: boolean;
-  message: string;
-  reservation?: Reservation;
+  message?: string;
   error?: string;
-}
-
-// Dashboard related types
-export interface DashboardTable {
-  id: number;
-  name: string;
-  capacity: number;
-  location?: string;
-  status: 'available' | 'pending' | 'confirmed';
-  reservation?: {
-    id: number;
-    customer_name: string;
-    reservation_time: string;
-    party_size: number;
-  };
+  reservation?: Table;
 }
 
 export interface DashboardStatusResponse {
-  date: string;
+  totalTables: number;
+  available: number;
+  occupied: number;
+  pending: number;
   tables: DashboardTable[];
 }

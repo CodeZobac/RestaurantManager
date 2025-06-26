@@ -46,7 +46,7 @@ export function SimpleTableForm({ open, onOpenChange, mode }: SimpleTableFormPro
     name: '',
     capacity: '4',
     location: '',
-    status: 'available' as 'available' | 'maintenance' | 'pending' | 'occupied',
+    status: 'available' as 'available' | 'maintenance' | 'pending' | 'confirmed' | 'occupied',
   });
 
   const [errors, setErrors] = useState({
@@ -108,7 +108,7 @@ export function SimpleTableForm({ open, onOpenChange, mode }: SimpleTableFormPro
       };
 
       if (isEdit && selectedTable) {
-        await updateTable(selectedTable.id, data);
+        await updateTable(parseInt(selectedTable.id, 10), data);
       } else {
         await createTable(data);
       }
@@ -181,7 +181,7 @@ export function SimpleTableForm({ open, onOpenChange, mode }: SimpleTableFormPro
             <Label htmlFor="status">{t('statusLabel')}</Label>
             <Select
               value={formData.status}
-              onValueChange={(value: 'available' | 'maintenance' | 'pending' | 'occupied') =>
+              onValueChange={(value: 'available' | 'maintenance' | 'pending' | 'confirmed' | 'occupied') =>
                 setFormData({ ...formData, status: value })
               }
             >
@@ -192,6 +192,7 @@ export function SimpleTableForm({ open, onOpenChange, mode }: SimpleTableFormPro
                 <SelectItem value="available">{tStatus('available')}</SelectItem>
                 <SelectItem value="maintenance">{tStatus('maintenance')}</SelectItem>
                 <SelectItem value="pending">{tStatus('pending')}</SelectItem>
+                <SelectItem value="confirmed">{tStatus('confirmed')}</SelectItem>
                 <SelectItem value="occupied">{tStatus('occupied')}</SelectItem>
               </SelectContent>
             </Select>

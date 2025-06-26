@@ -114,6 +114,10 @@ export default function Header() {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>{t('myAccountLabel')}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => handleNavigation('/profile')}>
+                  <User className="w-4 h-4 mr-2" />
+                  {t('profileLabel')}
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => signOut({ callbackUrl: '/' })}>
                   <LogOut className="w-4 h-4 mr-2" />
                   {t('logoutButton')}

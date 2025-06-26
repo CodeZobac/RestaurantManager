@@ -19,9 +19,10 @@ interface TablesListProps {
   tables: Table[];
   loading: boolean;
   onEditClick?: (table: Table) => void;
+  onDeleteClick?: (table: Table) => void;
 }
 
-export function TablesList({ tables, loading, onEditClick }: TablesListProps) {
+export function TablesList({ tables, loading, onEditClick, onDeleteClick }: TablesListProps) {
   const t = useTranslations("TableManagement");
 
   if (loading) {
@@ -89,9 +90,8 @@ export function TablesList({ tables, loading, onEditClick }: TablesListProps) {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => {
-                      // TODO: Implement delete functionality
-                    }}
+                    onClick={() => onDeleteClick?.(table)}
+                    className="hover:bg-red-100 hover:text-red-700"
                   >
                     <Trash2 className="h-4 w-4 mr-1" />
                     {t("delete")}
