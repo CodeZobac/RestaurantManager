@@ -14,7 +14,7 @@ class ReservationService:
         Fetches all pending reservations from the database, optionally filtered by restaurant.
         """
         try:
-            params = {"status": "eq.pending", "select": "*,reservation_date"}
+            params = {"status": "eq.pending", "reminder_sent": "is.false", "select": "*,reservation_date"}
             if restaurant_id:
                 tables_params = {"restaurant_id": f"eq.{restaurant_id}"}
                 tables_data = await supabase_get("tables", params=tables_params)
@@ -42,6 +42,7 @@ class ReservationService:
         try:
             data_to_insert = reservation_data.model_dump()
             data_to_insert["status"] = "pending"
+            data_to_insert["reminder_sent"] = False
             
             created_reservation = await supabase_post("reservations", data=data_to_insert)
 
