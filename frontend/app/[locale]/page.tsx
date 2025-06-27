@@ -126,7 +126,7 @@ export default function RestaurantLandingPage() {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#menu" className={`transition-colors hover:text-orange-600 ${isScrolled ? 'text-gray-700' : 'text-white'}`}>{t('navMenu')}</a>
+              <button onClick={() => router.push('/menu')} className={`transition-colors hover:text-orange-600 ${isScrolled ? 'text-gray-700' : 'text-white'}`}>{t('navMenu')}</button>
               <a href="#about" className={`transition-colors hover:text-orange-600 ${isScrolled ? 'text-gray-700' : 'text-white'}`}>{t('navAbout')}</a>
               <a href="#contact" className={`transition-colors hover:text-orange-600 ${isScrolled ? 'text-gray-700' : 'text-white'}`}>{t('navContact')}</a>
               
@@ -182,7 +182,7 @@ export default function RestaurantLandingPage() {
         {mobileMenuOpen && (
           <div className="md:hidden bg-white/95 backdrop-blur-md border-t animate-in slide-in-from-top-2 duration-200">
             <div className="px-4 py-4 space-y-4">
-              <a href="#menu" className="block text-gray-700 hover:text-orange-600 transition-colors">{t('navMenu')}</a>
+              <button onClick={() => router.push('/menu')} className="block text-gray-700 hover:text-orange-600 transition-colors">{t('navMenu')}</button>
               <a href="#about" className="block text-gray-700 hover:text-orange-600 transition-colors">{t('navAbout')}</a>
               <a href="#contact" className="block text-gray-700 hover:text-orange-600 transition-colors">{t('navContact')}</a>
               <Button variant="outline" size="sm" className="w-full justify-start">
@@ -247,6 +247,7 @@ export default function RestaurantLandingPage() {
             <Button 
               variant="outline" 
               size="lg"
+              onClick={() => router.push('/menu')}
               className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 px-8 py-4 text-lg rounded-full"
             >
               <Menu className="w-5 h-5 mr-2" />
@@ -372,7 +373,7 @@ export default function RestaurantLandingPage() {
             <div>
               <h3 className="font-semibold mb-4">{t('quickLinksTitle')}</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#menu" className="hover:text-white transition-colors">{t('navMenu')}</a></li>
+                <li><button onClick={() => router.push('/menu')} className="hover:text-white transition-colors">{t('navMenu')}</button></li>
                 <li><a href="#about" className="hover:text-white transition-colors">{t('aboutUsLink')}</a></li>
                 <li><a href="#contact" className="hover:text-white transition-colors">{t('navContact')}</a></li>
                 <li><a href="#reservations" className="hover:text-white transition-colors">{t('reservationsLink')}</a></li>

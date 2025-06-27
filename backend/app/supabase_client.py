@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 load_dotenv()
 import os
 import httpx
+from typing import Optional, Dict, Any
 
 SUPABASE_URL = os.environ["SUPABASE_URL"].rstrip("/")
 SUPABASE_KEY = os.environ["SUPABASE_SERVICE_KEY"]
@@ -17,7 +18,7 @@ def get_supabase_headers():
     }
 
 
-async def supabase_get(table, params=None):
+async def supabase_get(table: str, params: Optional[Dict[str, Any]] = None):
     async with httpx.AsyncClient() as client:
         resp = await client.get(
             f"{SUPABASE_URL}/rest/v1/{table}",

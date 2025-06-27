@@ -3,16 +3,22 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
+import { DragEndEvent } from '@dnd-kit/core';
+import { arrayMove } from '@dnd-kit/sortable';
 import { dashboardApi, ApiError } from '@/lib/api';
-import { DashboardTable } from '@/lib/types';
+import { CreateReservationData, DashboardTable, DisplayTable, TableGroup } from '@/lib/types';
 import { DashboardHeader } from './dashboard-header';
 import { TableGrid } from './table-grid';
 import { Button } from '@/components/ui/button';
 
-export function DashboardContent() {
+interface DashboardContentProps {
+  restaurantId: string;
+}
+
+export function DashboardContent({ restaurantId }: DashboardContentProps) {
   const t = useTranslations('Dashboard');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [tables, setTables] = useState<DashboardTable[]>([]);
+  const [tables, setTables] = useState<DisplayTable[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,9 +29,24 @@ export function DashboardContent() {
     try {
       const dateString = format(date, 'yyyy-MM-dd');
       const response = await dashboardApi.getDashboardStatus(dateString);
-      setTables(response.tables);
+      
+      // Sort tables by location
+      const sortedTables = response.tables.sort((a: DashboardTable, b: DashboardTable) => {
+        const locationA = a.location || '';
+        const locationB = b.location || '';
+        return locationA.localeCompare(locationB);
+      });
+      
+      setTables(sortedTables);
     } catch (err) {
       if (err instanceof ApiError) {
+        // Special handling for users without restaurant (403 error)
+        if (err.status === 403 && err.message.includes('No restaurant associated')) {
+          // Redirect to onboarding if user doesn't have a restaurant
+          const locale = window.location.pathname.split('/')[1];
+          window.location.href = `/${locale}/onboarding`;
+          return;
+        }
         setError(err.message);
       } else {
         setError(t('error'));
@@ -46,13 +67,95 @@ export function DashboardContent() {
     }
   };
 
-  const handleTableClick = (table: DashboardTable) => {
-    // TODO: Handle table click - could show reservation details, etc.
-    console.log('Table clicked:', table);
+  const handleEditReservation = (table: DashboardTable) => {
+    // TODO: Implement edit reservation functionality
+    console.log('Edit reservation for table:', table);
+  };
+
+  const handleDeleteReservation = async (table: DashboardTable) => {
+    // TODO: Implement delete reservation functionality
+    console.log('Delete reservation for table:', table);
+    // For now, just refresh data
+    fetchDashboardData(selectedDate);
+  };
+
+  const handleCreateReservation = async (
+    reservationData: Omit<CreateReservationData, 'restaurant_id'>
+  ) => {
+    try {
+      const response = await fetch('/api/reservations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ...reservationData, restaurant_id: restaurantId }),
+      });
+
+      if (response.ok) {
+        // Refresh dashboard data after successful creation
+        fetchDashboardData(selectedDate);
+      } else {
+        console.error('Failed to create reservation');
+      }
+    } catch (error) {
+      console.error('Error creating reservation:', error);
+    }
   };
 
   const handleRetry = () => {
     fetchDashboardData(selectedDate);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over) return;
+
+    const activeId = active.id;
+    const overId = over.id;
+
+    setTables((currentTables) => {
+      const activeItem = currentTables.find((t) => t.id === activeId);
+      const overItem = currentTables.find((t) => t.id === overId);
+
+      // Handle merging
+      if (activeItem && overItem && activeId !== overId && !('isGroup' in activeItem) && !('isGroup' in overItem)) {
+        const activeTable = activeItem as DashboardTable;
+        const overTable = overItem as DashboardTable;
+
+        const newGroup: TableGroup = {
+          id: `group-${activeTable.id}-${overTable.id}`,
+          isGroup: true,
+          name: `${activeTable.name} + ${overTable.name}`,
+          capacity: activeTable.capacity + overTable.capacity,
+          status: 'available',
+          tables: [activeTable, overTable],
+          location: activeTable.location,
+        };
+
+        return [
+          ...currentTables.filter((t) => t.id !== activeId && t.id !== overId),
+          newGroup,
+        ];
+      }
+
+      // Handle reordering
+      const oldIndex = currentTables.findIndex((item) => item.id === activeId);
+      const newIndex = currentTables.findIndex((item) => item.id === overId);
+      return arrayMove(currentTables, oldIndex, newIndex);
+    });
+  };
+
+  const handleUnmerge = (groupId: string) => {
+    setTables((currentTables) => {
+      const groupToUnmerge = currentTables.find((t) => t.id === groupId) as TableGroup;
+      if (!groupToUnmerge || !groupToUnmerge.isGroup) return currentTables;
+
+      return [
+        ...currentTables.filter((t) => t.id !== groupId),
+        ...groupToUnmerge.tables,
+      ];
+    });
   };
 
   // Debug: log tables before reduce
@@ -109,7 +212,14 @@ export function DashboardContent() {
           </Button>
         </div>
       ) : (
-        <TableGrid tables={tables ?? []} onTableClick={handleTableClick} />
+        <TableGrid
+          tables={tables ?? []}
+          onEditReservation={handleEditReservation}
+          onDeleteReservation={handleDeleteReservation}
+          onCreateReservation={handleCreateReservation}
+          onDragEnd={handleDragEnd}
+          onUnmerge={handleUnmerge}
+        />
       )}
     </div>
   );

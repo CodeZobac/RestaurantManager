@@ -1,1 +1,121 @@
-# RestaurantManager
+# Restaurant Manager
+
+<div align="center">
+
+[![Next.js](https://img.shields.io/badge/Next.js-15.3.4-black?style=flat-square&logo=next.js)](https://nextjs.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.104.0-009688?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+
+</div>
+
+<div align="center">
+
+Restaurant Manager is a comprehensive, full-stack application designed to streamline restaurant operations. It provides a robust system for managing tables, reservations, staff, and customer interactions, enhancing the overall efficiency and dining experience.
+
+</div>
+
+## Features
+
+*   **Reservation Management:** Customers can easily book tables through a user-friendly interface. Staff can manage all reservations from a centralized dashboard, with real-time notifications and the ability to accept or reject bookings via Telegram integration.
+*   **Visual Table Management:** A dynamic dashboard allows staff to visually orient and manage table layouts. Tables can be merged to accommodate larger parties, and their status (e.g., available, reserved) can be updated in real-time.
+*   **Restaurant & Staff Onboarding:** A guided onboarding process enables new restaurants to quickly set up their profiles, add staff members with different roles, and upload menu items. This allows customers to view the menu when making a reservation.
+*   **Secure Access:** The application employs token-based authentication to ensure that only authorized personnel can access administrative functions, protecting sensitive restaurant and customer data.
+*   **Analytics & Reporting:** The system provides valuable insights into reservation trends, peak dining hours, and table utilization rates, helping management make data-driven decisions to optimize operations.
+*   **Internationalization (i18n):** Full support for multiple languages (initially English and Portuguese) ensures the application is accessible to a diverse user base.
+
+## Tech Stack
+
+*   **Frontend:**
+    *   Next.js
+    *   React
+    *   TypeScript
+    *   Tailwind CSS
+    *   Shadcn UI
+*   **Backend:**
+    *   FastAPI
+    *   Python
+*   **Database:**
+    *   Supabase (PostgreSQL)
+*   **Containerization:**
+    *   Docker
+    *   Docker Compose
+
+## Getting Started
+
+### Prerequisites
+
+*   Docker and Docker Compose
+*   Node.js and npm (for local frontend development)
+*   Python and uv (for local backend development)
+
+### Installation & Running the Application
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/CodeZobac/RestaurantManager.git
+    cd RestaurantManager
+    ```
+
+2.  **Set up environment variables:**
+    *   Create a `.env` file in the `frontend` directory by copying `frontend/.env.example`.
+    *   Create a `.env` file in the `backend` directory by copying `backend/.env.example`.
+    *   Fill in the necessary environment variables in both `.env` files (e.g., Supabase credentials, database URL).
+
+3.  **Run with Docker (Recommended):**
+    Use the provided Makefile to manage the application services:
+    *   **Start:** `make start`
+    *   **Stop:** `make stop`
+    *   **Restart:** `make restart`
+
+    The frontend will be available at `http://localhost:3000`, and the backend API will be at `http://localhost:8000`.
+
+4.  **Local Development:**
+    *   **Frontend:**
+        ```bash
+        cd frontend
+        npm install
+        npm run dev
+        ```
+    *   **Backend:**
+        ```bash
+        cd backend
+        uv pip install -r requirements.txt
+        uv run app.main:app --reload
+        ```
+
+## 👥 Team
+
+<div align="center">
+  <a href="https://kapta.pt">
+    <img src="https://media.licdn.com/dms/image/v2/D4D3DAQEhPIKnSrFifw/image-scale_191_1128/image-scale_191_1128/0/1727791287468/kapta_pt_cover?e=1751587200&v=beta&t=uS-YRAg1XublVAcncXsopgLlS6_PAHrAFzjSpioqJPk" width="800px;" alt="Kapta"/>
+  </a>
+</div>
+
+<table align="center">
+  <tr>
+    <td align="center">
+      <a href="https://github.com/CodeZobac">
+        <img src="https://github.com/CodeZobac.png" width="100px;" alt="Afonso Caboz"/>
+        <br />
+        <sub><b>Afonso Caboz</b></sub>
+      </a>
+      <br />
+      <sub>Frontend Developer</sub>
+    </td>
+    <td align="center">
+      <a href="https://github.com/LuisBBandeira">
+        <img src="https://github.com/LuisBBandeira.png" width="100px;" alt="Luis Bandeira"/>
+        <br />
+        <sub><b>Luis Bandeira</b></sub>
+      </a>
+      <br />
+      <sub>Backend Developer</sub>
+    </td>
+  </tr>
+</table>
+
+<div align="center">
+
+[Report Bug](https://github.com/CodeZobac/RestaurantManager/issues) • [Request Feature](https://github.com/CodeZobac/RestaurantManager/issues) 
+
+</div>

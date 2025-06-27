@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Calendar, Settings, LogOut, User, ChevronDown } from 'lucide-react';
+import { Menu, Calendar, Settings, LogOut, User, ChevronDown, BarChart3 } from 'lucide-react';
 import { useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import {
@@ -29,6 +29,12 @@ export default function Header() {
       label: t('dashboardLabel'),
       icon: Calendar,
       description: t('dashboardDescription')
+    },
+    {
+      href: `/analytics`,
+      label: t('analyticsLabel') || 'Analytics',
+      icon: BarChart3,
+      description: t('analyticsDescription') || 'Performance insights and reports'
     },
     {
       href: `/tables`,
@@ -114,6 +120,10 @@ export default function Header() {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>{t('myAccountLabel')}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => handleNavigation('/profile')}>
+                  <User className="w-4 h-4 mr-2" />
+                  {t('profileLabel')}
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => signOut({ callbackUrl: '/' })}>
                   <LogOut className="w-4 h-4 mr-2" />
                   {t('logoutButton')}

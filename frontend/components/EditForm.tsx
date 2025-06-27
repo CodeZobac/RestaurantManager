@@ -126,7 +126,7 @@ export default function EditForm({ table, isOpen, onClose, onSuccess }: EditForm
 
     setIsSubmitting(true);
     try {
-      await updateTable(table.id, {
+      await updateTable(parseInt(table.id, 10), {
         name: data.name.trim(),
         capacity: data.capacity,
         location: data.location.trim(),

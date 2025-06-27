@@ -1,31 +1,159 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { DashboardTable } from '@/lib/types';
+import React, { useState, useMemo, useEffect } from 'react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  useDroppable,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { DisplayTable, DashboardTable } from '@/lib/types';
 import { TableCard } from './table-card';
 
 interface TableGridProps {
-  tables: DashboardTable[];
-  onTableClick?: (table: DashboardTable) => void;
+  tables: DisplayTable[];
+  onEditReservation?: (table: DashboardTable) => void;
+  onDeleteReservation?: (table: DashboardTable) => void;
+  onCreateReservation?: (reservationData: any) => void;
+  onDragEnd: (event: DragEndEvent) => void;
+  onUnmerge: (groupId: string) => void;
 }
 
-export function TableGrid({ tables, onTableClick }: TableGridProps) {
-  if (tables.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-64 text-gray-500">
-        <p>No tables found</p>
-      </div>
-    );
-  }
+function DraggableTableCard({
+  table,
+  onEditReservation,
+  onDeleteReservation,
+  onCreateReservation,
+  onUnmerge,
+}: {
+  table: DisplayTable;
+  onEditReservation?: (table: DashboardTable) => void;
+  onDeleteReservation?: (table: DashboardTable) => void;
+  onCreateReservation?: (reservationData: any) => void;
+  onUnmerge: (groupId: string) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: table.id, data: { type: 'table' } });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  const { setNodeRef: droppableRef } = useDroppable({
+    id: table.id,
+  });
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
-      {tables.map((table) => (
+    <div ref={droppableRef}>
+      <div
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
+        className="touch-none"
+      >
         <TableCard
-          key={table.id}
           table={table}
-          onClick={onTableClick ? () => onTableClick(table) : undefined}
+          onEditReservation={onEditReservation}
+          onDeleteReservation={onDeleteReservation}
+          onCreateReservation={onCreateReservation}
+          onUnmerge={onUnmerge}
         />
-      ))}
+      </div>
+    </div>
+  );
+}
+
+export function TableGrid({
+  tables,
+  onEditReservation,
+  onDeleteReservation,
+  onCreateReservation,
+  onDragEnd,
+  onUnmerge,
+}: TableGridProps) {
+  const [sortedTables, setSortedTables] = useState(tables);
+
+  useEffect(() => {
+    setSortedTables(tables);
+  }, [tables]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+
+  const locationGroups = useMemo(() => {
+    return sortedTables.reduce((groups, table) => {
+      const location = table.location || 'No Location';
+      if (!groups[location]) {
+        groups[location] = [];
+      }
+      groups[location].push(table);
+      return groups;
+    }, {} as Record<string, DisplayTable[]>);
+  }, [sortedTables]);
+
+  return (
+    <div className="relative">
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={onDragEnd}
+      >
+        <div className="space-y-8">
+          {Object.entries(locationGroups).map(([location, locationTables]) => (
+            <div key={location} className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+                <h3 className="text-lg font-semibold text-gray-800">{location}</h3>
+                <div className="flex-1 h-px bg-gray-200"></div>
+                <span className="text-sm text-gray-500">
+                  {locationTables.length} tables
+                </span>
+              </div>
+              <SortableContext
+                items={locationTables.map((t) => t.id)}
+                strategy={rectSortingStrategy}
+              >
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+                  {locationTables.map((table) => (
+                    <DraggableTableCard
+                      key={table.id}
+                      table={table}
+                      onEditReservation={onEditReservation}
+                      onDeleteReservation={onDeleteReservation}
+                      onCreateReservation={onCreateReservation}
+                      onUnmerge={onUnmerge}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </div>
+          ))}
+        </div>
+      </DndContext>
     </div>
   );
 }

@@ -18,7 +18,8 @@ export async function POST(request: Request) {
         email,
         password_hash,
         name,
-        role: 'user'
+        role: 'user',
+        onboarding_completed: false,
       })
       .select()
       .single();

@@ -1,37 +1,49 @@
-import createMiddleware from 'next-intl/middleware';
-import {routing} from './i18n/routing';
-import { auth } from './auth';
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/auth';
+import { routing } from './i18n/routing';
+import createIntlMiddleware from 'next-intl/middleware';
 
-const intlMiddleware = createMiddleware(routing);
+const intlMiddleware = createIntlMiddleware(routing);
 
 export default async function middleware(request: NextRequest) {
-  // Handle authentication for API routes
-  if (request.nextUrl.pathname.startsWith('/api/')) {
-    // For API routes, just pass through - let individual routes handle auth
-    return;
-  }
-  
-  // Get the locale from the URL
-  const locale = request.nextUrl.pathname.split('/')[1];
-  
-  // Check if the user is accessing admin routes
-  if (request.nextUrl.pathname.includes('/admin')) {
-    const session = await auth();
-    
-    if (!session || !session.user) {
-      // No session, redirect to home page
-      return Response.redirect(new URL(`/${locale}`, request.url));
+  const response = intlMiddleware(request);
+  const session = await auth();
+  const { pathname } = request.nextUrl;
+
+  const locale = routing.locales.find(loc => pathname.startsWith(`/${loc}`)) || routing.defaultLocale;
+
+  const protectedPaths = [
+    `/${locale}/[restaurantId]/admin/dashboard`,
+    `/${locale}/[restaurantId]/admin/tables`,
+    `/${locale}/[restaurantId]/admin/profile`,
+  ];
+
+  const isOnboardingPath = pathname.startsWith(`/${locale}/onboarding`);
+  const isAuthPath = pathname.startsWith(`/${locale}/auth`);
+
+  if (protectedPaths.some(p => new RegExp(p.replace('[restaurantId]', '\\w+')).test(pathname))) {
+    if (!session) {
+      return NextResponse.redirect(new URL(`/${locale}/auth`, request.url));
     }
-    
-    if (!session.user.restaurant_id) {
-      // User has no restaurant, redirect to onboarding
-      return Response.redirect(new URL(`/${locale}/onboarding`, request.url));
+
+    if (!session.user.onboarding_completed || !session.user.restaurant_id) {
+      return NextResponse.redirect(new URL(`/${locale}/onboarding`, request.url));
     }
   }
-  
-  // Handle internationalization for other routes
-  return intlMiddleware(request);
+
+  if (isOnboardingPath && session?.user.onboarding_completed && session?.user.restaurant_id) {
+    return NextResponse.redirect(new URL(`/${locale}/${session.user.restaurant_id}/admin/dashboard`, request.url));
+  }
+
+  if (isAuthPath && session) {
+    if (session.user.onboarding_completed && session.user.restaurant_id) {
+      return NextResponse.redirect(new URL(`/${locale}/${session.user.restaurant_id}/admin/dashboard`, request.url));
+    } else {
+      return NextResponse.redirect(new URL(`/${locale}/onboarding`, request.url));
+    }
+  }
+
+  return response;
 }
 
 export const config = {

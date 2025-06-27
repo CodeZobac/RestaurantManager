@@ -1,5 +1,6 @@
 """FastAPI application entry point for Restaurant Manager API"""
 
+import asyncio
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -7,24 +8,32 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from .core.config import settings
-from .routers import tables_router
-from .routers.reservations import router as reservations_router
+from .routers import tables, reservations, telegram
+from .services.background_tasks import main_task
 
 # Load environment variables from .env file
 load_dotenv()
 
+background_task = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan manager for startup and shutdown events"""
+    global background_task
     # Startup
     print(
         f"📊 API Documentation available at: http://{settings.host}:{settings.port}/docs"
     )
+    background_task = asyncio.create_task(main_task())
     yield
     # Shutdown
+    if background_task:
+        background_task.cancel()
+        try:
+            await background_task
+        except asyncio.CancelledError:
+            pass
     print("🛑 No database connections to close (using Supabase REST API)")
-
 
 # Create FastAPI application
 app = FastAPI(
@@ -84,9 +93,10 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(tables_router, prefix="/api/v1")
+app.include_router(tables.router, prefix="/api/v1")
+app.include_router(reservations.router, prefix="/api/v1")
+app.include_router(telegram.router, prefix="/api/v1")
 
-app.include_router(reservations_router)
 
 
 # Root endpoint
@@ -122,7 +132,6 @@ async def root():
         ],
     }
 
-
 # Health check endpoint
 @app.get("/health", tags=["health"])
 async def health_check():
@@ -132,7 +141,6 @@ async def health_check():
         "message": "API is running",
         "version": settings.app_version,
     }
-
 
 # Global exception handler
 @app.exception_handler(Exception)
@@ -146,7 +154,6 @@ async def global_exception_handler(request, exc):
             "type": "internal_error",
         },
     )
-
 
 if __name__ == "__main__":
     import uvicorn

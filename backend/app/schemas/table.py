@@ -1,5 +1,3 @@
-"""Pydantic schemas for table management"""
-
 from datetime import datetime
 from typing import Optional, List
 from pydantic import BaseModel, Field, ConfigDict
@@ -13,15 +11,16 @@ class TableBase(BaseModel):
 
 class TableCreate(TableBase):
     """Schema for creating a new table"""
-    # Auto-generate table name if not provided (T1, T2, T3, etc.)
-    name: Optional[str] = Field(None, description="Table identifier - auto-generated if not provided")
+    restaurant_id: str = Field(..., description="ID of the restaurant this table belongs to")
+    name: Optional[str] = Field(None, description="Table identifier (e.g., T1, T2, T3). Auto-generated if not provided.")
     
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
                 "capacity": 2,
                 "location": "Main Dining",
-                "status": "available"
+                "status": "available",
+                "restaurant_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
             }
         }
     )
@@ -32,13 +31,15 @@ class TableUpdate(BaseModel):
     capacity: Optional[int] = Field(None, ge=1, description="Maximum number of guests")
     location: Optional[str] = Field(None, description="Physical location in restaurant")
     status: Optional[str] = Field(None, description="Table status")
+    restaurant_id: Optional[str] = Field(None, description="ID of the restaurant this table belongs to")
     
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
                 "capacity": 4,
                 "location": "Patio",
-                "status": "maintenance"
+                "status": "maintenance",
+                "restaurant_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
             }
         }
     )

@@ -82,7 +82,9 @@
       "dateTimeInfo": "Date & Time",
       "partyInfo": "Party Details",
       "submitButton": "Request Reservation",
-      "submitting": "Submitting..."
+      "submitting": "Submitting...",
+      "selectRestaurant": "Select a Restaurant",
+      "restaurant": "Restaurant"
     },
     "validation": {
       "nameMinLength": "Name must be at least 2 characters",
@@ -104,8 +106,16 @@
       "error": "Failed to Submit Reservation",
       "noTablesAvailable": "Sorry, no tables are available for the selected date and time. Please try a different time slot.",
       "serverError": "An error occurred while processing your request. Please try again.",
-      "makeAnother": "Make Another Reservation"
-    }
+      "makeAnother": "Make Another Reservation",
+      "goHome": "Go home"
+    },
+    "backToHome": "Back to Home",
+    "reserveYourTable": "Reserve Your Table",
+    "experience": "Experience",
+    "reservationDetails": "Reservation Details",
+    "fillInDetails": "Fill in the details below to secure your table",
+    "needHelp": "Need Help?",
+    "specialOccasions": "For special occasions or large groups, please call us directly at (555) 123-4567"
   },
   "Dashboard": {
     "title": "Restaurant Dashboard",
@@ -122,6 +132,38 @@
     "retry": "Try again",
     "guests": "guests",
     "at": "at"
+  },
+  "NewReservationPopover": {
+    "title": "New Reservation",
+    "seats": "seats",
+    "customerNameLabel": "Customer Name *",
+    "customerNamePlaceholder": "Enter customer name",
+    "emailLabel": "Email",
+    "emailPlaceholder": "email@example.com",
+    "phoneLabel": "Phone",
+    "phonePlaceholder": "+1234567890",
+    "partySizeLabel": "Party Size *",
+    "partySizePlaceholder": "Select size",
+    "guest": "guest",
+    "guests": "guests",
+    "timeLabel": "Time *",
+    "timePlaceholder": "Select time",
+    "specialRequestsLabel": "Special Requests",
+    "specialRequestsPlaceholder": "Any special requirements...",
+    "cancelButton": "Cancel",
+    "createButton": "Create Reservation",
+    "creatingButton": "Creating..."
+  },
+  "ReservationInfoPopover": {
+    "confirmed": "Confirmed",
+    "pending": "Pending",
+    "seats": "seats",
+    "partyOf": "Party of",
+    "reservationTime": "Reservation time",
+    "email": "Email",
+    "phone": "Phone",
+    "editButton": "Edit",
+    "cancelButton": "Cancel"
   },
   "LandingPage": {
     "brandName": "Reservation Manager",
@@ -186,9 +228,12 @@
     "restaurantAdmin": "Restaurant Admin",
     "adminLabel": "Admin",
     "myAccountLabel": "My Account",
+    "profileLabel": "Profile",
     "logoutButton": "Log out",
     "toggleMenu": "Toggle menu",
-    "signOutButton": "Sign out"
+    "signOutButton": "Sign out",
+    "analyticsLabel": "Analytics",
+    "analyticsDescription": "Performance insights and reports"
   },
   "Onboarding": {
     "contactInfoTitle": "Contact Info",
@@ -246,6 +291,7 @@
     "passwordPlaceholder": "Password",
     "forgotPassword": "Forgot Password?",
     "loginButton": "Login",
+    "loggingInButton": "Logging in...",
     "orLoginWithSocial": "or login with social platforms",
     "registrationTitle": "Registration",
     "emailPlaceholder": "Email",
@@ -260,6 +306,7 @@
     "loginLink": "Login",
     "somethingWentWrong": "Something went wrong",
     "unknownError": "An unknown error occurred",
+    "backToHome": "Back to Home",
     "validation": {
       "emailTitle": "Email Requirements",
       "emailValid": "Must be a valid email address",
@@ -269,6 +316,62 @@
       "lowercase": "Contains at least one lowercase letter",
       "number": "Contains at least one number",
       "specialChar": "Contains at least one special character (!@#$%^&*)"
+    }
+  },
+  "Menu": {
+    "loading": "Loading delicious menus...",
+    "culinaryExcellence": "Culinary Excellence",
+    "discoverOur": "Discover Our",
+    "exquisiteMenus": "Exquisite Menus",
+    "exploreDishes": "Explore carefully crafted dishes from our partner restaurants, each telling a unique culinary story",
+    "premiumQuality": "Premium Quality",
+    "freshDaily": "Fresh Daily",
+    "expertChefs": "Expert Chefs",
+    "restaurantPartners": "Our Restaurant Partners",
+    "restaurantPartnersDescription": "Each restaurant brings its own unique flavors and culinary expertise to your table",
+    "noMenusAvailable": "No Menus Available",
+    "noMenusAvailableDescription": "We're working on adding delicious menus for you. Please check back soon!",
+    "itemCount": "{count, plural, one {# item} other {# items}}",
+    "hideMenu": "Hide Menu",
+    "viewMenu": "View Menu",
+    "readyToExperience": "Ready to Experience These Flavors?",
+    "bookYourTable": "Book your table now and embark on a culinary journey that will delight your senses",
+    "makeReservation": "Make a Reservation",
+    "categories": {
+      "appetizer": "Appetizers",
+      "main": "Main Courses",
+      "dessert": "Desserts",
+      "beverage": "Beverages"
+    }
+  },
+  "Analytics": {
+    "failedToLoad": "Failed to load analytics data. Please try again.",
+    "retry": "Retry",
+    "dashboardTitle": "Analytics Dashboard",
+    "dashboardDescription": "Comprehensive insights into your restaurant's performance",
+    "revenueTrendsTitle": "Revenue Trends",
+    "revenueTrendsDescription": "Daily revenue and reservations over time",
+    "peakHoursTitle": "Peak Hours Analysis",
+    "peakHoursDescription": "Busiest times and customer flow patterns",
+    "reservationStatusTitle": "Reservation Status Breakdown",
+    "reservationStatusDescription": "Distribution of reservation outcomes",
+    "tableUtilizationTitle": "Table Utilization",
+    "tableUtilizationDescription": "Performance metrics by table",
+    "customerInsightsTitle": "Customer Insights",
+    "customerInsightsDescription": "Detailed customer behavior and loyalty metrics",
+    "pickDateRange": "Pick a date range",
+    "kpi": {
+      "totalRevenue": "Total Revenue",
+      "totalReservations": "Total Reservations",
+      "completionRate": "Completion Rate",
+      "avgGuestsPerReservation": "Avg Guests/Reservation",
+      "avgRevenuePerDay": "Avg Revenue/Day",
+      "peakHour": "Peak Hour"
+    },
+    "revenueChart": {
+      "noData": "No revenue data available for the selected period",
+      "revenueLabel": "Revenue ($)",
+      "reservationsLabel": "Reservations"
     }
   }
 }
