@@ -1,14 +1,16 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, Users, DollarSign, Calendar, Clock } from 'lucide-react';
-import { AnalyticsData } from './analytics-content';
+import { AnalyticsData } from '../types/analytics';
 
 interface KPICardsProps {
   data: AnalyticsData | null;
 }
 
 export function KPICards({ data }: KPICardsProps) {
+  const t = useTranslations('Analytics.kpi');
   if (!data) return null;
 
   // Calculate KPIs from the data
@@ -29,7 +31,7 @@ export function KPICards({ data }: KPICardsProps) {
 
   const kpis = [
     {
-      title: 'Total Revenue',
+      title: t('totalRevenue'),
       value: `$${totalRevenue.toLocaleString()}`,
       icon: DollarSign,
       trend: totalRevenue > 0 ? 'up' : 'neutral',
@@ -37,7 +39,7 @@ export function KPICards({ data }: KPICardsProps) {
       bgColor: 'bg-green-50',
     },
     {
-      title: 'Total Reservations',
+      title: t('totalReservations'),
       value: totalReservations.toLocaleString(),
       icon: Calendar,
       trend: totalReservations > 0 ? 'up' : 'neutral',
@@ -45,7 +47,7 @@ export function KPICards({ data }: KPICardsProps) {
       bgColor: 'bg-blue-50',
     },
     {
-      title: 'Completion Rate',
+      title: t('completionRate'),
       value: `${completionRate.toFixed(1)}%`,
       icon: Users,
       trend: completionRate > 75 ? 'up' : completionRate > 50 ? 'neutral' : 'down',
@@ -53,7 +55,7 @@ export function KPICards({ data }: KPICardsProps) {
       bgColor: 'bg-purple-50',
     },
     {
-      title: 'Avg Guests/Reservation',
+      title: t('avgGuestsPerReservation'),
       value: avgGuestsPerReservation.toFixed(1),
       icon: Users,
       trend: avgGuestsPerReservation > 3 ? 'up' : 'neutral',
@@ -61,7 +63,7 @@ export function KPICards({ data }: KPICardsProps) {
       bgColor: 'bg-orange-50',
     },
     {
-      title: 'Avg Revenue/Day',
+      title: t('avgRevenuePerDay'),
       value: `$${avgRevenuePerDay.toLocaleString()}`,
       icon: TrendingUp,
       trend: avgRevenuePerDay > 0 ? 'up' : 'neutral',
@@ -69,7 +71,7 @@ export function KPICards({ data }: KPICardsProps) {
       bgColor: 'bg-emerald-50',
     },
     {
-      title: 'Peak Hour',
+      title: t('peakHour'),
       value: `${peakHour.hour}:00`,
       icon: Clock,
       trend: 'neutral',

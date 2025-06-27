@@ -4,6 +4,7 @@ import * as React from 'react';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { DateRange } from 'react-day-picker';
+import { useTranslations } from 'next-intl';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,7 @@ export function DatePickerWithRange({
   onDateChange,
   className,
 }: DatePickerWithRangeProps) {
+  const t = useTranslations('Analytics');
   return (
     <div className={cn("grid gap-2", className)}>
       <Popover>
@@ -48,7 +50,7 @@ export function DatePickerWithRange({
                 format(date.from, 'LLL dd, y')
               )
             ) : (
-              <span>Pick a date range</span>
+              <span>{t('pickDateRange')}</span>
             )}
           </Button>
         </PopoverTrigger>

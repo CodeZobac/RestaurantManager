@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DatePickerWithRange } from './date-picker-range';
 import { KPICards } from './kpi-cards';
@@ -11,18 +12,24 @@ import { TableUtilizationTable } from './table-utilization-table';
 import { CustomerInsightsTable } from './customer-insights-table';
 import { LoadingSpinner } from './loading-spinner';
 import { CalendarIcon, BarChart3, Users, Clock } from 'lucide-react';
-import { format, subDays } from 'date-fns';
-import { AnalyticsData, DateRange } from '../types/analytics';
+import { format } from 'date-fns';
+import { AnalyticsData } from '../types/analytics';
+import { DateRange } from 'react-day-picker';
 
 interface AnalyticsContentProps {
   restaurantId: string;
+  initialDateRange: DateRange;
 }
 
-export function AnalyticsContent({ restaurantId }: AnalyticsContentProps) {
-  const [dateRange, setDateRange] = useState<DateRange>({
-    from: subDays(new Date(), 30),
-    to: new Date(),
-  });
+export function AnalyticsContent({ restaurantId, initialDateRange }: AnalyticsContentProps) {
+  const t = useTranslations('Analytics');
+  const [dateRange, setDateRange] = useState<DateRange>(initialDateRange);
+
+  const handleDateChange = (date: DateRange | undefined) => {
+    if (date) {
+      setDateRange(date);
+    }
+  };
   
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -87,11 +94,11 @@ export function AnalyticsContent({ restaurantId }: AnalyticsContentProps) {
       setData(analyticsData);
     } catch (err) {
       console.error('Error fetching analytics data:', err);
-      setError('Failed to load analytics data. Please try again.');
+      setError(t('failedToLoad'));
     } finally {
       setLoading(false);
     }
-  }, [restaurantId, dateRange]);
+  }, [restaurantId, dateRange, t]);
 
   useEffect(() => {
     fetchAnalyticsData();
@@ -119,7 +126,7 @@ export function AnalyticsContent({ restaurantId }: AnalyticsContentProps) {
                 onClick={fetchAnalyticsData}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
-                Retry
+                {t('retry')}
               </button>
             </div>
           </CardContent>
@@ -135,10 +142,10 @@ export function AnalyticsContent({ restaurantId }: AnalyticsContentProps) {
         <div>
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
             <BarChart3 className="w-8 h-8 text-blue-600" />
-            Analytics Dashboard
+            {t('dashboardTitle')}
           </h1>
           <p className="text-gray-600 mt-2">
-            Comprehensive insights into your restaurant&apos;s performance
+            {t('dashboardDescription')}
           </p>
         </div>
         
@@ -146,8 +153,8 @@ export function AnalyticsContent({ restaurantId }: AnalyticsContentProps) {
         <div className="flex items-center gap-2">
           <CalendarIcon className="w-4 h-4 text-gray-500" />
           <DatePickerWithRange
-            date={dateRange}
-            onDateChange={setDateRange}
+            date={dateRange as DateRange | undefined}
+            onDateChange={handleDateChange}
           />
         </div>
       </div>
@@ -161,10 +168,10 @@ export function AnalyticsContent({ restaurantId }: AnalyticsContentProps) {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-blue-600" />
-              Revenue Trends
+              {t('revenueTrendsTitle')}
             </CardTitle>
             <CardDescription>
-              Daily revenue and reservations over time
+              {t('revenueTrendsDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -176,10 +183,10 @@ export function AnalyticsContent({ restaurantId }: AnalyticsContentProps) {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-green-600" />
-              Peak Hours Analysis
+              {t('peakHoursTitle')}
             </CardTitle>
             <CardDescription>
-              Busiest times and customer flow patterns
+              {t('peakHoursDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -194,10 +201,10 @@ export function AnalyticsContent({ restaurantId }: AnalyticsContentProps) {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="w-5 h-5 text-purple-600" />
-              Reservation Status Breakdown
+              {t('reservationStatusTitle')}
             </CardTitle>
             <CardDescription>
-              Distribution of reservation outcomes
+              {t('reservationStatusDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -207,9 +214,9 @@ export function AnalyticsContent({ restaurantId }: AnalyticsContentProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Table Utilization</CardTitle>
+            <CardTitle>{t('tableUtilizationTitle')}</CardTitle>
             <CardDescription>
-              Performance metrics by table
+              {t('tableUtilizationDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -223,10 +230,10 @@ export function AnalyticsContent({ restaurantId }: AnalyticsContentProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="w-5 h-5 text-orange-600" />
-            Customer Insights
+            {t('customerInsightsTitle')}
           </CardTitle>
           <CardDescription>
-            Detailed customer behavior and loyalty metrics
+            {t('customerInsightsDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent>

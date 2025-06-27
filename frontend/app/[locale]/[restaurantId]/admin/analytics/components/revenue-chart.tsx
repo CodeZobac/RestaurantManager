@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -31,10 +32,12 @@ interface RevenueChartProps {
 }
 
 export function RevenueChart({ data }: RevenueChartProps) {
+  const t = useTranslations('Analytics.revenueChart');
+
   if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 text-gray-500">
-        No revenue data available for the selected period
+        {t('noData')}
       </div>
     );
   }
@@ -46,7 +49,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
     labels: sortedData.map(item => format(parseISO(item.date), 'MMM dd')),
     datasets: [
       {
-        label: 'Revenue ($)',
+        label: t('revenueLabel'),
         data: sortedData.map(item => item.estimated_revenue || 0),
         borderColor: 'rgb(59, 130, 246)',
         backgroundColor: 'rgba(59, 130, 246, 0.1)',
@@ -59,7 +62,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
         pointHoverRadius: 6,
       },
       {
-        label: 'Reservations',
+        label: t('reservationsLabel'),
         data: sortedData.map(item => item.completed_reservations || 0),
         borderColor: 'rgb(16, 185, 129)',
         backgroundColor: 'rgba(16, 185, 129, 0.1)',
@@ -100,7 +103,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
             if (label) {
               label += ': ';
             }
-            if (context.dataset.label === 'Revenue ($)') {
+            if (context.dataset.label === t('revenueLabel')) {
               label += '$' + context.parsed.y.toLocaleString();
             } else {
               label += context.parsed.y;
@@ -131,7 +134,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
         position: 'left' as const,
         title: {
           display: true,
-          text: 'Revenue ($)',
+          text: t('revenueLabel'),
           color: 'rgb(59, 130, 246)',
         },
         grid: {
@@ -149,14 +152,14 @@ export function RevenueChart({ data }: RevenueChartProps) {
         position: 'right' as const,
         title: {
           display: true,
-          text: 'Reservations',
+          text: t('reservationsLabel'),
           color: 'rgb(16, 185, 129)',
         },
         grid: {
           drawOnChartArea: false,
         },
         ticks: {
-          beginAtZero: true,
+          stepSize: 1,
         },
       },
     },

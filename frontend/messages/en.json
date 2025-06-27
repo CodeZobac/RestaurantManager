@@ -231,7 +231,9 @@
     "profileLabel": "Profile",
     "logoutButton": "Log out",
     "toggleMenu": "Toggle menu",
-    "signOutButton": "Sign out"
+    "signOutButton": "Sign out",
+    "analyticsLabel": "Analytics",
+    "analyticsDescription": "Performance insights and reports"
   },
   "Onboarding": {
     "contactInfoTitle": "Contact Info",
@@ -289,6 +291,7 @@
     "passwordPlaceholder": "Password",
     "forgotPassword": "Forgot Password?",
     "loginButton": "Login",
+    "loggingInButton": "Logging in...",
     "orLoginWithSocial": "or login with social platforms",
     "registrationTitle": "Registration",
     "emailPlaceholder": "Email",
@@ -303,6 +306,7 @@
     "loginLink": "Login",
     "somethingWentWrong": "Something went wrong",
     "unknownError": "An unknown error occurred",
+    "backToHome": "Back to Home",
     "validation": {
       "emailTitle": "Email Requirements",
       "emailValid": "Must be a valid email address",
@@ -338,6 +342,36 @@
       "main": "Main Courses",
       "dessert": "Desserts",
       "beverage": "Beverages"
+    }
+  },
+  "Analytics": {
+    "failedToLoad": "Failed to load analytics data. Please try again.",
+    "retry": "Retry",
+    "dashboardTitle": "Analytics Dashboard",
+    "dashboardDescription": "Comprehensive insights into your restaurant's performance",
+    "revenueTrendsTitle": "Revenue Trends",
+    "revenueTrendsDescription": "Daily revenue and reservations over time",
+    "peakHoursTitle": "Peak Hours Analysis",
+    "peakHoursDescription": "Busiest times and customer flow patterns",
+    "reservationStatusTitle": "Reservation Status Breakdown",
+    "reservationStatusDescription": "Distribution of reservation outcomes",
+    "tableUtilizationTitle": "Table Utilization",
+    "tableUtilizationDescription": "Performance metrics by table",
+    "customerInsightsTitle": "Customer Insights",
+    "customerInsightsDescription": "Detailed customer behavior and loyalty metrics",
+    "pickDateRange": "Pick a date range",
+    "kpi": {
+      "totalRevenue": "Total Revenue",
+      "totalReservations": "Total Reservations",
+      "completionRate": "Completion Rate",
+      "avgGuestsPerReservation": "Avg Guests/Reservation",
+      "avgRevenuePerDay": "Avg Revenue/Day",
+      "peakHour": "Peak Hour"
+    },
+    "revenueChart": {
+      "noData": "No revenue data available for the selected period",
+      "revenueLabel": "Revenue ($)",
+      "reservationsLabel": "Reservations"
     }
   }
 }

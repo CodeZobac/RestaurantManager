@@ -80,6 +80,6 @@ export interface AnalyticsData {
 }
 
 export interface DateRange {
-  from: Date | undefined;
-  to: Date | undefined;
+  from: Date;
+  to?: Date;
 }
