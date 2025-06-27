@@ -16,7 +16,14 @@
     "deleteSuccess": "Table deleted successfully",
     "deleteError": "Failed to delete table",
     "loading": "Loading tables...",
-    "guests": "guests"
+    "guests": "guests",
+    "bulkEdit": "Bulk Edit",
+    "selectTables": "Select Tables",
+    "selectedTables": "{count} tables selected",
+    "noTablesSelected": "No tables selected",
+    "selectTablesForBulkEdit": "Select tables to edit in bulk",
+    "bulkUpdateSuccess": "Tables updated successfully",
+    "bulkUpdateError": "Failed to update tables"
   },
   "TableForm": {
     "createTitle": "Add New Table",
@@ -283,7 +290,24 @@
     "continueButton": "Continue",
     "welcomeFamilyTitle": "Welcome to the family!",
     "onboardingCompleteDescription": "Your restaurant onboarding is complete. You're ready to start managing your tables and taking reservations!",
-    "getStartedButton": "Get Started"
+    "getStartedButton": "Get Started",
+    "telegramConnectTitle": "Connect Telegram",
+    "telegramConnectDescription": "Get instant notifications on your phone for new reservations",
+    "telegramScanQr": "Scan QR Code with Telegram",
+    "telegramOpenInApp": "Open in Telegram",
+    "telegramGenerateQr": "Generate QR Code",
+    "telegramGenerating": "Generating...",
+    "telegramQrInstructions": "Click to generate a QR code for linking your Telegram account",
+    "telegramHowItWorks": "How it works:",
+    "telegramSteps": [
+      "Generate a QR code above",
+      "Scan it with your phone's camera or Telegram app",
+      "It will open our bot in Telegram",
+      "Your account will be automatically linked"
+    ],
+    "telegramOptional": "⚠️ Optional",
+    "skipForNow": "Skip for now",
+    "telegramCannotScan": "Can't scan? Enter Chat ID manually"
   },
   "Auth": {
     "loginTitle": "Login",
@@ -372,6 +396,51 @@
       "noData": "No revenue data available for the selected period",
       "revenueLabel": "Revenue ($)",
       "reservationsLabel": "Reservations"
+    }
+  },
+  "TermsOfService": {
+    "title": "Terms of Service",
+    "subtitle": "Please read our terms and conditions carefully",
+    "lastUpdated": "Last updated: {date}",
+    "backToHome": "Back to Home",
+    "sections": {
+      "acceptance": {
+        "title": "1. Acceptance of Terms",
+        "content": "By accessing and using our restaurant reservation system, you accept and agree to be bound by the terms and provision of this agreement."
+      },
+      "serviceDescription": {
+        "title": "2. Service Description",
+        "content": "Our platform provides online restaurant reservation services. We facilitate connections between customers and participating restaurants for table bookings."
+      },
+      "userResponsibilities": {
+        "title": "3. User Responsibilities",
+        "content": "Users are responsible for providing accurate information when making reservations. You must arrive on time for your reservation and notify the restaurant of any changes or cancellations."
+      },
+      "reservationPolicy": {
+        "title": "4. Reservation Policy",
+        "content": "Reservations are subject to availability and restaurant policies. We reserve the right to cancel or modify reservations in case of unforeseen circumstances."
+      },
+      "privacyPolicy": {
+        "title": "5. Privacy Policy",
+        "content": "We are committed to protecting your privacy. Your personal information will be used solely for reservation purposes and will not be shared with third parties without your consent."
+      },
+      "limitations": {
+        "title": "6. Limitations of Liability",
+        "content": "Our liability is limited to the extent permitted by law. We are not responsible for any issues that may arise during your dining experience at the restaurant."
+      },
+      "modifications": {
+        "title": "7. Modifications to Terms",
+        "content": "We reserve the right to modify these terms at any time. Changes will be effective immediately upon posting on our website."
+      },
+      "contact": {
+        "title": "8. Contact Information",
+        "content": "If you have any questions about these Terms of Service, please contact us at legal@restaurant-manager.com"
+      }
+    },
+    "agreement": {
+      "checkbox": "I have read and agree to the Terms of Service",
+      "required": "You must accept the Terms of Service to continue",
+      "viewTerms": "View Terms of Service"
     }
   }
 }

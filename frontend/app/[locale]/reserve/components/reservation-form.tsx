@@ -12,16 +12,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FormStatusDisplay } from "@/app/[locale]/reserve/components/form-status-display";
+import { TermsCheckbox } from "@/components/terms-checkbox";
 import { MapPin, Calendar, Loader2, ChefHat } from "lucide-react";
 
 type FormStatus = "idle" | "submitting" | "success" | "error";
 
 export function ReservationForm() {
   const t = useTranslations("Reservation");
+  const tTerms = useTranslations("TermsOfService");
   const [formStatus, setFormStatus] = useState<FormStatus>("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loadingRestaurants, setLoadingRestaurants] = useState(true);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsError, setTermsError] = useState("");
 
   const {
     register,
@@ -52,15 +56,22 @@ export function ReservationForm() {
   }, []);
 
   const onSubmit = async (data: ReservationFormData) => {
+    if (!termsAccepted) {
+      setTermsError(tTerms('agreement.required'));
+      return;
+    }
+    
     try {
       setFormStatus("submitting");
       setErrorMessage("");
+      setTermsError("");
 
       const response = await reservationApi.createReservation(data);
 
       if (response.success) {
         setFormStatus("success");
         reset();
+        setTermsAccepted(false);
       } else {
         setFormStatus("error");
         setErrorMessage(response.error || t("status.serverError"));
@@ -315,11 +326,23 @@ export function ReservationForm() {
         </div>
       </div>
 
+      {/* Terms and Conditions */}
+      <div className="pt-4">
+        <TermsCheckbox
+          checked={termsAccepted}
+          onCheckedChange={(checked) => {
+            setTermsAccepted(checked);
+            if (checked) setTermsError("");
+          }}
+          error={termsError}
+        />
+      </div>
+
       {/* Submit Button */}
       <div className="pt-6">
         <Button
           type="submit"
-          disabled={formStatus === "submitting" || !isValid || loadingRestaurants}
+          disabled={formStatus === "submitting" || !isValid || loadingRestaurants || !termsAccepted}
           className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white py-4 text-lg rounded-full shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         >
           {formStatus === "submitting" ? (

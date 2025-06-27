@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 const onboardingSchema = z.object({
   restaurantName: z.string().min(1, 'Restaurant name is required'),
-  restaurantId: z.string().optional(),
+  restaurantId: z.string().min(1, 'Restaurant ID is required'),
   tables: z.array(z.object({
     name: z.string().min(1, 'Table name is required'),
     capacity: z.number().min(1, 'Capacity must be at least 1'),
@@ -27,12 +27,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: parsed.error.errors }, { status: 400 });
     }
 
-    const { restaurantName, tables } = parsed.data;
+    const { restaurantName, restaurantId, tables } = parsed.data;
 
     // 1. Create the restaurant
     const { data: restaurant, error: restaurantError } = await supabaseAdmin
       .from('restaurants')
-      .insert({ id: session.user.id, name: restaurantName })
+      .insert({ id: restaurantId, name: restaurantName })
       .select()
       .single();
 
