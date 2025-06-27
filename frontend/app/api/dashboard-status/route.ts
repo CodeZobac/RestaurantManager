@@ -64,6 +64,7 @@ export async function GET(request: Request) {
         capacity: table.capacity,
         location: table.location,
         status: tableStatus,
+        connections: table.connections,
         reservation: reservation ? {
           id: reservation.id,
           customer_name: reservation.client_name || reservation.customers?.name || '',

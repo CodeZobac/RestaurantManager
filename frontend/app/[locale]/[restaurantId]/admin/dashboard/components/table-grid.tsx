@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -10,47 +10,42 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
+  useDroppable,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   rectSortingStrategy,
-} from '@dnd-kit/sortable';
-import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { DashboardTable } from '@/lib/types';
+import { DisplayTable, DashboardTable } from '@/lib/types';
 import { TableCard } from './table-card';
 
 interface TableGridProps {
-  tables: DashboardTable[];
+  tables: DisplayTable[];
   onEditReservation?: (table: DashboardTable) => void;
   onDeleteReservation?: (table: DashboardTable) => void;
   onCreateReservation?: (reservationData: any) => void;
+  onDragEnd: (event: DragEndEvent) => void;
+  onUnmerge: (groupId: string) => void;
 }
 
-// Draggable Table Card Component
-function DraggableTableCard({ 
-  table, 
-  onEditReservation, 
-  onDeleteReservation, 
-  onCreateReservation 
-}: { 
-  table: DashboardTable; 
+function DraggableTableCard({
+  table,
+  onEditReservation,
+  onDeleteReservation,
+  onCreateReservation,
+  onUnmerge,
+}: {
+  table: DisplayTable;
   onEditReservation?: (table: DashboardTable) => void;
   onDeleteReservation?: (table: DashboardTable) => void;
   onCreateReservation?: (reservationData: any) => void;
+  onUnmerge: (groupId: string) => void;
 }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: table.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: table.id, data: { type: 'table' } });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -58,31 +53,49 @@ function DraggableTableCard({
     opacity: isDragging ? 0.5 : 1,
   };
 
+  const { setNodeRef: droppableRef } = useDroppable({
+    id: table.id,
+  });
+
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      className="touch-none" // Prevents touch scrolling conflicts
-    >
-      <TableCard
-        table={table}
-        onEditReservation={onEditReservation}
-        onDeleteReservation={onDeleteReservation}
-        onCreateReservation={onCreateReservation}
-      />
+    <div ref={droppableRef}>
+      <div
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
+        className="touch-none"
+      >
+        <TableCard
+          table={table}
+          onEditReservation={onEditReservation}
+          onDeleteReservation={onDeleteReservation}
+          onCreateReservation={onCreateReservation}
+          onUnmerge={onUnmerge}
+        />
+      </div>
     </div>
   );
 }
 
-export function TableGrid({ tables, onEditReservation, onDeleteReservation, onCreateReservation }: TableGridProps) {
+export function TableGrid({
+  tables,
+  onEditReservation,
+  onDeleteReservation,
+  onCreateReservation,
+  onDragEnd,
+  onUnmerge,
+}: TableGridProps) {
   const [sortedTables, setSortedTables] = useState(tables);
-  
+
+  useEffect(() => {
+    setSortedTables(tables);
+  }, [tables]);
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8, // Minimum distance before drag starts
+        distance: 8,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -90,76 +103,57 @@ export function TableGrid({ tables, onEditReservation, onDeleteReservation, onCr
     })
   );
 
-  // Update sorted tables when tables prop changes
-  React.useEffect(() => {
-    setSortedTables(tables);
-  }, [tables]);
 
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
-
-    if (active.id !== over?.id) {
-      setSortedTables((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over?.id);
-
-        return arrayMove(items, oldIndex, newIndex);
-      });
-    }
-  }
-
-  if (sortedTables.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-64 text-gray-500">
-        <p>No tables found</p>
-      </div>
-    );
-  }
-
-  // Group tables by location for better organization
-  const locationGroups = sortedTables.reduce((groups, table) => {
-    const location = table.location || 'No Location';
-    if (!groups[location]) {
-      groups[location] = [];
-    }
-    groups[location].push(table);
-    return groups;
-  }, {} as Record<string, DashboardTable[]>);
+  const locationGroups = useMemo(() => {
+    return sortedTables.reduce((groups, table) => {
+      const location = table.location || 'No Location';
+      if (!groups[location]) {
+        groups[location] = [];
+      }
+      groups[location].push(table);
+      return groups;
+    }, {} as Record<string, DisplayTable[]>);
+  }, [sortedTables]);
 
   return (
-    <div className="space-y-8">
-      {Object.entries(locationGroups).map(([location, locationTables]) => (
-        <div key={location} className="space-y-4">
-          {/* Location Header */}
-          <div className="flex items-center space-x-2">
-            <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-            <h3 className="text-lg font-semibold text-gray-800">{location}</h3>
-            <div className="flex-1 h-px bg-gray-200"></div>
-            <span className="text-sm text-gray-500">{locationTables.length} tables</span>
-          </div>
-          
-          {/* Draggable Tables Grid */}
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext items={locationTables.map(t => t.id)} strategy={rectSortingStrategy}>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
-                {locationTables.map((table) => (
-                  <DraggableTableCard
-                    key={table.id}
-                    table={table}
-                    onEditReservation={onEditReservation}
-                    onDeleteReservation={onDeleteReservation}
-                    onCreateReservation={onCreateReservation}
-                  />
-                ))}
+    <div className="relative">
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={onDragEnd}
+      >
+        <div className="space-y-8">
+          {Object.entries(locationGroups).map(([location, locationTables]) => (
+            <div key={location} className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+                <h3 className="text-lg font-semibold text-gray-800">{location}</h3>
+                <div className="flex-1 h-px bg-gray-200"></div>
+                <span className="text-sm text-gray-500">
+                  {locationTables.length} tables
+                </span>
               </div>
-            </SortableContext>
-          </DndContext>
+              <SortableContext
+                items={locationTables.map((t) => t.id)}
+                strategy={rectSortingStrategy}
+              >
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+                  {locationTables.map((table) => (
+                    <DraggableTableCard
+                      key={table.id}
+                      table={table}
+                      onEditReservation={onEditReservation}
+                      onDeleteReservation={onDeleteReservation}
+                      onCreateReservation={onCreateReservation}
+                      onUnmerge={onUnmerge}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </div>
+          ))}
         </div>
-      ))}
+      </DndContext>
     </div>
   );
 }

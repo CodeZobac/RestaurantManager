@@ -6,6 +6,7 @@ import createIntlMiddleware from 'next-intl/middleware';
 const intlMiddleware = createIntlMiddleware(routing);
 
 export default async function middleware(request: NextRequest) {
+  const response = intlMiddleware(request);
   const session = await auth();
   const { pathname } = request.nextUrl;
 
@@ -42,7 +43,7 @@ export default async function middleware(request: NextRequest) {
     }
   }
 
-  return intlMiddleware(request);
+  return response;
 }
 
 export const config = {

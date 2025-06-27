@@ -23,6 +23,7 @@ export interface DashboardTable {
   status: 'available' | 'pending' | 'confirmed';
   capacity: number;
   location?: string;
+  connections?: string[];
   reservation?: {
     customer_name: string;
     reservation_time: string;
@@ -82,3 +83,17 @@ export interface DashboardStatusResponse {
   pending: number;
   tables: DashboardTable[];
 }
+
+// New Type for Merged Groups
+export interface TableGroup {
+  id: string; // e.g., "group-table1-table2"
+  isGroup: true;
+  name: string; // e.g., "Table 1 + Table 2"
+  capacity: number; // Sum of capacities
+  status: 'available'; // Groups are always available
+  tables: DashboardTable[]; // The original tables in the group
+  location?: string;
+}
+
+// A union type to represent either a single table or a group
+export type DisplayTable = DashboardTable | TableGroup;

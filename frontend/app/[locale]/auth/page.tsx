@@ -259,7 +259,7 @@ const LoginSignupForm = () => {
           <Link href="/">
             <Button variant="ghost" className="text-gray-600 hover:text-gray-900 bg-white/80 backdrop-blur-sm hover:bg-white/90 transition-all duration-300">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Home
+              {t('backToHome')}
             </Button>
           </Link>
         </div>
