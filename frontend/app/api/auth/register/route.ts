@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
+import { hash } from 'bcrypt-ts';
 import { supabaseAdmin } from '@/lib/supabase';
 
 export async function POST(request: Request) {
@@ -9,7 +9,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Missing email, password, or name' }, { status: 400 });
   }
 
-  const password_hash = await bcrypt.hash(password, 10);
+  const password_hash = await hash(password, 10);
 
   try {
     const { data, error } = await supabaseAdmin

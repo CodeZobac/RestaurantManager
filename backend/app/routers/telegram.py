@@ -13,7 +13,8 @@ from fastapi import APIRouter, Request, HTTPException
 from app.supabase_client import supabase_get, supabase_patch
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup 
 from telegram.error import TelegramError 
-from app.services.telegram_service import get_admin_by_telegram_id 
+from app.services.telegram_service import get_admin_by_telegram_id
+from app.services.telegram_token_service import consume_telegram_token
 
 router = APIRouter(prefix="/telegram", tags=["telegram"])
 
@@ -72,7 +73,45 @@ async def telegram_webhook(request: Request):
         username = chat.get("username", "")
         first_name = chat.get("first_name", "")
 
-        if text.strip() == "/start":
+        if text.startswith("/start"):
+            # Extract token if available
+            token = None
+            if " " in text:
+                token = text.split(" ")[1]
+
+            if token:
+                # Attempt to consume the token
+                admin_id = consume_telegram_token(token)
+                if admin_id:
+                    # Update admin with Telegram chat_id
+                    await supabase_patch(
+                        "admins",
+                        row_id=admin_id,
+                        data={
+                            "telegram_chat_id": user_id,
+                            "telegram_username": username,
+                            "first_name": first_name
+                        },
+                        id_column="id"
+                    )
+                    
+                    # Send confirmation to user
+                    if telegram_service:
+                        await telegram_service.bot.send_message(
+                            chat_id=user_id,
+                            text="🎉 Your Telegram account has been linked successfully! You'll now receive reservation notifications here."
+                        )
+                    return {"ok": True}
+
+                else:
+                    if telegram_service:
+                        await telegram_service.bot.send_message(
+                            chat_id=user_id,
+                            text="❌ This link has expired or is already used. Please generate a new QR code from the onboarding page."
+                        )
+                    return {"ok": True}
+
+            # If no token, proceed with normal /start logic
             query_params = f"telegram_chat_id=eq.{user_id}"
             if phone_number:
                 query_params += f"&phone_number=eq.{phone_number}"

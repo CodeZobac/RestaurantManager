@@ -6,8 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Plus, Phone, Store, MapPin, Check, ArrowRight, Sparkles } from 'lucide-react';
+import { Plus, Phone, Store, MapPin, Check, ArrowRight, Sparkles, MessageSquare, QrCode, ExternalLink } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { QRCodeCanvas } from 'qrcode.react';
+import { v4 as uuidv4 } from 'uuid';
 
 interface FormData {
   phoneNumber: string;
@@ -48,11 +50,22 @@ export default function RestaurantOnboarding() {
   const [errors, setErrors] = useState<Errors>({});
   const [isLoading, setIsLoading] = useState(false);
   const [regionError, setRegionError] = useState<string | null>(null);
+  const [telegramDeepLink, setTelegramDeepLink] = useState<string>('');
+  const [loadingTelegram, setLoadingTelegram] = useState<boolean>(false);
+  const [restaurantId, setRestaurantId] = useState<string>('');
+  const [showManualTelegramInput, setShowManualTelegramInput] = useState<boolean>(false);
+  const [manualChatId, setManualChatId] = useState<string>('');
+  const [connectingManual, setConnectingManual] = useState<boolean>(false);
+
+  React.useEffect(() => {
+    setRestaurantId(uuidv4());
+  }, []);
 
   const steps = [
     { icon: Phone, title: t('contactInfoTitle'), description: t('contactInfoDescription') },
     { icon: Store, title: t('restaurantDetailsTitle'), description: t('restaurantDetailsDescription') },
     { icon: MapPin, title: t('tableLayoutTitle'), description: t('tableLayoutDescription') },
+    { icon: MessageSquare, title: t('telegramConnectTitle'), description: t('telegramConnectDescription') },
     { icon: Check, title: t('allSetTitle'), description: t('allSetDescription') }
   ];
 
@@ -113,6 +126,7 @@ export default function RestaurantOnboarding() {
         credentials: 'include',
         body: JSON.stringify({
           restaurantName: formData.restaurantName,
+          restaurantId: restaurantId,
           tables,
         }),
       });
@@ -155,6 +169,12 @@ export default function RestaurantOnboarding() {
     }
   };
 
+  const skipTelegram = () => {
+    if (currentStep === 3) {
+      setCurrentStep(4);
+    }
+  };
+
   const prevStep = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
@@ -179,6 +199,75 @@ export default function RestaurantOnboarding() {
 
   const removeTableRegion = (index: number) => {
     setTableRegions(tableRegions.filter((_, i) => i !== index));
+  };
+
+  const generateTelegramToken = async () => {
+    setLoadingTelegram(true);
+    try {
+      // For now, we'll use a temporary token approach since the admin isn't created yet
+      // In production, you might want to create a temporary admin record or use session tokens
+      const response = await fetch('/api/v1/auth/telegram/generate-token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setTelegramDeepLink(data.deep_link);
+      } else {
+        const errorText = await response.text();
+        console.error('Failed to generate Telegram token:', errorText);
+        // Show user-friendly error message
+        alert('Failed to generate QR code. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error generating Telegram token:', error);
+      alert('An error occurred. Please try again.');
+    } finally {
+      setLoadingTelegram(false);
+    }
+  };
+
+  const handleManualTelegramConnect = async () => {
+    if (!manualChatId.trim()) {
+      alert('Please enter a valid Chat ID');
+      return;
+    }
+
+    setConnectingManual(true);
+    try {
+      const response = await fetch('/api/v1/auth/telegram/connect-manual', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ 
+          chat_id: manualChatId.trim() 
+        }),
+      });
+
+      if (response.ok) {
+        alert('Successfully connected to Telegram!');
+        // Clear the form and hide it
+        setManualChatId('');
+        setShowManualTelegramInput(false);
+        // Optionally move to next step
+        setCurrentStep(4);
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to connect manually:', errorData);
+        alert(errorData.error || 'Failed to connect to Telegram. Please check your Chat ID and try again.');
+      }
+    } catch (error) {
+      console.error('Error connecting to Telegram manually:', error);
+      alert('An error occurred. Please try again.');
+    } finally {
+      setConnectingManual(false);
+    }
   };
 
   const getStepContent = () => {
@@ -371,6 +460,132 @@ export default function RestaurantOnboarding() {
       case 3:
         return (
           <div className="space-y-8 animate-in fade-in-50 slide-in-from-bottom-4 duration-500">
+            <div className="text-center space-y-4">
+              <div className="mx-auto w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center transform -rotate-12 hover:rotate-0 transition-transform duration-300">
+                <MessageSquare className="w-10 h-10 text-white" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                  {t('telegramConnectTitle')}
+                </h2>
+                <p className="text-gray-600 mt-2">{t('telegramConnectDescription')}</p>
+              </div>
+            </div>
+            <div className="space-y-6">
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-xl border border-blue-200">
+                <div className="text-center space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-800">{t('telegramScanQr')}</h3>
+                  
+                  {telegramDeepLink ? (
+                    <div className="flex flex-col items-center space-y-4">
+                      <div className="p-4 bg-white rounded-lg shadow-sm">
+                        <QRCodeCanvas
+                          value={telegramDeepLink} 
+                          size={200}
+                          level="M"
+                          includeMargin={true}
+                        />
+                      </div>
+                      <div className="text-center space-y-2">
+                        <p className="text-sm text-gray-600">{t('telegramQrInstructions')}</p>
+                        <div className="flex items-center justify-center space-x-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => window.open(telegramDeepLink, '_blank')}
+                            className="flex items-center space-x-2"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            <span>{t('telegramOpenInApp')}</span>
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <Button 
+                        onClick={generateTelegramToken}
+                        disabled={loadingTelegram}
+                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                      >
+                        {loadingTelegram ? t('telegramGenerating') : (
+                          <>
+                            <QrCode className="w-4 h-4 mr-2" />
+                            {t('telegramGenerateQr')}
+                          </>
+                        )}
+                      </Button>
+                      <p className="text-sm text-gray-500">{t('telegramQrInstructions')}</p>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Manual Chat ID Input Link */}
+                <div className="text-center mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowManualTelegramInput(!showManualTelegramInput)}
+                    className="text-sm text-blue-600 hover:text-blue-800 underline transition-colors duration-200"
+                  >
+                    {t('telegramCannotScan')}
+                  </button>
+                </div>
+                
+                {/* Manual Chat ID Input Form */}
+                {showManualTelegramInput && (
+                  <div className="mt-6 p-4 bg-white border rounded-lg shadow-sm">
+                    <h3 className="text-sm font-medium text-gray-600 mb-4">Manual Telegram Chat ID Input</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label htmlFor="chat-id" className="block text-sm font-medium text-gray-700 mb-1">
+                          Telegram Chat ID:
+                        </label>
+                        <input
+                          id="chat-id"
+                          type="text"
+                          value={manualChatId}
+                          onChange={(e) => setManualChatId(e.target.value)}
+                          placeholder="Enter your Telegram Chat ID"
+                          className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                      <button
+                        onClick={handleManualTelegramConnect}
+                        disabled={connectingManual || !manualChatId.trim()}
+                        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        {connectingManual ? 'Connecting...' : 'Connect'}
+                      </button>
+                      <div className="text-xs text-gray-500 space-y-1">
+                        <p className="font-medium">How to find your Telegram Chat ID:</p>
+                        <ol className="list-decimal list-inside space-y-1 pl-2">
+                          <li>Open Telegram and search for @userinfobot</li>
+                          <li>Start a conversation with the bot</li>
+                          <li>Send any message to the bot</li>
+                          <li>The bot will reply with your Chat ID</li>
+                          <li>Copy the Chat ID and paste it above</li>
+                        </ol>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <h4 className="font-medium text-yellow-800 mb-2">{t('telegramHowItWorks')}</h4>
+                <ol className="text-sm text-yellow-700 space-y-1 list-decimal list-inside">
+                  {(t.raw('telegramSteps') as string[]).map((step: string, index: number) => (
+                    <li key={index}>{step}</li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+          </div>
+        );
+      
+      case 4:
+        return (
+          <div className="space-y-8 animate-in fade-in-50 slide-in-from-bottom-4 duration-500">
             <div className="text-center space-y-6">
               <div className="mx-auto w-24 h-24 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center animate-pulse">
                 <Check className="w-12 h-12 text-white" />
@@ -401,6 +616,10 @@ export default function RestaurantOnboarding() {
                 <div className="flex justify-between">
                   <span className="text-gray-600">{t('regionsLabel')}:</span>
                   <span className="font-medium">{tableRegions.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">{t('telegramConnectTitle')}:</span>
+                  <span className="font-medium text-green-600">{t('telegramOptional')}</span>
                 </div>
               </div>
             </div>
@@ -453,14 +672,26 @@ export default function RestaurantOnboarding() {
             >
               {t('previousButton')}
             </Button>
-            <Button
-              onClick={nextStep}
-              disabled={isLoading}
-              className="px-8 py-3 text-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg"
-            >
-              {isLoading ? t('processingButton') : (currentStep === steps.length - 1 ? t('completeSetupButton') : t('continueButton'))}
-              {!isLoading && <ArrowRight className="w-5 h-5 ml-2" />}
-            </Button>
+            
+            <div className="flex space-x-4">
+              {currentStep === 3 && (
+                <Button
+                  variant="outline"
+                  onClick={skipTelegram}
+                  className="px-6 py-3 text-lg text-gray-600 hover:text-gray-800"
+                >
+                  {t('skipForNow')}
+                </Button>
+              )}
+              <Button
+                onClick={nextStep}
+                disabled={isLoading}
+                className="px-8 py-3 text-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg"
+              >
+                {isLoading ? t('processingButton') : (currentStep === steps.length - 1 ? t('completeSetupButton') : t('continueButton'))}
+                {!isLoading && <ArrowRight className="w-5 h-5 ml-2" />}
+              </Button>
+            </div>
           </div>
         </div>
       </div>

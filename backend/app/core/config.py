@@ -55,6 +55,10 @@ class Settings(BaseSettings):
         default=None,
         description="Telegram Bot API token"
     )
+    telegram_bot_username: Optional[str] = Field(
+        default=None,
+        description="Telegram Bot username (without @)"
+    )
     telegram_webhook_secret: Optional[str] = Field(
         default=None,
         description="Secret token for validating Telegram webhook requests"

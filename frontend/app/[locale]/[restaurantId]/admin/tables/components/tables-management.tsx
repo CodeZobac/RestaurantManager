@@ -12,6 +12,8 @@ import { DeleteTableDialog } from "./delete-table-dialog";
 import { LanguageSelector } from "@/components/language-selector";
 import EditForm from "@/components/EditForm";
 import { Table } from "@/lib/types";
+import { BulkEditDropdown } from "./bulk-edit-dropdown";
+import { BulkEditDialog } from "./bulk-edit-dialog";
 
 interface Props {
   restaurantId: string;
@@ -23,6 +25,8 @@ export function TablesManagement({ restaurantId }: Props) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
+  const [selectedTables, setSelectedTables] = useState<Table[]>([]);
+  const [isBulkEditDialogOpen, setIsBulkEditDialogOpen] = useState(false);
 
   const { tables, loading, error, fetchTables, clearError, setSelectedTable: setSelectedTableForDelete } = useTableStore();
 
@@ -53,6 +57,26 @@ export function TablesManagement({ restaurantId }: Props) {
 
   const handleDeleteClick = (table: Table) => {
     setSelectedTableForDelete(table);
+  };
+
+  const handleTableSelectionChange = (tableId: string, selected: boolean) => {
+    const table = tables.find(t => t.id === tableId);
+    if (!table) return;
+    
+    setSelectedTables(prev => 
+      selected 
+        ? [...prev, table]
+        : prev.filter(t => t.id !== tableId)
+    );
+  };
+
+  const handleBulkEdit = () => {
+    setIsBulkEditDialogOpen(true);
+  };
+
+  const handleBulkEditSuccess = () => {
+    setSelectedTables([]);
+    fetchTables(restaurantId);
   };
 
   return (
@@ -91,10 +115,18 @@ export function TablesManagement({ restaurantId }: Props) {
             className="pl-10"
           />
         </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          {t("addNew")}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            {t("addNew")}
+          </Button>
+          <BulkEditDropdown
+            tables={filteredTables}
+            selectedTables={selectedTables}
+            onTableSelectionChange={handleTableSelectionChange}
+            onBulkEdit={handleBulkEdit}
+          />
+        </div>
       </div>
 
       {/* Tables List */}
@@ -120,6 +152,13 @@ export function TablesManagement({ restaurantId }: Props) {
       />
       
       <DeleteTableDialog />
+      
+      <BulkEditDialog
+        isOpen={isBulkEditDialogOpen}
+        onClose={() => setIsBulkEditDialogOpen(false)}
+        selectedTables={selectedTables}
+        onSuccess={handleBulkEditSuccess}
+      />
     </div>
   );
 }

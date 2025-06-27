@@ -20,10 +20,18 @@ def get_supabase_headers():
 
 async def supabase_get(table: str, params: Optional[Dict[str, Any]] = None):
     async with httpx.AsyncClient() as client:
+        # Handle both string and dict params for backwards compatibility
+        if isinstance(params, str):
+            url = f"{SUPABASE_URL}/rest/v1/{table}?{params}"
+            query_params = None
+        else:
+            url = f"{SUPABASE_URL}/rest/v1/{table}"
+            query_params = params
+            
         resp = await client.get(
-            f"{SUPABASE_URL}/rest/v1/{table}",
+            url,
             headers=get_supabase_headers(),
-            params=params,
+            params=query_params,
         )
         resp.raise_for_status()
         return resp.json()
