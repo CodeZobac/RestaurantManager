@@ -5,6 +5,7 @@ import Head from 'next/head';
 import { signIn } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import ValidationRequirements from '@/components/ValidationRequirements';
+import { TermsCheckbox } from '@/components/terms-checkbox';
 import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -16,11 +17,14 @@ import {
 
 const LoginSignupForm = () => {
   const t = useTranslations('Auth');
+  const tTerms = useTranslations('TermsOfService');
   const [isActive, setIsActive] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsError, setTermsError] = useState('');
   const [error, setError] = useState('');
 
   // Reference to main container for class manipulation with proper HTML type
@@ -32,8 +36,15 @@ const LoginSignupForm = () => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!termsAccepted) {
+      setTermsError(tTerms('agreement.required'));
+      return;
+    }
+    
     setIsLoading(true);
     setError('');
+    setTermsError('');
 
     try {
       const response = await fetch('/api/auth/register', {
@@ -356,10 +367,23 @@ const LoginSignupForm = () => {
                   </PopoverContent>
                 </Popover>
               </div>
+              
+              {/* Terms and Conditions */}
+              <div className="my-4">
+                <TermsCheckbox
+                  checked={termsAccepted}
+                  onCheckedChange={(checked) => {
+                    setTermsAccepted(checked);
+                    if (checked) setTermsError("");
+                  }}
+                  error={termsError}
+                />
+              </div>
+              
               <button
                 type="submit"
-                className="w-full h-12 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 rounded-lg shadow-sm border-none cursor-pointer text-base text-white font-semibold transition-all duration-300"
-                disabled={isLoading}
+                className="w-full h-12 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 rounded-lg shadow-sm border-none cursor-pointer text-base text-white font-semibold transition-all duration-300 disabled:opacity-50"
+                disabled={isLoading || !termsAccepted}
               >
                 {isLoading ? t('registeringButton') : t('registerButton')}
               </button>

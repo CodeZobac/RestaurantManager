@@ -14,6 +14,7 @@ interface TableStore {
   createTable: (data: CreateTableData) => Promise<void>;
   createTablesBulk: (tables: TempTable[]) => Promise<void>;
   updateTable: (id: number, data: UpdateTableData) => Promise<void>;
+  updateBulkTables: (tableIds: string[], data: Partial<UpdateTableData>) => Promise<void>;
   deleteTable: (id: number) => Promise<void>;
   setSelectedTable: (table: Table | null) => void;
   clearError: () => void;
@@ -99,6 +100,32 @@ export const useTableStore = create<TableStore>((set) => ({
       }));
     } catch (error) {
       const errorMessage = error instanceof ApiError ? error.message : 'Failed to update table';
+      set({ error: errorMessage, loading: false });
+      throw error;
+    }
+  },
+
+  updateBulkTables: async (tableIds: string[], data: Partial<UpdateTableData>) => {
+    set({ loading: true, error: null });
+    try {
+      // Update each table individually for now
+      // In a real implementation, you'd want a bulk API endpoint
+      const updatePromises = tableIds.map(async (tableId) => {
+        const numericId = parseInt(tableId, 10);
+        return await tableApi.updateTable(numericId, data as UpdateTableData);
+      });
+      
+      const updatedTables = await Promise.all(updatePromises);
+      
+      set(state => ({
+        tables: state.tables.map(table => {
+          const updatedTable = updatedTables.find(updated => updated.id === table.id);
+          return updatedTable || table;
+        }),
+        loading: false
+      }));
+    } catch (error) {
+      const errorMessage = error instanceof ApiError ? error.message : 'Failed to update tables';
       set({ error: errorMessage, loading: false });
       throw error;
     }

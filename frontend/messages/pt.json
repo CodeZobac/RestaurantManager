@@ -16,7 +16,14 @@
     "deleteSuccess": "Mesa eliminada com sucesso",
     "deleteError": "Falha ao eliminar mesa",
     "loading": "A carregar mesas...",
-    "guests": "convidados"
+    "guests": "convidados",
+    "bulkEdit": "Edição em Lote",
+    "selectTables": "Selecionar Mesas",
+    "selectedTables": "{count} mesas selecionadas",
+    "noTablesSelected": "Nenhuma mesa selecionada",
+    "selectTablesForBulkEdit": "Selecione mesas para editar em lote",
+    "bulkUpdateSuccess": "Mesas atualizadas com sucesso",
+    "bulkUpdateError": "Falha ao atualizar mesas"
   },
   "TableForm": {
     "createTitle": "Adicionar Nova Mesa",
@@ -310,10 +317,27 @@
     "continueButton": "Continuar",
     "welcomeFamilyTitle": "Bem-vindo à família!",
     "onboardingCompleteDescription": "O seu processo de integração do restaurante está completo. Está pronto para começar a gerir as suas mesas e a aceitar reservas!",
-    "getStartedButton": "Começar"
+    "getStartedButton": "Começar",
+    "telegramConnectTitle": "Conectar Telegram",
+    "telegramConnectDescription": "Receba notificações instantâneas no seu telemóvel para novas reservas",
+    "telegramScanQr": "Digitalizar QR Code com o Telegram",
+    "telegramOpenInApp": "Abrir no Telegram",
+    "telegramGenerateQr": "Gerar QR Code",
+    "telegramGenerating": "A gerar...",
+    "telegramQrInstructions": "Clique para gerar um código QR para vincular a sua conta do Telegram",
+    "telegramHowItWorks": "Como funciona:",
+    "telegramSteps": [
+      "Gere um código QR acima",
+      "Digitalize-o com a câmara do seu telemóvel ou aplicação do Telegram",
+      "Irá abrir o nosso bot no Telegram",
+      "A sua conta será automaticamente vinculada"
+    ],
+    "telegramOptional": "⚠️ Opcional",
+    "skipForNow": "Pular por agora",
+    "telegramCannotScan": "Não consegue escanear? Digite o Chat ID manualmente"
   },
   "Auth": {
-    "loginTitle": "Login",
+    "loginTitle": "Entrar",
     "usernamePlaceholder": "Nome de utilizador",
     "passwordPlaceholder": "Palavra-passe",
     "forgotPassword": "Esqueceu a Palavra-passe?",
@@ -373,6 +397,51 @@
       "noData": "Não há dados de receita disponíveis para o período selecionado",
       "revenueLabel": "Receita (€)",
       "reservationsLabel": "Reservas"
+    }
+  },
+  "TermsOfService": {
+    "title": "Termos de Serviço",
+    "subtitle": "Por favor, leia atentamente nossos termos e condições",
+    "lastUpdated": "Última atualização: {date}",
+    "backToHome": "Voltar para Casa",
+    "sections": {
+      "acceptance": {
+        "title": "1. Aceitação dos Termos",
+        "content": "Ao acessar e utilizar nosso sistema de reservas de restaurantes, você aceita e concorda em estar vinculado pelos termos e disposições deste acordo."
+      },
+      "serviceDescription": {
+        "title": "2. Descrição do Serviço",
+        "content": "Nossa plataforma fornece serviços de reserva de restaurantes online. Facilitamos as conexões entre clientes e restaurantes participantes para reservas de mesas."
+      },
+      "userResponsibilities": {
+        "title": "3. Responsabilidades do Usuário",
+        "content": "Os usuários são responsáveis por fornecer informações precisas ao fazer reservas. Você deve chegar a tempo para sua reserva e notificar o restaurante sobre quaisquer alterações ou cancelamentos."
+      },
+      "reservationPolicy": {
+        "title": "4. Política de Reservas",
+        "content": "As reservas estão sujeitas à disponibilidade e às políticas do restaurante. Reservamo-nos o direito de cancelar ou modificar reservas em caso de circunstâncias imprevistas."
+      },
+      "privacyPolicy": {
+        "title": "5. Política de Privacidade",
+        "content": "Estamos comprometidos em proteger sua privacidade. Suas informações pessoais serão usadas exclusivamente para fins de reserva e não serão compartilhadas com terceiros sem seu consentimento."
+      },
+      "limitations": {
+        "title": "6. Limitações de Responsabilidade",
+        "content": "Nossa responsabilidade é limitada na extensão permitida por lei. Não somos responsáveis por quaisquer problemas que possam surgir durante sua experiência de jantar no restaurante."
+      },
+      "modifications": {
+        "title": "7. Modificações dos Termos",
+        "content": "Reservamo-nos o direito de modificar estes termos a qualquer momento. As alterações entrarão em vigor imediatamente após serem publicadas em nosso site."
+      },
+      "contact": {
+        "title": "8. Informações de Contato",
+        "content": "Se você tiver alguma dúvida sobre estes Termos de Serviço, entre em contato conosco no e-mail legal@restaurant-manager.com"
+      }
+    },
+    "agreement": {
+      "checkbox": "Li e aceito os Termos de Serviço",
+      "required": "Você deve aceitar os Termos de Serviço para continuar",
+      "viewTerms": "Visualizar Termos de Serviço"
     }
   }
 }

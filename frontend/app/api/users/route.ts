@@ -1,7 +1,7 @@
 import { supabaseAdmin } from '@/lib/supabase';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import bcrypt from 'bcryptjs';
+import { genSalt, hash } from 'bcrypt-ts';
 
 export async function GET() {
   try {
@@ -51,8 +51,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const password_hash = await bcrypt.hash(password, salt);
+    const salt = await genSalt(10);
+    const password_hash = await hash(password, salt);
 
     const { data, error } = await supabaseAdmin
       .from('admins')

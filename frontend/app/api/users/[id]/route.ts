@@ -1,7 +1,7 @@
 import { supabaseAdmin } from '@/lib/supabase';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import bcrypt from 'bcryptjs';
+import { genSalt, hash } from 'bcrypt-ts';
 
 interface UpdateData {
   name: string;
@@ -54,8 +54,8 @@ export async function PUT(
     };
 
     if (password) {
-      const salt = await bcrypt.genSalt(10);
-      updateData.password_hash = await bcrypt.hash(password, salt);
+      const salt = await genSalt(10);
+      updateData.password_hash = await hash(password, salt);
     }
 
     const { data, error } = await supabaseAdmin
