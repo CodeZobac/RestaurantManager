@@ -58,6 +58,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               restaurant_id: admin.restaurant_id,
               restaurant_name: restaurantName,
               onboarding_completed: admin.onboarding_completed,
+              admin_id: admin.id,
             };
           } else {
             return null;
@@ -73,7 +74,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     signIn: "/auth/signin",
   },
   callbacks: {
-    async jwt({ token, user, trigger, session }) {
+    async jwt({ token, user, trigger }) {
       if (trigger === "update") {
         // Fetch fresh user data from database on session update
         try {
@@ -110,6 +111,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.restaurant_id = user.restaurant_id;
         token.restaurant_name = user.restaurant_name;
         token.onboarding_completed = user.onboarding_completed;
+        token.admin_id = user.admin_id;
       }
       return token;
     },
@@ -120,6 +122,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.restaurant_id = token.restaurant_id as string | null;
         session.user.restaurant_name = token.restaurant_name as string | null;
         session.user.onboarding_completed = token.onboarding_completed as boolean;
+        session.user.admin_id = token.admin_id as string | null;
       }
       return session;
     },

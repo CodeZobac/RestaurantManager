@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     // 1. Create the restaurant
     const { data: restaurant, error: restaurantError } = await supabaseAdmin
       .from('restaurants')
-      .insert({ id: session.user.id, name: restaurantName })
+      .insert({ name: restaurantName })
       .select()
       .single();
 
@@ -66,6 +66,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       message: 'Onboarding completed successfully',
       restaurant_id: restaurant.id,
+      admin_id: session.user.id,
     });
 
   } catch (error) {

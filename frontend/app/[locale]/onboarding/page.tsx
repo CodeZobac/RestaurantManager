@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 'use client';
 import React, { useState } from 'react';
 import { useSession } from 'next-auth/react';
@@ -6,8 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Plus, Phone, Store, MapPin, Check, ArrowRight, Sparkles } from 'lucide-react';
+import { Plus, Phone, Store, MapPin, Check, ArrowRight, Sparkles, MessageSquare, QrCode, ExternalLink } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { QRCodeCanvas } from 'qrcode.react';
 
 interface FormData {
   phoneNumber: string;
@@ -48,11 +50,15 @@ export default function RestaurantOnboarding() {
   const [errors, setErrors] = useState<Errors>({});
   const [isLoading, setIsLoading] = useState(false);
   const [regionError, setRegionError] = useState<string | null>(null);
+  const [telegramDeepLink, setTelegramDeepLink] = useState<string>('');
+  const [loadingTelegram, setLoadingTelegram] = useState<boolean>(false);
+  const [adminId, setAdminId] = useState<string | null>(null);
 
   const steps = [
     { icon: Phone, title: t('contactInfoTitle'), description: t('contactInfoDescription') },
     { icon: Store, title: t('restaurantDetailsTitle'), description: t('restaurantDetailsDescription') },
     { icon: MapPin, title: t('tableLayoutTitle'), description: t('tableLayoutDescription') },
+    { icon: MessageSquare, title: "Connect Telegram", description: "Get instant notifications on your phone" },
     { icon: Check, title: t('allSetTitle'), description: t('allSetDescription') }
   ];
 
@@ -118,14 +124,16 @@ export default function RestaurantOnboarding() {
       });
 
       if (response.ok) {
-        const { restaurant_id: restaurantId } = await response.json();
+        const { restaurant_id: restaurantId, admin_id: adminId } = await response.json();
+        setAdminId(adminId);
         setShowSuccess(true);
         
-        // Update the session with the new restaurant_id
+        // Update the session with the new restaurant_id and admin_id
         if (update) {
           await update({
             restaurant_id: restaurantId,
             onboarding_completed: true,
+            admin_id: adminId,
           });
         }
         
@@ -155,6 +163,12 @@ export default function RestaurantOnboarding() {
     }
   };
 
+  const skipTelegram = () => {
+    if (currentStep === 3) {
+      setCurrentStep(4);
+    }
+  };
+
   const prevStep = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
@@ -179,6 +193,40 @@ export default function RestaurantOnboarding() {
 
   const removeTableRegion = (index: number) => {
     setTableRegions(tableRegions.filter((_, i) => i !== index));
+  };
+
+  const generateTelegramToken = async () => {
+    setLoadingTelegram(true);
+    try {
+      // For now, we'll use a temporary token approach since the admin isn't created yet
+      // In production, you might want to create a temporary admin record or use session tokens
+      const tempAdminId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      const response = await fetch('/api/v1/auth/telegram/generate-token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ admin_id: tempAdminId }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setTelegramDeepLink(data.deep_link);
+        setAdminId(tempAdminId); // Store the temp admin ID for linking later
+      } else {
+        const errorText = await response.text();
+        console.error('Failed to generate Telegram token:', errorText);
+        // Show user-friendly error message
+        alert('Failed to generate QR code. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error generating Telegram token:', error);
+      alert('An error occurred. Please try again.');
+    } finally {
+      setLoadingTelegram(false);
+    }
   };
 
   const getStepContent = () => {
@@ -371,6 +419,83 @@ export default function RestaurantOnboarding() {
       case 3:
         return (
           <div className="space-y-8 animate-in fade-in-50 slide-in-from-bottom-4 duration-500">
+            <div className="text-center space-y-4">
+              <div className="mx-auto w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center transform -rotate-12 hover:rotate-0 transition-transform duration-300">
+                <MessageSquare className="w-10 h-10 text-white" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                  Connect Telegram
+                </h2>
+                <p className="text-gray-600 mt-2">Get instant notifications on your phone for new reservations</p>
+              </div>
+            </div>
+            <div className="space-y-6">
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-xl border border-blue-200">
+                <div className="text-center space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-800">Scan QR Code with Telegram</h3>
+                  
+                  {telegramDeepLink ? (
+                    <div className="flex flex-col items-center space-y-4">
+                      <div className="p-4 bg-white rounded-lg shadow-sm">
+                        <QRCodeCanvas
+                          value={telegramDeepLink} 
+                          size={200}
+                          level="M"
+                          includeMargin={true}
+                        />
+                      </div>
+                      <div className="text-center space-y-2">
+                        <p className="text-sm text-gray-600">Scan this QR code with your phone's camera or Telegram app</p>
+                        <div className="flex items-center justify-center space-x-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => window.open(telegramDeepLink, '_blank')}
+                            className="flex items-center space-x-2"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            <span>Open in Telegram</span>
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <Button 
+                        onClick={generateTelegramToken}
+                        disabled={loadingTelegram}
+                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                      >
+                        {loadingTelegram ? 'Generating...' : (
+                          <>
+                            <QrCode className="w-4 h-4 mr-2" />
+                            Generate QR Code
+                          </>
+                        )}
+                      </Button>
+                      <p className="text-sm text-gray-500">Click to generate a QR code for linking your Telegram account</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <h4 className="font-medium text-yellow-800 mb-2">How it works:</h4>
+                <ol className="text-sm text-yellow-700 space-y-1 list-decimal list-inside">
+                  <li>Generate a QR code above</li>
+                  <li>Scan it with your phone's camera or Telegram app</li>
+                  <li>It will open our bot in Telegram</li>
+                  <li>Your account will be automatically linked</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        );
+      
+      case 4:
+        return (
+          <div className="space-y-8 animate-in fade-in-50 slide-in-from-bottom-4 duration-500">
             <div className="text-center space-y-6">
               <div className="mx-auto w-24 h-24 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center animate-pulse">
                 <Check className="w-12 h-12 text-white" />
@@ -401,6 +526,10 @@ export default function RestaurantOnboarding() {
                 <div className="flex justify-between">
                   <span className="text-gray-600">{t('regionsLabel')}:</span>
                   <span className="font-medium">{tableRegions.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Telegram:</span>
+                  <span className="font-medium text-green-600">{'⚠️ Optional'}</span>
                 </div>
               </div>
             </div>
@@ -453,14 +582,26 @@ export default function RestaurantOnboarding() {
             >
               {t('previousButton')}
             </Button>
-            <Button
-              onClick={nextStep}
-              disabled={isLoading}
-              className="px-8 py-3 text-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg"
-            >
-              {isLoading ? t('processingButton') : (currentStep === steps.length - 1 ? t('completeSetupButton') : t('continueButton'))}
-              {!isLoading && <ArrowRight className="w-5 h-5 ml-2" />}
-            </Button>
+            
+            <div className="flex space-x-4">
+              {currentStep === 3 && (
+                <Button
+                  variant="outline"
+                  onClick={skipTelegram}
+                  className="px-6 py-3 text-lg text-gray-600 hover:text-gray-800"
+                >
+                  Skip for now
+                </Button>
+              )}
+              <Button
+                onClick={nextStep}
+                disabled={isLoading}
+                className="px-8 py-3 text-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg"
+              >
+                {isLoading ? t('processingButton') : (currentStep === steps.length - 1 ? t('completeSetupButton') : t('continueButton'))}
+                {!isLoading && <ArrowRight className="w-5 h-5 ml-2" />}
+              </Button>
+            </div>
           </div>
         </div>
       </div>

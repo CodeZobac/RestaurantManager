@@ -33,6 +33,7 @@
     "next-auth": "^5.0.0-beta.29",
     "next-intl": "^4.1.0",
     "pg": "^8.16.2",
+    "qrcode.react": "^4.2.0",
     "react": "^19.0.0",
     "react-chartjs-2": "^5.3.0",
     "react-day-picker": "^9.7.0",
