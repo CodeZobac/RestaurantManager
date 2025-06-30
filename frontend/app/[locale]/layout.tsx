@@ -5,6 +5,15 @@ import {routing} from '@/i18n/routing';
 import Provider from '@/components/SessionProvider';
 import { auth } from '@/auth';
 import { Toaster } from '@/components/ui/sonner';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: {
+    template: '%s | The Golden Spoon',
+    default: 'The Golden Spoon',
+  },
+  description: 'The Golden Spoon is a restaurant management platform that helps you manage your restaurant, reservations, and customers.',
+};
 
 export function generateStaticParams() {
   return routing.locales.map((locale: string) => ({locale}));

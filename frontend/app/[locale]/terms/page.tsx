@@ -2,6 +2,12 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, FileText, Clock } from "lucide-react";
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: "Terms of Service - The Golden Spoon",
+  description: "Read our terms of service to understand the rules and regulations for using our platform.",
+};
 
 export default function TermsPage() {
   const t = useTranslations("TermsOfService");

@@ -138,6 +138,15 @@ export default function RestaurantLandingPage() {
               >
                 {t("navMenu")}
               </button>
+              <button
+                onClick={() => router.push("/maps")}
+                className={`transition-colors hover:text-orange-600 flex items-center gap-1 ${
+                  isScrolled ? "text-gray-700" : "text-white"
+                }`}
+              >
+                <MapPin className="w-4 h-4" />
+                Locations
+              </button>
               <a
                 href="#about"
                 className={`transition-colors hover:text-orange-600 ${
@@ -226,6 +235,13 @@ export default function RestaurantLandingPage() {
                 className="block text-gray-700 hover:text-orange-600 transition-colors"
               >
                 {t("navMenu")}
+              </button>
+              <button
+                onClick={() => router.push("/maps")}
+                className="flex items-center gap-2 text-gray-700 hover:text-orange-600 transition-colors"
+              >
+                <MapPin className="w-4 h-4" />
+                Locations
               </button>
               <a
                 href="#about"
