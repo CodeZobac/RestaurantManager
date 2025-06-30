@@ -10,8 +10,10 @@ import { NewReservationPopover } from './new-reservation-popover';
 
 interface TableCardProps {
   table: DisplayTable;
-  onEditReservation?: (table: DashboardTable) => void;
-  onDeleteReservation?: (table: DashboardTable) => void;
+  onEditReservation?: (reservation: DashboardTable['reservation']) => void;
+  onDeleteReservation?: (reservationId: string) => void;
+  onAcceptReservation?: (reservationId: string) => void;
+  onDeclineReservation?: (reservationId: string) => void;
   onCreateReservation?: (reservationData: {
     customer_name: string;
     customer_email: string;
@@ -26,7 +28,7 @@ interface TableCardProps {
 }
 
 
-export function TableCard({ table, onEditReservation, onDeleteReservation, onCreateReservation, onUnmerge }: TableCardProps) {
+export function TableCard({ table, onEditReservation, onDeleteReservation, onAcceptReservation, onDeclineReservation, onCreateReservation, onUnmerge }: TableCardProps) {
   const t = useTranslations('Dashboard');
 
   const isGroup = 'isGroup' in table;
@@ -123,9 +125,11 @@ export function TableCard({ table, onEditReservation, onDeleteReservation, onCre
   if (!isGroup && (table as DashboardTable).reservation) {
     return (
       <ReservationInfoPopover
-        table={table}
+        table={table as DashboardTable}
         onEdit={onEditReservation}
         onDelete={onDeleteReservation}
+        onAccept={onAcceptReservation}
+        onDecline={onDeclineReservation}
       >
         {TableCardContent}
       </ReservationInfoPopover>

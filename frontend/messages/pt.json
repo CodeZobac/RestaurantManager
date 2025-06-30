@@ -196,6 +196,8 @@
     "reservationTime": "Hora da reserva",
     "email": "Email",
     "phone": "Telefone",
+    "acceptButton": "Aceitar",
+    "declineButton": "Recusar",
     "editButton": "Editar",
     "cancelButton": "Cancelar"
   },

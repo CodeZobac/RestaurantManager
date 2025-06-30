@@ -19,13 +19,15 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { DisplayTable, DashboardTable } from '@/lib/types';
+import { DisplayTable } from '@/lib/types';
 import { TableCard } from './table-card';
 
 interface TableGridProps {
   tables: DisplayTable[];
-  onEditReservation?: (table: DashboardTable) => void;
-  onDeleteReservation?: (table: DashboardTable) => void;
+  onEditReservation?: (reservation: any) => void;
+  onDeleteReservation?: (reservationId: string) => void;
+  onAcceptReservation?: (reservationId: string) => void;
+  onDeclineReservation?: (reservationId: string) => void;
   onCreateReservation?: (reservationData: any) => void;
   onDragEnd: (event: DragEndEvent) => void;
   onUnmerge: (groupId: string) => void;
@@ -35,12 +37,16 @@ function DraggableTableCard({
   table,
   onEditReservation,
   onDeleteReservation,
+  onAcceptReservation,
+  onDeclineReservation,
   onCreateReservation,
   onUnmerge,
 }: {
   table: DisplayTable;
-  onEditReservation?: (table: DashboardTable) => void;
-  onDeleteReservation?: (table: DashboardTable) => void;
+  onEditReservation?: (reservation: any) => void;
+  onDeleteReservation?: (reservationId: string) => void;
+  onAcceptReservation?: (reservationId: string) => void;
+  onDeclineReservation?: (reservationId: string) => void;
   onCreateReservation?: (reservationData: any) => void;
   onUnmerge: (groupId: string) => void;
 }) {
@@ -70,6 +76,8 @@ function DraggableTableCard({
           table={table}
           onEditReservation={onEditReservation}
           onDeleteReservation={onDeleteReservation}
+          onAcceptReservation={onAcceptReservation}
+          onDeclineReservation={onDeclineReservation}
           onCreateReservation={onCreateReservation}
           onUnmerge={onUnmerge}
         />
@@ -82,6 +90,8 @@ export function TableGrid({
   tables,
   onEditReservation,
   onDeleteReservation,
+  onAcceptReservation,
+  onDeclineReservation,
   onCreateReservation,
   onDragEnd,
   onUnmerge,
@@ -144,6 +154,8 @@ export function TableGrid({
                       table={table}
                       onEditReservation={onEditReservation}
                       onDeleteReservation={onDeleteReservation}
+                      onAcceptReservation={onAcceptReservation}
+                      onDeclineReservation={onDeclineReservation}
                       onCreateReservation={onCreateReservation}
                       onUnmerge={onUnmerge}
                     />

@@ -150,3 +150,65 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to create reservation' }, { status: 500 });
   }
 }
+
+export async function PUT(request: Request) {
+  try {
+    const body = await request.json();
+    const { id, status, ...updates } = body;
+
+    // First, update the reservation
+    const { data: reservation, error: reservationError } = await supabase
+      .from('reservations')
+      .update({ status, ...updates })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (reservationError) throw reservationError;
+
+    // If the reservation was updated successfully, update the corresponding table
+    if (reservation) {
+      let tableStatus;
+      if (status === 'confirmed') {
+        tableStatus = 'occupied';
+      } else if (status === 'declined') {
+        tableStatus = 'available';
+      }
+
+      if (tableStatus) {
+        const { error: tableError } = await supabase
+          .from('tables')
+          .update({ status: tableStatus })
+          .eq('id', reservation.table_id);
+
+        if (tableError) {
+          // Log the error, but don't block the response to the client
+          console.error('Error updating table status:', tableError);
+        }
+      }
+    }
+
+    return NextResponse.json({ success: true, data: reservation });
+  } catch (error) {
+    console.error('Error updating reservation:', error);
+    return NextResponse.json({ error: 'Failed to update reservation' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const { id } = await request.json();
+
+    const { error } = await supabase
+      .from('reservations')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+
+    return NextResponse.json({ success: true, message: 'Reservation deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting reservation:', error);
+    return NextResponse.json({ error: 'Failed to delete reservation' }, { status: 500 });
+  }
+}

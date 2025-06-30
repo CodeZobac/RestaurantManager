@@ -25,6 +25,7 @@ export interface DashboardTable {
   location?: string;
   connections?: string[];
   reservation?: {
+    id: string;
     customer_name: string;
     reservation_time: string;
     party_size: number;

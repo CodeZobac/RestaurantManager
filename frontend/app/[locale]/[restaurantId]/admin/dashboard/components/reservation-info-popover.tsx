@@ -5,17 +5,19 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DashboardTable } from '@/lib/types';
-import {  Clock, Users, Mail, Phone, Edit, Trash2 } from 'lucide-react';
+import {  Clock, Users, Mail, Phone, Edit, Trash2, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 interface ReservationInfoPopoverProps {
   table: DashboardTable;
   children: React.ReactNode;
-  onEdit?: (table: DashboardTable) => void;
-  onDelete?: (table: DashboardTable) => void;
+  onEdit?: (reservation: DashboardTable['reservation']) => void;
+  onDelete?: (reservationId: string) => void;
+  onAccept?: (reservationId: string) => void;
+  onDecline?: (reservationId: string) => void;
 }
 
-export function ReservationInfoPopover({ table, children, onEdit, onDelete }: ReservationInfoPopoverProps) {
+export function ReservationInfoPopover({ table, children, onEdit, onDelete, onAccept, onDecline }: ReservationInfoPopoverProps) {
   const t = useTranslations('ReservationInfoPopover');
   const [open, setOpen] = useState(false);
 
@@ -24,12 +26,28 @@ export function ReservationInfoPopover({ table, children, onEdit, onDelete }: Re
   }
 
   const handleEdit = () => {
-    onEdit?.(table);
+    onEdit?.(table.reservation);
     setOpen(false);
   };
 
   const handleDelete = () => {
-    onDelete?.(table);
+    if (table.reservation?.id) {
+      onDelete?.(table.reservation.id);
+    }
+    setOpen(false);
+  };
+
+  const handleAccept = () => {
+    if (table.reservation?.id) {
+      onAccept?.(table.reservation.id);
+    }
+    setOpen(false);
+  };
+
+  const handleDecline = () => {
+    if (table.reservation?.id) {
+      onDecline?.(table.reservation.id);
+    }
     setOpen(false);
   };
 
@@ -112,7 +130,25 @@ export function ReservationInfoPopover({ table, children, onEdit, onDelete }: Re
           </div>
 
           {/* Actions */}
-          <div className="flex space-x-2 pt-3 border-t">
+          <div className="grid grid-cols-2 gap-2 pt-3 border-t">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleAccept}
+              className="flex-1 bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+            >
+              <ThumbsUp className="h-4 w-4 mr-2" />
+              {t('acceptButton')}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDecline}
+              className="flex-1 bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
+            >
+              <ThumbsDown className="h-4 w-4 mr-2" />
+              {t('declineButton')}
+            </Button>
             <Button
               variant="outline"
               size="sm"

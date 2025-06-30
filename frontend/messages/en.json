@@ -169,6 +169,8 @@
     "reservationTime": "Reservation time",
     "email": "Email",
     "phone": "Phone",
+    "acceptButton": "Accept",
+    "declineButton": "Decline",
     "editButton": "Edit",
     "cancelButton": "Cancel"
   },

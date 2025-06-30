@@ -67,16 +67,39 @@ export function DashboardContent({ restaurantId }: DashboardContentProps) {
     }
   };
 
-  const handleEditReservation = (table: DashboardTable) => {
-    // TODO: Implement edit reservation functionality
-    console.log('Edit reservation for table:', table);
+  const handleEditReservation = (reservation: DashboardTable['reservation']) => {
+    // TODO: Implement a modal or form for editing
+    console.log('Editing reservation:', reservation);
   };
 
-  const handleDeleteReservation = async (table: DashboardTable) => {
-    // TODO: Implement delete reservation functionality
-    console.log('Delete reservation for table:', table);
-    // For now, just refresh data
-    fetchDashboardData(selectedDate);
+  const handleDeleteReservation = async (reservationId: string) => {
+    try {
+      await dashboardApi.deleteReservation(reservationId);
+      fetchDashboardData(selectedDate);
+    } catch (error) {
+      console.error('Failed to delete reservation', error);
+      setError(t('errorDelete'));
+    }
+  };
+
+  const handleAcceptReservation = async (reservationId: string) => {
+    try {
+      await dashboardApi.updateReservation(reservationId, { status: 'confirmed' });
+      fetchDashboardData(selectedDate);
+    } catch (error) {
+      console.error('Failed to accept reservation', error);
+      setError(t('errorAccept'));
+    }
+  };
+
+  const handleDeclineReservation = async (reservationId: string) => {
+    try {
+      await dashboardApi.updateReservation(reservationId, { status: 'declined' });
+      fetchDashboardData(selectedDate);
+    } catch (error) {
+      console.error('Failed to decline reservation', error);
+      setError(t('errorDecline'));
+    }
   };
 
   const handleCreateReservation = async (
@@ -216,6 +239,8 @@ export function DashboardContent({ restaurantId }: DashboardContentProps) {
           tables={tables ?? []}
           onEditReservation={handleEditReservation}
           onDeleteReservation={handleDeleteReservation}
+          onAcceptReservation={handleAcceptReservation}
+          onDeclineReservation={handleDeclineReservation}
           onCreateReservation={handleCreateReservation}
           onDragEnd={handleDragEnd}
           onUnmerge={handleUnmerge}
