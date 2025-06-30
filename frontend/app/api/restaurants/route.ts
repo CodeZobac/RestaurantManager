@@ -15,7 +15,7 @@ export async function GET(request: Request) {
       // Fetch a single restaurant by ID
       const { data: restaurant, error } = await supabase
         .from('restaurants')
-        .select('id, name, created_at, updated_at')
+        .select('id, name, photo, location, created_at, updated_at')
         .eq('id', id)
         .single();
 
@@ -39,7 +39,7 @@ export async function GET(request: Request) {
       // Fetch all restaurants
       const { data: restaurants, error } = await supabase
         .from('restaurants')
-        .select('id, name, created_at, updated_at')
+        .select('id, name, photo, location, created_at, updated_at')
         .order('name');
 
       if (error) {

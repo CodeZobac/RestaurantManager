@@ -51,7 +51,18 @@ export interface Table {
 export interface Restaurant {
   id: string;
   name: string;
-  location?: string;
+  photo?: string;
+  location?: {
+    lat: number;
+    lng: number;
+    address: string;
+  } | string; // Can be JSON string or parsed object
+  phone?: string;
+  website?: string;
+  hours?: string;
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export type CreateTableData = Omit<Table, 'id'>;
