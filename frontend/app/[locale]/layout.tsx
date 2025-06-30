@@ -4,6 +4,7 @@ import {setRequestLocale} from 'next-intl/server';
 import {routing} from '@/i18n/routing';
 import Provider from '@/components/SessionProvider';
 import { auth } from '@/auth';
+import { Toaster } from '@/components/ui/sonner';
 
 export function generateStaticParams() {
   return routing.locales.map((locale: string) => ({locale}));
@@ -31,6 +32,7 @@ export default async function LocaleLayout({
       <body>
         <Provider session={session}>
           <NextIntlClientProvider>{children}</NextIntlClientProvider>
+          <Toaster />
         </Provider>
       </body>
     </html>

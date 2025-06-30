@@ -14,6 +14,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useParams } from 'next/navigation';
+import { useEffect } from 'react';
 
 const LoginSignupForm = () => {
   const t = useTranslations('Auth');
@@ -26,6 +28,28 @@ const LoginSignupForm = () => {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [termsError, setTermsError] = useState('');
   const [error, setError] = useState('');
+  const [isAuthorized, setIsAuthorized] = useState(false);
+
+  const params = useParams();
+  const { hash } = params;
+
+  useEffect(() => {
+    const checkHash = async () => {
+      if (hash) {
+        const response = await fetch('/api/auth/check-hash', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ hash }),
+        });
+        if (response.ok) {
+          setIsAuthorized(true);
+        }
+      }
+    };
+    checkHash();
+  }, [hash]);
 
   // Reference to main container for class manipulation with proper HTML type
   const containerRef = useRef<HTMLDivElement>(null);
@@ -128,6 +152,14 @@ const LoginSignupForm = () => {
       setIsLoading(false);
     }
   };
+
+  if (!isAuthorized) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <h1 className="text-2xl">Unauthorized</h1>
+      </div>
+    );
+  }
 
   return (
     <>

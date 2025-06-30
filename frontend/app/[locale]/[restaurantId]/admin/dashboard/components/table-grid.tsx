@@ -25,8 +25,7 @@ import { TableCard } from './table-card';
 interface TableGridProps {
   tables: DisplayTable[];
   onEditReservation?: (table: DashboardTable) => void;
-  onDeleteReservation?: (table: DashboardTable) => void;
-  onCreateReservation?: (reservationData: any) => void;
+  onCreateReservation?: (table: any) => void;
   onDragEnd: (event: DragEndEvent) => void;
   onUnmerge: (groupId: string) => void;
 }
@@ -34,14 +33,12 @@ interface TableGridProps {
 function DraggableTableCard({
   table,
   onEditReservation,
-  onDeleteReservation,
   onCreateReservation,
   onUnmerge,
 }: {
   table: DisplayTable;
   onEditReservation?: (table: DashboardTable) => void;
-  onDeleteReservation?: (table: DashboardTable) => void;
-  onCreateReservation?: (reservationData: any) => void;
+  onCreateReservation?: (table: any) => void;
   onUnmerge: (groupId: string) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
@@ -69,7 +66,6 @@ function DraggableTableCard({
         <TableCard
           table={table}
           onEditReservation={onEditReservation}
-          onDeleteReservation={onDeleteReservation}
           onCreateReservation={onCreateReservation}
           onUnmerge={onUnmerge}
         />
@@ -81,7 +77,6 @@ function DraggableTableCard({
 export function TableGrid({
   tables,
   onEditReservation,
-  onDeleteReservation,
   onCreateReservation,
   onDragEnd,
   onUnmerge,
@@ -137,13 +132,12 @@ export function TableGrid({
                 items={locationTables.map((t) => t.id)}
                 strategy={rectSortingStrategy}
               >
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
                   {locationTables.map((table) => (
                     <DraggableTableCard
                       key={table.id}
                       table={table}
                       onEditReservation={onEditReservation}
-                      onDeleteReservation={onDeleteReservation}
                       onCreateReservation={onCreateReservation}
                       onUnmerge={onUnmerge}
                     />

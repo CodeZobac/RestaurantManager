@@ -9,9 +9,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Users, Plus, Edit, Trash2, MenuIcon, DollarSign, User as UserIcon, Mail, Phone, Utensils, Clock, Settings } from 'lucide-react';
-import { User, MenuItem } from '@/lib/types';
+import { Users, Plus, Edit, Trash2, MenuIcon, DollarSign, User as UserIcon, Mail, Phone, Utensils, Clock, Settings, Link as LinkIcon, Copy } from 'lucide-react';
+import { User, MenuItem, Restaurant } from '@/lib/types';
 import { useParams } from 'next/navigation';
+import { restaurantApi } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
 
 
 const userRoles = [
@@ -29,6 +31,7 @@ const menuCategories = [
 
 export default function ProfilePage() {
   const params = useParams();
+  const { toast } = useToast();
   const restaurantId = params.restaurantId as string;
   // Users state
   const [users, setUsers] = useState<User[]>([]);
@@ -44,9 +47,14 @@ export default function ProfilePage() {
   const [newMenuItem, setNewMenuItem] = useState<Omit<MenuItem, 'id' | 'price'> & { price: string }>({ name: '', description: '', price: '', category: '' });
   const [loadingMenuItems, setLoadingMenuItems] = useState(true);
 
+  // Restaurant state
+  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+  const [loadingRestaurant, setLoadingRestaurant] = useState(true);
+
   useEffect(() => {
     fetchUsers();
     fetchMenuItems();
+    fetchRestaurant();
   }, []);
 
   const fetchUsers = async () => {
@@ -63,6 +71,13 @@ export default function ProfilePage() {
     const data = await response.json();
     setMenuItems(data);
     setLoadingMenuItems(false);
+  };
+
+  const fetchRestaurant = async () => {
+    setLoadingRestaurant(true);
+    const data = await restaurantApi.getRestaurantById(restaurantId);
+    setRestaurant(data);
+    setLoadingRestaurant(false);
   };
 
   // User management functions
@@ -499,6 +514,47 @@ export default function ProfilePage() {
               ))
             )}
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Shareable Link Section */}
+      <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+        <CardHeader className="bg-gradient-to-r from-green-600 to-green-700 text-white rounded-t-lg">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-white/20 rounded-lg">
+              <LinkIcon className="h-6 w-6" />
+            </div>
+            <div>
+              <CardTitle className="text-2xl text-white">Reservation Link</CardTitle>
+              <CardDescription className="text-green-100">
+                Share this link with your customers to allow them to make reservations.
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="p-6">
+          {loadingRestaurant ? (
+            <p>Loading link...</p>
+          ) : restaurant ? (
+            <div className="flex items-center space-x-4">
+              <Input
+                readOnly
+                value={`${window.location.origin}/${params.locale}/reserve?restaurantId=${restaurant.id}`}
+                className="flex-1"
+              />
+              <Button
+                onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}/${params.locale}/reserve?restaurantId=${restaurant.id}`);
+                  toast("success", "Link copied to clipboard");
+                }}
+              >
+                <Copy className="h-4 w-4 mr-2" />
+                Copy Link
+              </Button>
+            </div>
+          ) : (
+            <p>Could not generate the reservation link.</p>
+          )}
         </CardContent>
       </Card>
     </div>

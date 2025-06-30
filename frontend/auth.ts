@@ -71,7 +71,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   pages: {
-    signIn: "/auth/signin",
+    signIn: `/auth/${process.env.ADMIN_LOGIN_HASH}`,
   },
   callbacks: {
     async jwt({ token, user, trigger }) {

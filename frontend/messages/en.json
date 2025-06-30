@@ -172,6 +172,21 @@
     "editButton": "Edit",
     "cancelButton": "Cancel"
   },
+  "ReservationModal": {
+    "editTitle": "Edit Reservation",
+    "createTitle": "Create Reservation",
+    "customerNameLabel": "Customer Name",
+    "emailLabel": "Email",
+    "phoneLabel": "Phone",
+    "partySizeLabel": "Party Size",
+    "guest": "guest",
+    "guests": "guests",
+    "timeLabel": "Time",
+    "specialRequestsLabel": "Special Requests",
+    "cancelButton": "Cancel",
+    "savingButton": "Saving...",
+    "saveButton": "Save Changes"
+  },
   "LandingPage": {
     "brandName": "Reservation Manager",
     "navMenu": "Menu",

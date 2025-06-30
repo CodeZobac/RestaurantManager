@@ -130,6 +130,11 @@ export const restaurantApi = {
   getRestaurants: (): Promise<Restaurant[]> => {
     return fetchApi<Restaurant[]>("/api/restaurants");
   },
+  
+  // Get a single restaurant by ID
+  getRestaurantById: (id: string): Promise<Restaurant | null> => {
+    return fetchApi<Restaurant>(`/api/restaurants?id=${id}`);
+  }
 };
 
 export { ApiError };

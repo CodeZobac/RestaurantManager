@@ -199,6 +199,21 @@
     "editButton": "Editar",
     "cancelButton": "Cancelar"
   },
+  "ReservationModal": {
+    "editTitle": "Editar Reserva",
+    "createTitle": "Criar Reserva",
+    "customerNameLabel": "Nome do Cliente",
+    "emailLabel": "Email",
+    "phoneLabel": "Telefone",
+    "partySizeLabel": "Tamanho do Grupo",
+    "guest": "convidado",
+    "guests": "convidados",
+    "timeLabel": "Hora",
+    "specialRequestsLabel": "Pedidos Especiais",
+    "cancelButton": "Cancelar",
+    "savingButton": "A guardar...",
+    "saveButton": "Guardar Alterações"
+  },
   "LandingPage": {
     "brandName": "Gerente de Reservas",
     "navMenu": "Menu",

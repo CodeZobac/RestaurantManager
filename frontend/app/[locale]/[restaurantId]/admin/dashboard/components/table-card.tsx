@@ -5,28 +5,16 @@ import { DisplayTable, DashboardTable, TableGroup } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { GripVertical } from 'lucide-react';
-import { ReservationInfoPopover } from './reservation-info-popover';
-import { NewReservationPopover } from './new-reservation-popover';
 
 interface TableCardProps {
   table: DisplayTable;
   onEditReservation?: (table: DashboardTable) => void;
-  onDeleteReservation?: (table: DashboardTable) => void;
-  onCreateReservation?: (reservationData: {
-    customer_name: string;
-    customer_email: string;
-    customer_phone: string;
-    party_size: number;
-    reservation_time: string;
-    special_requests: string;
-    table_id: string;
-    reservation_date: string;
-  }) => void;
+  onCreateReservation?: (table: DashboardTable) => void;
   onUnmerge?: (groupId: string) => void;
 }
 
 
-export function TableCard({ table, onEditReservation, onDeleteReservation, onCreateReservation, onUnmerge }: TableCardProps) {
+export function TableCard({ table, onEditReservation, onCreateReservation, onUnmerge }: TableCardProps) {
   const t = useTranslations('Dashboard');
 
   const isGroup = 'isGroup' in table;
@@ -47,7 +35,8 @@ export function TableCard({ table, onEditReservation, onDeleteReservation, onCre
   const TableCardContent = (
     <div
       className={cn(
-        'aspect-square rounded-lg border-2 p-3 cursor-pointer transition-all hover:shadow-md relative group',
+        'rounded-lg border-2 p-3 cursor-pointer transition-all hover:shadow-md relative group',
+        'sm:aspect-square', // Aspect ratio for larger screens
         getStatusColors(table.status),
         'hover:scale-105'
       )}
@@ -57,34 +46,38 @@ export function TableCard({ table, onEditReservation, onDeleteReservation, onCre
         <GripVertical className="h-3 w-3" />
       </div>
       
-      <div className="flex flex-col h-full">
-        <div className="font-semibold text-sm truncate">{table.name}</div>
-        <div className="text-xs opacity-75 mt-1">
-          {table.capacity} {t('guests')}
+      <div className="flex flex-col sm:flex-col h-full">
+        <div className="flex flex-row sm:flex-col">
+          <div className="flex-1">
+            <div className="font-semibold text-sm truncate">{table.name}</div>
+            <div className="text-xs opacity-75 mt-1">
+              {table.capacity} {t('guests')}
+            </div>
+            {table.location && (
+              <div className="text-xs opacity-60 truncate">{table.location}</div>
+            )}
+          </div>
+          
+          <div className="flex-1 sm:hidden" />
+
+          {!isGroup && (table as DashboardTable).reservation ? (
+            <div className="text-xs space-y-1 text-right sm:text-left">
+              <div className="font-medium truncate">
+                {(table as DashboardTable).reservation!.customer_name}
+              </div>
+              <div className="opacity-75">
+                {t('at')} {(table as DashboardTable).reservation!.reservation_time}
+              </div>
+              <div className="opacity-60">
+                {(table as DashboardTable).reservation!.party_size} {t('guests')}
+              </div>
+            </div>
+          ) : !isGroup ? (
+            <div className="text-xs opacity-75 text-right sm:text-left">
+              {t('noReservations')}
+            </div>
+          ) : null}
         </div>
-        {table.location && (
-          <div className="text-xs opacity-60 truncate">{table.location}</div>
-        )}
-        
-        <div className="flex-1" />
-        
-        {!isGroup && (table as DashboardTable).reservation ? (
-          <div className="text-xs space-y-1">
-            <div className="font-medium truncate">
-              {(table as DashboardTable).reservation!.customer_name}
-            </div>
-            <div className="opacity-75">
-              {t('at')} {(table as DashboardTable).reservation!.reservation_time}
-            </div>
-            <div className="opacity-60">
-              {(table as DashboardTable).reservation!.party_size} {t('guests')}
-            </div>
-          </div>
-        ) : !isGroup ? (
-          <div className="text-xs opacity-75">
-            {t('noReservations')}
-          </div>
-        ) : null}
       </div>
     </div>
   );
@@ -119,25 +112,13 @@ export function TableCard({ table, onEditReservation, onDeleteReservation, onCre
     );
   }
 
-  // Wrap with appropriate popover based on reservation status for single tables
-  if (!isGroup && (table as DashboardTable).reservation) {
-    return (
-      <ReservationInfoPopover
-        table={table}
-        onEdit={onEditReservation}
-        onDelete={onDeleteReservation}
-      >
-        {TableCardContent}
-      </ReservationInfoPopover>
-    );
-  } else if (!isGroup) {
-    return (
-      <NewReservationPopover
-        table={table}
-        onCreateReservation={onCreateReservation}
-      >
-        {TableCardContent}
-      </NewReservationPopover>
-    );
-  }
+  const handleCardClick = () => {
+    if ((table as DashboardTable).reservation) {
+      onEditReservation?.(table as DashboardTable);
+    } else {
+      onCreateReservation?.(table as DashboardTable);
+    }
+  };
+
+  return <div onClick={handleCardClick}>{TableCardContent}</div>;
 }

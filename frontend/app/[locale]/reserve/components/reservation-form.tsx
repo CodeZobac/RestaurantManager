@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
@@ -17,7 +17,7 @@ import { MapPin, Calendar, Loader2, ChefHat } from "lucide-react";
 
 type FormStatus = "idle" | "submitting" | "success" | "error";
 
-export function ReservationForm() {
+export function ReservationForm({ restaurantId: singleRestaurantId }: { restaurantId?: string }) {
   const t = useTranslations("Reservation");
   const tTerms = useTranslations("TermsOfService");
   const [formStatus, setFormStatus] = useState<FormStatus>("idle");
@@ -26,6 +26,7 @@ export function ReservationForm() {
   const [loadingRestaurants, setLoadingRestaurants] = useState(true);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [termsError, setTermsError] = useState("");
+  const [restaurantSearch, setRestaurantSearch] = useState("");
 
   const {
     register,
@@ -33,6 +34,7 @@ export function ReservationForm() {
     formState: { errors, isValid },
     reset,
     control,
+    setValue,
   } = useForm<ReservationFormData>({
     resolver: zodResolver(reservationSchema),
     mode: "onChange",
@@ -43,8 +45,16 @@ export function ReservationForm() {
     const fetchRestaurants = async () => {
       try {
         setLoadingRestaurants(true);
-        const restaurantData = await restaurantApi.getRestaurants();
-        setRestaurants(restaurantData);
+        if (singleRestaurantId) {
+          const restaurantData = await restaurantApi.getRestaurantById(singleRestaurantId);
+          setRestaurants(restaurantData ? [restaurantData] : []);
+          if (restaurantData) {
+            setValue("restaurant_id", restaurantData.id);
+          }
+        } else {
+          const restaurantData = await restaurantApi.getRestaurants();
+          setRestaurants(restaurantData);
+        }
       } catch (error) {
         console.error('Failed to load restaurants:', error);
       } finally {
@@ -53,7 +63,13 @@ export function ReservationForm() {
     };
 
     fetchRestaurants();
-  }, []);
+  }, [singleRestaurantId, setValue]);
+
+  const filteredRestaurants = useMemo(() => {
+    return restaurants.filter((restaurant) =>
+      restaurant.name.toLowerCase().includes(restaurantSearch.toLowerCase())
+    );
+  }, [restaurants, restaurantSearch]);
 
   const onSubmit = async (data: ReservationFormData) => {
     if (!termsAccepted) {
@@ -136,6 +152,8 @@ export function ReservationForm() {
               <Loader2 className="w-4 h-4 animate-spin" />
               <span className="text-sm text-gray-600">Loading restaurants...</span>
             </div>
+          ) : singleRestaurantId && restaurants.length > 0 ? (
+            <p className="font-bold">{restaurants[0].name}</p>
           ) : (
             <Controller
               name="restaurant_id"
@@ -146,7 +164,14 @@ export function ReservationForm() {
                     <SelectValue placeholder="Select a restaurant location" />
                   </SelectTrigger>
                   <SelectContent>
-                    {restaurants.map((restaurant) => (
+                    <div className="p-2">
+                      <Input
+                        placeholder="Search restaurants..."
+                        value={restaurantSearch}
+                        onChange={(e) => setRestaurantSearch(e.target.value)}
+                      />
+                    </div>
+                    {filteredRestaurants.map((restaurant) => (
                       <SelectItem key={restaurant.id} value={restaurant.id}>
                         <div className="flex items-center gap-2">
                           <MapPin className="w-4 h-4 text-gray-500" />

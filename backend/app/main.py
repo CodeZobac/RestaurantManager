@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from .core.config import settings
-from .routers import tables, reservations, telegram, auth
+from .routers import tables, reservations, telegram, auth, restaurants
 from .services.background_tasks import main_task
 
 # Load environment variables from .env file
@@ -86,10 +86,10 @@ app = FastAPI(
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.allowed_origins,
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=settings.allowed_methods,
-    allow_headers=settings.allowed_headers,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Include routers
@@ -97,6 +97,7 @@ app.include_router(tables.router, prefix="/api/v1")
 app.include_router(reservations.router, prefix="/api/v1")
 app.include_router(telegram.router, prefix="/api/v1")
 app.include_router(auth.router, prefix="/api/v1")
+app.include_router(restaurants.router, prefix="/api/v1")
 
 
 

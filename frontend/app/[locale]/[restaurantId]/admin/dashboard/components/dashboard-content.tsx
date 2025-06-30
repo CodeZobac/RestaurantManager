@@ -10,6 +10,8 @@ import { CreateReservationData, DashboardTable, DisplayTable, TableGroup } from 
 import { DashboardHeader } from './dashboard-header';
 import { TableGrid } from './table-grid';
 import { Button } from '@/components/ui/button';
+import { MobileStatusCard, ReservationStatus } from './mobile-status-card';
+import { ReservationModal, ReservationFormData } from './reservation-modal';
 
 interface DashboardContentProps {
   restaurantId: string;
@@ -21,6 +23,12 @@ export function DashboardContent({ restaurantId }: DashboardContentProps) {
   const [tables, setTables] = useState<DisplayTable[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [filterStatus, setFilterStatus] = useState<ReservationStatus | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTable, setSelectedTable] = useState<DashboardTable | null>(null);
+  const [modalInitialData, setModalInitialData] = useState<
+    ReservationFormData | undefined
+  >(undefined);
 
   const fetchDashboardData = useCallback(async (date: Date) => {
     setLoading(true);
@@ -67,20 +75,42 @@ export function DashboardContent({ restaurantId }: DashboardContentProps) {
     }
   };
 
+  const handleFilterChange = (status: ReservationStatus | null) => {
+    setFilterStatus(status);
+  };
+
+  const handleOpenModal = (
+    table: DashboardTable,
+    initialData?: ReservationFormData
+  ) => {
+    setSelectedTable(table);
+    setModalInitialData(initialData);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedTable(null);
+    setModalInitialData(undefined);
+  };
+
   const handleEditReservation = (table: DashboardTable) => {
-    // TODO: Implement edit reservation functionality
-    console.log('Edit reservation for table:', table);
+    handleOpenModal(table, {
+      customer_name: table.reservation?.customer_name || '',
+      customer_email: table.reservation?.customer_email || '',
+      customer_phone: table.reservation?.customer_phone || '',
+      party_size: table.reservation?.party_size || 1,
+      reservation_time: table.reservation?.reservation_time || '',
+      special_requests: '', // Not available in data
+    });
   };
 
-  const handleDeleteReservation = async (table: DashboardTable) => {
-    // TODO: Implement delete reservation functionality
-    console.log('Delete reservation for table:', table);
-    // For now, just refresh data
-    fetchDashboardData(selectedDate);
+  const handleCreateReservation = async (table: DashboardTable) => {
+    handleOpenModal(table);
   };
 
-  const handleCreateReservation = async (
-    reservationData: Omit<CreateReservationData, 'restaurant_id'>
+  const handleModalSubmit = async (
+    reservationData: Omit<CreateReservationData, 'restaurant_id' | 'reservation_date'>
   ) => {
     try {
       const response = await fetch('/api/reservations', {
@@ -88,7 +118,11 @@ export function DashboardContent({ restaurantId }: DashboardContentProps) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...reservationData, restaurant_id: restaurantId }),
+        body: JSON.stringify({
+          ...reservationData,
+          restaurant_id: restaurantId,
+          reservation_date: format(selectedDate, 'yyyy-MM-dd'),
+        }),
       });
 
       if (response.ok) {
@@ -178,20 +212,40 @@ export function DashboardContent({ restaurantId }: DashboardContentProps) {
       />
 
       {/* Status Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+      <MobileStatusCard
+        statusCounts={statusCounts}
+        onFilterChange={handleFilterChange}
+        selectedStatus={filterStatus}
+      />
+      <div className="hidden sm:grid sm:grid-cols-3 gap-4 mb-6">
+        <div
+          className={`bg-green-50 border border-green-200 rounded-lg p-4 cursor-pointer ${
+            filterStatus === 'available' ? 'ring-2 ring-green-500' : ''
+          }`}
+          onClick={() => handleFilterChange(filterStatus === 'available' ? null : 'available')}
+        >
           <div className="text-green-800 font-semibold">{t('availableTables')}</div>
           <div className="text-2xl font-bold text-green-900">
             {statusCounts.available || 0}
           </div>
         </div>
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+        <div
+          className={`bg-yellow-50 border border-yellow-200 rounded-lg p-4 cursor-pointer ${
+            filterStatus === 'pending' ? 'ring-2 ring-yellow-500' : ''
+          }`}
+          onClick={() => handleFilterChange(filterStatus === 'pending' ? null : 'pending')}
+        >
           <div className="text-yellow-800 font-semibold">{t('pendingReservations')}</div>
           <div className="text-2xl font-bold text-yellow-900">
             {statusCounts.pending || 0}
           </div>
         </div>
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div
+          className={`bg-red-50 border border-red-200 rounded-lg p-4 cursor-pointer ${
+            filterStatus === 'confirmed' ? 'ring-2 ring-red-500' : ''
+          }`}
+          onClick={() => handleFilterChange(filterStatus === 'confirmed' ? null : 'confirmed')}
+        >
           <div className="text-red-800 font-semibold">{t('confirmedReservations')}</div>
           <div className="text-2xl font-bold text-red-900">
             {statusCounts.confirmed || 0}
@@ -212,15 +266,36 @@ export function DashboardContent({ restaurantId }: DashboardContentProps) {
           </Button>
         </div>
       ) : (
-        <TableGrid
-          tables={tables ?? []}
-          onEditReservation={handleEditReservation}
-          onDeleteReservation={handleDeleteReservation}
-          onCreateReservation={handleCreateReservation}
-          onDragEnd={handleDragEnd}
-          onUnmerge={handleUnmerge}
-        />
+        <>
+          {filterStatus &&
+          tables.filter((table) => table.status === filterStatus).length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-lg text-gray-500">
+                {t('noTablesForFilter')}
+              </p>
+            </div>
+          ) : (
+            <TableGrid
+              tables={
+                filterStatus
+                  ? tables.filter((table) => table.status === filterStatus)
+                  : tables ?? []
+              }
+              onEditReservation={handleEditReservation}
+              onCreateReservation={handleCreateReservation}
+              onDragEnd={handleDragEnd}
+              onUnmerge={handleUnmerge}
+            />
+          )}
+        </>
       )}
+      <ReservationModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        table={selectedTable}
+        onSubmit={handleModalSubmit}
+        initialData={modalInitialData}
+      />
     </div>
   );
 }
