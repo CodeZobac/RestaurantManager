@@ -116,16 +116,12 @@ async def set_admin_restaurant(telegram_chat_id: int, restaurant_id: str) -> Opt
         logger.warning(f"Admin with Telegram chat ID {telegram_chat_id} not found.")
     return None
 
-async def is_telegram_admin(user_id: int, phone_number: Optional[str] = None) -> bool:
+async def is_telegram_admin(user_id: int) -> bool:
     """
-    Checks if a given Telegram user ID or phone number corresponds to an admin in the database.
+    Checks if a given Telegram user ID corresponds to an admin in the database.
+    Only checks by telegram_chat_id for linked accounts.
     """
-
-    query_params = f"telegram_chat_id=eq.{user_id}"
-    if phone_number:
-        query_params += f"&phone_number=eq.{phone_number}"
-    
-    admins = await supabase_get("admins", params=query_params)
+    admins = await supabase_get("admins", params=f"telegram_chat_id=eq.{user_id}")
     return bool(admins)
 
 # Singleton instance for use in app

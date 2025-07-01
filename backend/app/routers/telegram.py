@@ -57,16 +57,27 @@ async def telegram_webhook(request: Request):
 
     if not user_id:
         raise HTTPException(status_code=400, detail="Could not determine user ID from payload")
-
- 
-    if not await is_telegram_admin(user_id, phone_number):
+    # Check if user is already an authorized admin before processing any commands
+    # For /start command with token, we allow it to proceed for linking
+    is_start_with_token = (
+        message and 
+        message.get("text", "").startswith("/start") and 
+        " " in message.get("text", "")
+    )
+    
+    if not is_start_with_token and not await is_telegram_admin(user_id):
         if telegram_service:
             await telegram_service.bot.send_message(
                 chat_id=user_id,
-                text="Unauthorized: This bot is for authorized administrators only."
+                text=(
+                    "⚠️ This bot is for authorized restaurant administrators only.\n\n"
+                    "If you're an admin, please:\n"
+                    "1. Log into your admin dashboard\n" 
+                    "2. Go to Settings → Telegram Integration\n"
+                    "3. Generate and scan a QR code to link your account"
+                )
             )
         return {"ok": True}
-
 
     if message:
         text = message.get("text", "")
@@ -107,38 +118,24 @@ async def telegram_webhook(request: Request):
                     if telegram_service:
                         await telegram_service.bot.send_message(
                             chat_id=user_id,
-                            text="❌ This link has expired or is already used. Please generate a new QR code from the onboarding page."
+                            text="❌ This link has expired or is already used. Please generate a new QR code from your admin dashboard."
                         )
                     return {"ok": True}
 
-            # If no token, proceed with normal /start logic
-            query_params = f"telegram_chat_id=eq.{user_id}"
-            if phone_number:
-                query_params += f"&phone_number=eq.{phone_number}"
-            
-            admins = await supabase_get("admins", params=query_params)
-
-            if admins:
-                admin_id = admins[0]["id"]
-                await supabase_patch(
-                    "admins",
-                    row_id=admin_id,
-                    data={
-                        "telegram_chat_id": user_id,
-                        "telegram_username": username,
-                        "first_name": first_name
-                    },
-                    id_column="id"
-                )
-                if telegram_service:
-                    await telegram_service.send_start_message(user_id, first_name)
-            else:
-                if telegram_service:
-                    await telegram_service.bot.send_message(
-                        chat_id=user_id,
-                        text="Unauthorized: You are not registered as an admin."
+            # If no token provided, inform user about the proper linking process
+            if telegram_service:
+                await telegram_service.bot.send_message(
+                    chat_id=user_id,
+                    text=(
+                        "👋 Welcome to the Restaurant Manager Bot!\n\n"
+                        "To link your admin account:\n"
+                        "1. Go to your admin dashboard\n"
+                        "2. Navigate to Settings\n"
+                        "3. Generate a QR code in the Telegram section\n"
+                        "4. Scan the QR code or click the link\n\n"
+                        "If you're already an admin and having issues, please contact support."
                     )
-                return {"ok": True}
+                )
             return {"ok": True}
 
         elif text.strip() == "/help":
