@@ -242,7 +242,9 @@
     "toggleMenu": "Toggle menu",
     "signOutButton": "Sign out",
     "analyticsLabel": "Analytics",
-    "analyticsDescription": "Performance insights and reports"
+    "analyticsDescription": "Performance insights and reports",
+    "settingsLabel": "QR Code",
+    "settingsDescription": "Manage your QR code"
   },
   "Onboarding": {
     "contactInfoTitle": "Contact Info",

@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import TelegramQRManager from '@/components/TelegramQRManager';
 import { MessageSquare, Settings, Bell } from 'lucide-react';
+import Header from '@/components/Header';
 
 export default function SettingsPage() {
   const { data: session } = useSession();
@@ -18,16 +19,18 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="max-w-4xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
-          <p className="text-gray-600">Manage your restaurant settings and integrations</p>
-        </div>
+    <>
+      <Header />
+      <div className="container mx-auto py-8 px-4">
+        <div className="max-w-4xl mx-auto space-y-8">
+          {/* Header */}
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
+            <p className="text-gray-600">Manage your restaurant settings and integrations</p>
+          </div>
 
-        {/* Settings Grid */}
-        <div className="grid gap-6 md:grid-cols-2">
+          {/* Settings Grid */}
+          <div className="grid gap-6 md:grid-cols-2">
           {/* Telegram Integration Card */}
           <Card className="md:col-span-2">
             <CardHeader>
@@ -136,6 +139,7 @@ export default function SettingsPage() {
           </Card>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

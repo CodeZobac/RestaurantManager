@@ -269,7 +269,9 @@
     "toggleMenu": "Alternar menu",
     "signOutButton": "Sair",
     "analyticsLabel": "Análise",
-    "analyticsDescription": "Insights de desempenho e relatórios"
+    "analyticsDescription": "Insights de desempenho e relatórios",
+    "settingsLabel": "Código QR",
+    "settingsDescription": "Gerir o seu código QR"
   },
   "Onboarding": {
     "contactInfoTitle": "Informações de Contacto",
