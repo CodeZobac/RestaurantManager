@@ -27,7 +27,8 @@ export async function POST() {
       );
     }
     
-    const response = await fetch(`${BACKEND_URL}/api/v1/auth/telegram/generate-token`, {
+    const cleanedBackendUrl = BACKEND_URL.endsWith('/') ? BACKEND_URL.slice(0, -1) : BACKEND_URL;
+    const response = await fetch(`${cleanedBackendUrl}/api/v1/auth/telegram/generate-token`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

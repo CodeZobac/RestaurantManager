@@ -22,9 +22,9 @@ interface TelegramQRManagerProps {
 }
 
 export default function TelegramQRManager({ 
-  adminId, 
+  adminId, // eslint-disable-line @typescript-eslint/no-unused-vars
   telegramChatId, 
-  onTelegramLinked 
+  onTelegramLinked // eslint-disable-line @typescript-eslint/no-unused-vars
 }: TelegramQRManagerProps) {
   const [qrData, setQrData] = useState<{
     deep_link: string;

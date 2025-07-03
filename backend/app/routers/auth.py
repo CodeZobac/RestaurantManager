@@ -49,9 +49,12 @@ async def generate_telegram_token(request: TelegramTokenRequest):
         token_data = generate_token(request.admin_id, settings.telegram_bot_username)
         return token_data
 
+    except HTTPException as http_exc:
+        logger.error(f"HTTP exception in generate_telegram_token: {http_exc.detail}")
+        raise http_exc
     except Exception as e:
-        logger.error(f"Error generating Telegram token: {e}")
-        raise HTTPException(status_code=500, detail="Failed to generate token")
+        logger.error(f"Unexpected error in generate_telegram_token: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="An unexpected error occurred while generating the token.")
 
 
 @router.get("/telegram/token/{token}")
