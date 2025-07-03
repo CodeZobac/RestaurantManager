@@ -6,6 +6,7 @@ from app.core.config import settings
 from app.schemas.restaurant import Restaurant
 from app.schemas.admin import Admin  
 from app.supabase_client import supabase_get
+from app.i18n.telegram_i18n import telegram_i18n, get_admin_language
 
 logger = logging.getLogger(__name__)
 
@@ -19,11 +20,10 @@ class TelegramService:
         """
         Sends a personalized welcome message.
         """
-        start_text = (
-            f"Hi {first_name}, welcome to the Restaurant Management Bot!\n\n"
-            "Use /help to see the full list of commands."
-        )
         try:
+            language = await get_admin_language(chat_id)
+            start_text = telegram_i18n.get_text("start_message", language, first_name=first_name)
+            
             await self.bot.send_message(
                 chat_id=chat_id,
                 text=start_text,
@@ -36,14 +36,10 @@ class TelegramService:
         """
         Sends a help menu with available commands.
         """
-        help_text = (
-            "<b>Welcome to the Restaurant Management Bot!</b>\n\n"
-            "Here are the available commands:\n"
-            "/start - Show this welcome message and command list\n"
-            "/pending_reservations - Manually check for any pending reservations that have not yet been notified.\n"
-            "/help - Show this help menu\n"
-        )
         try:
+            language = await get_admin_language(chat_id)
+            help_text = telegram_i18n.get_help_menu(language)
+            
             await self.bot.send_message(
                 chat_id=chat_id,
                 text=help_text,
@@ -56,15 +52,23 @@ class TelegramService:
         """
         Sends a reservation notification with inline Confirm/Discard buttons.
         """
-        keyboard = [
-            [
-                InlineKeyboardButton("Confirm", callback_data=f"confirm:{reservation_id}"),
-                InlineKeyboardButton("Discard", callback_data=f"discard:{reservation_id}")
-            ]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        message_text = f"New reservation:\n{reservation_info}"
         try:
+            language = await get_admin_language(chat_id)
+            
+            # Get button texts in appropriate language
+            confirm_text = telegram_i18n.get_text("reservation_notification.buttons.confirm", language)
+            discard_text = telegram_i18n.get_text("reservation_notification.buttons.discard", language)
+            title_text = telegram_i18n.get_text("reservation_notification.title", language)
+            
+            keyboard = [
+                [
+                    InlineKeyboardButton(confirm_text, callback_data=f"confirm:{reservation_id}"),
+                    InlineKeyboardButton(discard_text, callback_data=f"discard:{reservation_id}")
+                ]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            message_text = f"{title_text}\n{reservation_info}"
+            
             sent_message = await self.bot.send_message(
                 chat_id=chat_id,
                 text=message_text,
