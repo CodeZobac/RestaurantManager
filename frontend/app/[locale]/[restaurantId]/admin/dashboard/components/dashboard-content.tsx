@@ -5,8 +5,8 @@ import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
 import { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
-import { dashboardApi, ApiError } from '@/lib/api';
-import { CreateReservationData, DashboardTable, DisplayTable, TableGroup } from '@/lib/types';
+import { dashboardApi, adminApi, ApiError } from '@/lib/api';
+import { CreateReservationData, DashboardTable, DisplayTable, TableGroup, Admin } from '@/lib/types';
 import { DashboardHeader } from './dashboard-header';
 import { TableGrid } from './table-grid';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,7 @@ export function DashboardContent({ restaurantId }: DashboardContentProps) {
   const [tables, setTables] = useState<DisplayTable[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [admin, setAdmin] = useState<Admin | null>(null);
 
   const fetchDashboardData = useCallback(async (date: Date) => {
     setLoading(true);
@@ -60,6 +61,18 @@ export function DashboardContent({ restaurantId }: DashboardContentProps) {
   useEffect(() => {
     fetchDashboardData(selectedDate);
   }, [selectedDate, fetchDashboardData]);
+
+  useEffect(() => {
+    const fetchAdmin = async () => {
+      try {
+        const adminData = await adminApi.getAdmin();
+        setAdmin(adminData);
+      } catch (error) {
+        console.error('Failed to fetch admin data:', error);
+      }
+    };
+    fetchAdmin();
+  }, []);
 
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
@@ -198,6 +211,7 @@ export function DashboardContent({ restaurantId }: DashboardContentProps) {
       <DashboardHeader
         selectedDate={selectedDate}
         onDateChange={handleDateChange}
+        admin={admin}
       />
 
       {/* Status Summary */}
