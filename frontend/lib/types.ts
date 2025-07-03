@@ -3,7 +3,7 @@ export interface User {
   name: string;
   email: string;
   role: string;
-  phone: string;
+  phone_number: string;
   password?: string;
 }
 
@@ -98,3 +98,15 @@ export interface TableGroup {
 
 // A union type to represent either a single table or a group
 export type DisplayTable = DashboardTable | TableGroup;
+
+export interface Admin {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  phone_number?: string;
+  restaurant_id?: string;
+  restaurant_name?: string;
+  telegram_chat_id?: number;
+  onboarding_completed: boolean;
+}

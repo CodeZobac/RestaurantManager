@@ -1,0 +1,43 @@
+{
+  "start_message": "Hi {first_name}, welcome to the Restaurant Management Bot!\n\nUse /help to see the full list of commands.",
+  "help_menu": {
+    "title": "Welcome to the Restaurant Management Bot!",
+    "commands": {
+      "start": "/start - Show this welcome message and command list",
+      "pending_reservations": "/pending_reservations - Manually check for any pending reservations that have not yet been notified.",
+      "help": "/help - Show this help menu",
+      "language": "/language - Change your language preference (/pt for Portuguese, /en for English)"
+    }
+  },
+  "reservation_notification": {
+    "title": "New reservation:",
+    "buttons": {
+      "confirm": "Confirm",
+      "discard": "Discard"
+    }
+  },
+  "unauthorized": "Unauthorized: This bot is for authorized restaurant administrators only.",
+  "unauthorized_detailed": "⚠️ This bot is for authorized restaurant administrators only.\n\nIf you're an admin, please:\n1. Log into your admin dashboard\n2. Go to Settings → Telegram Integration\n3. Generate and scan a QR code to link your account",
+  "link_success": "🎉 Your Telegram account has been linked successfully! You'll now receive reservation notifications here.",
+  "link_expired": "❌ This link has expired or is already used. Please generate a new QR code from your admin dashboard.",
+  "linking_instructions": "👋 Welcome to the Restaurant Manager Bot!\n\nTo link your admin account:\n1. Go to your admin dashboard\n2. Navigate to Settings\n3. Generate a QR code in the Telegram section\n4. Scan the QR code or click the link\n\nIf you're already an admin and having issues, please contact support.",
+  "no_restaurant_associated": "Your admin account is not associated with a restaurant. Please contact support.",
+  "restaurant_not_found": "Could not find the restaurant associated with your account. Please contact support.",
+  "pending_reservations": {
+    "title": "Pending Reservations for {restaurant_name}:",
+    "no_reservations": "There are no new pending reservations for {restaurant_name} that have not yet been notified.",
+    "fields": {
+      "reservation_id": "Reservation ID",
+      "client_name": "Client Name",
+      "contact": "Contact",
+      "time": "Time",
+      "party_size": "Party Size",
+      "status": "Status"
+    }
+  },
+  "email_registered": "Your email has been registered.",
+  "reservation_status_updated": "Reservation {reservation_id} {status} by admin.",
+  "language_changed": "✅ Language changed to English! All future messages will be in English.",
+  "language_info": "🌐 Current language: English\n\nTo change language, use:\n/en - English\n/pt - Português",
+  "language_invalid": "❌ Invalid language command. Use /en for English or /pt for Portuguese."
+}

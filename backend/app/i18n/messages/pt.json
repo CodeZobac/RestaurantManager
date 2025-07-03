@@ -1,0 +1,43 @@
+{
+  "start_message": "Olá {first_name}, bem-vindo ao Bot de Gestão de Restaurante!\n\nUse /help para ver a lista completa de comandos.",
+  "help_menu": {
+    "title": "Bem-vindo ao Bot de Gestão de Restaurante!",
+    "commands": {
+      "start": "/start - Mostrar esta mensagem de boas-vindas e lista de comandos",
+      "pending_reservations": "/pending_reservations - Verificar manualmente as reservas pendentes que ainda não foram notificadas.",
+      "help": "/help - Mostrar este menu de ajuda",
+      "language": "/language - Mudar sua preferência de idioma (/pt para Português, /en para Inglês)"
+    }
+  },
+  "reservation_notification": {
+    "title": "Nova reserva:",
+    "buttons": {
+      "confirm": "Confirmar",
+      "discard": "Descartar"
+    }
+  },
+  "unauthorized": "Não autorizado: Este bot é apenas para administradores de restaurantes autorizados.",
+  "unauthorized_detailed": "⚠️ Este bot é apenas para administradores de restaurantes autorizados.\n\nSe você é um administrador, por favor:\n1. Faça login no seu painel administrativo\n2. Vá para Configurações → Integração Telegram\n3. Gere e escaneie um código QR para vincular sua conta",
+  "link_success": "🎉 Sua conta do Telegram foi vinculada com sucesso! Você receberá notificações de reservas aqui.",
+  "link_expired": "❌ Este link expirou ou já foi usado. Por favor, gere um novo código QR do seu painel administrativo.",
+  "linking_instructions": "👋 Bem-vindo ao Bot de Gestão de Restaurante!\n\nPara vincular sua conta de administrador:\n1. Vá para o seu painel administrativo\n2. Navegue até Configurações\n3. Gere um código QR na seção Telegram\n4. Escaneie o código QR ou clique no link\n\nSe você já é um administrador e está enfrentando problemas, entre em contato com o suporte.",
+  "no_restaurant_associated": "Sua conta de administrador não está associada a um restaurante. Entre em contato com o suporte.",
+  "restaurant_not_found": "Não foi possível encontrar o restaurante associado à sua conta. Entre em contato com o suporte.",
+  "pending_reservations": {
+    "title": "Reservas Pendentes para {restaurant_name}:",
+    "no_reservations": "Não há novas reservas pendentes para {restaurant_name} que não foram notificadas.",
+    "fields": {
+      "reservation_id": "ID da Reserva",
+      "client_name": "Nome do Cliente",
+      "contact": "Contato",
+      "time": "Horário",
+      "party_size": "Tamanho do Grupo",
+      "status": "Status"
+    }
+  },
+  "email_registered": "Seu email foi registrado.",
+  "reservation_status_updated": "Reserva {reservation_id} {status} pelo administrador.",
+  "language_changed": "✅ Idioma alterado para Português! Todas as futuras mensagens serão em Português.",
+  "language_info": "🌐 Idioma atual: Português\n\nPara mudar o idioma, use:\n/en - English\n/pt - Português",
+  "language_invalid": "❌ Comando de idioma inválido. Use /en para Inglês ou /pt para Português."
+}

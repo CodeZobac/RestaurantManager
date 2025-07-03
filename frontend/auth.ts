@@ -59,6 +59,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               restaurant_name: restaurantName,
               onboarding_completed: admin.onboarding_completed,
               admin_id: admin.id,
+              telegram_chat_id: admin.telegram_chat_id,
             };
           } else {
             return null;
@@ -87,6 +88,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           if (!error && admin) {
             token.restaurant_id = admin.restaurant_id;
             token.onboarding_completed = admin.onboarding_completed;
+            token.telegram_chat_id = admin.telegram_chat_id;
             
             // Fetch restaurant name if restaurant_id exists
             if (admin.restaurant_id) {
@@ -112,6 +114,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.restaurant_name = user.restaurant_name;
         token.onboarding_completed = user.onboarding_completed;
         token.admin_id = user.admin_id;
+        token.telegram_chat_id = user.telegram_chat_id;
       }
       return token;
     },
@@ -123,6 +126,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.restaurant_name = token.restaurant_name as string | null;
         session.user.onboarding_completed = token.onboarding_completed as boolean;
         session.user.admin_id = token.admin_id as string | null;
+        session.user.telegram_chat_id = token.telegram_chat_id as number | null;
       }
       return session;
     },

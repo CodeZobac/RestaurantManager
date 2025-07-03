@@ -12,6 +12,8 @@ declare module "next-auth" {
       restaurant_id?: string | null;
       restaurant_name?: string | null;
       admin_id?: string | null;
+      telegram_chat_id?: number | null;
+      onboarding_completed?: boolean;
     } & DefaultSession["user"];
   }
 
@@ -21,6 +23,7 @@ declare module "next-auth" {
     restaurant_name?: string | null;
     onboarding_completed?: boolean;
     admin_id?: string | null;
+    telegram_chat_id?: number | null;
   }
 }
 
@@ -32,5 +35,6 @@ declare module "next-auth/jwt" {
     restaurant_name?: string | null;
     onboarding_completed?: boolean;
     admin_id?: string | null;
+    telegram_chat_id?: number | null;
   }
 }

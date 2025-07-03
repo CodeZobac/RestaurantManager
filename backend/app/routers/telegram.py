@@ -5,6 +5,7 @@ from app.services.telegram_service import telegram_service, is_telegram_admin
 from app.services.reservation_service import reservation_service
 from app.services.restaurant_service import restaurant_service
 from app.core.config import settings
+from app.i18n.telegram_i18n import telegram_i18n, get_admin_language
 import httpx
 import os
 import re
@@ -57,16 +58,23 @@ async def telegram_webhook(request: Request):
 
     if not user_id:
         raise HTTPException(status_code=400, detail="Could not determine user ID from payload")
-
- 
-    if not await is_telegram_admin(user_id, phone_number):
+    # Check if user is already an authorized admin before processing any commands
+    # For /start command with token, we allow it to proceed for linking
+    is_start_with_token = (
+        message and 
+        message.get("text", "").startswith("/start") and 
+        " " in message.get("text", "")
+    )
+    
+    if not is_start_with_token and not await is_telegram_admin(user_id):
         if telegram_service:
+            # For unauthorized users, we'll use default language (English)
+            unauthorized_text = telegram_i18n.get_text("unauthorized_detailed", "en")
             await telegram_service.bot.send_message(
                 chat_id=user_id,
-                text="Unauthorized: This bot is for authorized administrators only."
+                text=unauthorized_text
             )
         return {"ok": True}
-
 
     if message:
         text = message.get("text", "")
@@ -97,48 +105,32 @@ async def telegram_webhook(request: Request):
                     
                     # Send confirmation to user
                     if telegram_service:
+                        language = await get_admin_language(user_id)
+                        success_text = telegram_i18n.get_text("link_success", language)
                         await telegram_service.bot.send_message(
                             chat_id=user_id,
-                            text="🎉 Your Telegram account has been linked successfully! You'll now receive reservation notifications here."
+                            text=success_text
                         )
                     return {"ok": True}
 
                 else:
                     if telegram_service:
+                        # Use default language for expired links
+                        expired_text = telegram_i18n.get_text("link_expired", "en")
                         await telegram_service.bot.send_message(
                             chat_id=user_id,
-                            text="❌ This link has expired or is already used. Please generate a new QR code from the onboarding page."
+                            text=expired_text
                         )
                     return {"ok": True}
 
-            # If no token, proceed with normal /start logic
-            query_params = f"telegram_chat_id=eq.{user_id}"
-            if phone_number:
-                query_params += f"&phone_number=eq.{phone_number}"
-            
-            admins = await supabase_get("admins", params=query_params)
-
-            if admins:
-                admin_id = admins[0]["id"]
-                await supabase_patch(
-                    "admins",
-                    row_id=admin_id,
-                    data={
-                        "telegram_chat_id": user_id,
-                        "telegram_username": username,
-                        "first_name": first_name
-                    },
-                    id_column="id"
+            # If no token provided, inform user about the proper linking process
+            if telegram_service:
+                # Use default language for non-linked users
+                instructions_text = telegram_i18n.get_text("linking_instructions", "en")
+                await telegram_service.bot.send_message(
+                    chat_id=user_id,
+                    text=instructions_text
                 )
-                if telegram_service:
-                    await telegram_service.send_start_message(user_id, first_name)
-            else:
-                if telegram_service:
-                    await telegram_service.bot.send_message(
-                        chat_id=user_id,
-                        text="Unauthorized: You are not registered as an admin."
-                    )
-                return {"ok": True}
             return {"ok": True}
 
         elif text.strip() == "/help":
@@ -149,19 +141,22 @@ async def telegram_webhook(request: Request):
         elif text.strip() == "/pending_reservations":
             if telegram_service and reservation_service:
                 current_admin = await get_admin_by_telegram_id(user_id)
+                language = await get_admin_language(user_id)
                 
                 if not current_admin or not current_admin.restaurant_id:
+                    no_restaurant_text = telegram_i18n.get_text("no_restaurant_associated", language)
                     await telegram_service.bot.send_message(
                         chat_id=user_id,
-                        text="Your admin account is not associated with a restaurant. Please contact support."
+                        text=no_restaurant_text
                     )
                     return {"ok": True}
 
                 restaurant = await restaurant_service.get_restaurant_by_id(current_admin.restaurant_id)
                 if not restaurant:
+                    restaurant_not_found_text = telegram_i18n.get_text("restaurant_not_found", language)
                     await telegram_service.bot.send_message(
                         chat_id=user_id,
-                        text="Could not find the restaurant associated with your account. Please contact support."
+                        text=restaurant_not_found_text
                     )
                     return {"ok": True}
                 
@@ -169,16 +164,20 @@ async def telegram_webhook(request: Request):
 
                 pending_reservations = await reservation_service.get_pending_reservations(current_admin.restaurant_id)
                 if pending_reservations:
-                    response_text = f"<b>Pending Reservations for {restaurant_name}:</b>\n\n"
+                    # Get field labels in appropriate language
+                    fields = telegram_i18n.get_reservation_info_template(language)
+                    title_text = telegram_i18n.get_text("pending_reservations.title", language, restaurant_name=restaurant_name)
+                    
+                    response_text = f"<b>{title_text}</b>\n\n"
                     for reservation in pending_reservations:
                         reservation_datetime = datetime.combine(reservation.reservation_date, reservation.reservation_time)
                         response_text += (
-                            f"<b>Reservation ID:</b> {reservation.id}\n"
-                            f"<b>Client Name:</b> {reservation.client_name}\n"
-                            f"<b>Contact:</b> {reservation.client_contact}\n"
-                            f"<b>Time:</b> {reservation_datetime.strftime('%Y-%m-%d %H:%M')}\n"
-                            f"<b>Party Size:</b> {reservation.party_size}\n"
-                            f"<b>Status:</b> {reservation.status}\n\n"
+                            f"<b>{fields['reservation_id']}:</b> {reservation.id}\n"
+                            f"<b>{fields['client_name']}:</b> {reservation.client_name}\n"
+                            f"<b>{fields['contact']}:</b> {reservation.client_contact}\n"
+                            f"<b>{fields['time']}:</b> {reservation_datetime.strftime('%Y-%m-%d %H:%M')}\n"
+                            f"<b>{fields['party_size']}:</b> {reservation.party_size}\n"
+                            f"<b>{fields['status']}:</b> {reservation.status}\n\n"
                         )
                     await telegram_service.bot.send_message(
                         chat_id=user_id,
@@ -186,10 +185,45 @@ async def telegram_webhook(request: Request):
                         parse_mode="HTML"
                     )
                 else:
+                    no_reservations_text = telegram_i18n.get_text(
+                        "pending_reservations.no_reservations", 
+                        language, 
+                        restaurant_name=restaurant.name
+                    )
                     await telegram_service.bot.send_message(
                         chat_id=user_id,
-                        text=f"There are no new pending reservations for {restaurant_name} that have not yet been notified."
+                        text=no_reservations_text
                     )
+            return {"ok": True}
+        
+        elif text.strip() == "/language":
+            if telegram_service:
+                language = await get_admin_language(user_id)
+                language_info_text = telegram_i18n.get_text("language_info", language)
+                await telegram_service.bot.send_message(
+                    chat_id=user_id,
+                    text=language_info_text
+                )
+            return {"ok": True}
+        
+        elif text.strip() in ["/en", "/pt"]:
+            if telegram_service:
+                new_language = text.strip()[1:]  # Remove the '/' prefix
+                
+                # Update admin language preference
+                await supabase_patch(
+                    "admins",
+                    row_id=user_id,
+                    data={"language": new_language},
+                    id_column="telegram_chat_id"
+                )
+                
+                # Send confirmation in the new language
+                language_changed_text = telegram_i18n.get_text("language_changed", new_language)
+                await telegram_service.bot.send_message(
+                    chat_id=user_id,
+                    text=language_changed_text
+                )
             return {"ok": True}
 
 
@@ -202,9 +236,11 @@ async def telegram_webhook(request: Request):
                 id_column="telegram_chat_id"
             )
             if telegram_service:
+                language = await get_admin_language(user_id)
+                email_registered_text = telegram_i18n.get_text("email_registered", language)
                 await telegram_service.bot.send_message(
                     chat_id=user_id,
-                    text="Your email has been registered."
+                    text=email_registered_text
                 )
             return {"ok": True}
 
@@ -246,7 +282,10 @@ async def telegram_webhook(request: Request):
 
         if telegram_service:
             try:
-                text = f"Reservation {reservation_id} {new_status} by admin."
+                language = await get_admin_language(chat["id"])
+                status_text = "confirmed" if action == "confirm" else "discarded"
+                text = telegram_i18n.get_text("reservation_status_updated", language, 
+                                            reservation_id=reservation_id, status=status_text)
                 await telegram_service.bot.edit_message_text(
                     chat_id=chat["id"],
                     message_id=message_id,

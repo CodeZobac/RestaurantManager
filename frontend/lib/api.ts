@@ -7,6 +7,7 @@ import {
   ReservationResponse,
   DashboardStatusResponse,
   Restaurant,
+  Admin,
 } from "./types";
 
 class ApiError extends Error {
@@ -145,6 +146,13 @@ export const restaurantApi = {
   // Get all restaurants
   getRestaurants: (): Promise<Restaurant[]> => {
     return fetchApi<Restaurant[]>("/api/restaurants");
+  },
+};
+
+export const adminApi = {
+  // Get current admin
+  getAdmin: (): Promise<Admin> => {
+    return fetchApi<Admin>("/api/users/me");
   },
 };
 

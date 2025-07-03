@@ -11,6 +11,7 @@ class AdminBase(BaseModel):
     phone_number: Optional[str] = None
     first_name: Optional[str] = None
     restaurant_id: Optional[str] = None
+    language: Optional[str] = Field(default="en", description="Preferred language (en/pt)")
 
 class AdminCreate(AdminBase):
     pass
