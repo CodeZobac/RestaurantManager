@@ -37,7 +37,7 @@ export default function ProfilePage() {
   const [users, setUsers] = useState<User[]>([]);
   const [showAddUser, setShowAddUser] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [newUser, setNewUser] = useState<Omit<User, 'id'>>({ name: '', email: '', role: '', phone: '', password: '' });
+  const [newUser, setNewUser] = useState<Omit<User, 'id'>>({ name: '', email: '', role: '', phone_number: '', password: '' });
   const [loadingUsers, setLoadingUsers] = useState(true);
 
   // Menu items state
@@ -90,7 +90,7 @@ export default function ProfilePage() {
       });
       if (response.ok) {
         fetchUsers();
-        setNewUser({ name: '', email: '', role: '', phone: '', password: '' });
+        setNewUser({ name: '', email: '', role: '', phone_number: '', password: '' });
         setShowAddUser(false);
       }
     }
@@ -111,7 +111,7 @@ export default function ProfilePage() {
       });
       if (response.ok) {
         fetchUsers();
-        setNewUser({ name: '', email: '', role: '', phone: '', password: '' });
+        setNewUser({ name: '', email: '', role: '', phone_number: '', password: '' });
         setShowAddUser(false);
         setEditingUser(null);
       }
@@ -306,8 +306,8 @@ export default function ProfilePage() {
                   <Input
                     id="userPhone"
                     placeholder="+1234567890"
-                    value={newUser.phone}
-                    onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
+                    value={newUser.phone_number}
+                    onChange={(e) => setNewUser({ ...newUser, phone_number: e.target.value })}
                   />
                 </div>
               </div>
@@ -320,7 +320,7 @@ export default function ProfilePage() {
                   onClick={() => {
                     setShowAddUser(false);
                     setEditingUser(null);
-                    setNewUser({ name: '', email: '', role: '', phone: '', password: '' });
+                    setNewUser({ name: '', email: '', role: '', phone_number: '', password: '' });
                   }}
                 >
                   Cancel
@@ -353,10 +353,10 @@ export default function ProfilePage() {
                       <Mail className="h-3 w-3" />
                       <span>{user.email}</span>
                     </div>
-                    {user.phone && (
+                    {user.phone_number && (
                       <div className="flex items-center space-x-2">
                         <Phone className="h-3 w-3" />
-                        <span>{user.phone}</span>
+                        <span>{user.phone_number}</span>
                       </div>
                     )}
                   </div>

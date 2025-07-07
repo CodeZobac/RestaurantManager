@@ -5,7 +5,7 @@ description = "Restaurant Reservations Manager - FastAPI Backend"
 authors = [
     {name = "LuisBBandeira", email = "luisfilipebentobandeira@gmail.com"}
 ]
-readme = "../README.md"
+readme = "./README.md"
 requires-python = ">=3.11"
 classifiers = [
     "Development Status :: 3 - Alpha",

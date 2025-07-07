@@ -7,6 +7,7 @@ import {
   ReservationResponse,
   DashboardStatusResponse,
   Restaurant,
+  Admin,
 } from "./types";
 
 class ApiError extends Error {
@@ -123,6 +124,22 @@ export const dashboardApi = {
     const response = await fetchApi<DashboardStatusResponse>(`/api/dashboard-status?date=${date}`);
     return response;
   },
+
+  // Update a reservation
+  updateReservation: (id: string, updates: Partial<{ status: string }>): Promise<ReservationResponse> => {
+    return fetchApi<ReservationResponse>(`/api/reservations`, {
+      method: 'PUT',
+      body: JSON.stringify({ id, ...updates }),
+    });
+  },
+
+  // Delete a reservation
+  deleteReservation: (id: string): Promise<void> => {
+    return fetchApi<void>(`/api/reservations`, {
+      method: 'DELETE',
+      body: JSON.stringify({ id }),
+    });
+  },
 };
 
 export const restaurantApi = {
@@ -135,6 +152,13 @@ export const restaurantApi = {
   getRestaurantById: (id: string): Promise<Restaurant | null> => {
     return fetchApi<Restaurant>(`/api/restaurants?id=${id}`);
   }
+};
+
+export const adminApi = {
+  // Get current admin
+  getAdmin: (): Promise<Admin> => {
+    return fetchApi<Admin>("/api/users/me");
+  },
 };
 
 export { ApiError };

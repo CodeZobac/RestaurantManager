@@ -5,16 +5,27 @@ import { DisplayTable, DashboardTable, TableGroup } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { GripVertical } from 'lucide-react';
+import { ReservationInfoPopover } from './reservation-info-popover';
 
 interface TableCardProps {
   table: DisplayTable;
   onEditReservation?: (table: DashboardTable) => void;
+  onDeleteReservation?: (reservationId: string) => void;
+  onAcceptReservation?: (reservationId: string) => void;
+  onDeclineReservation?: (reservationId: string) => void;
   onCreateReservation?: (table: DashboardTable) => void;
   onUnmerge?: (groupId: string) => void;
 }
 
-
-export function TableCard({ table, onEditReservation, onCreateReservation, onUnmerge }: TableCardProps) {
+export function TableCard({ 
+  table, 
+  onEditReservation, 
+  onDeleteReservation, 
+  onAcceptReservation, 
+  onDeclineReservation, 
+  onCreateReservation, 
+  onUnmerge 
+}: TableCardProps) {
   const t = useTranslations('Dashboard');
 
   const isGroup = 'isGroup' in table;
@@ -36,12 +47,11 @@ export function TableCard({ table, onEditReservation, onCreateReservation, onUnm
     <div
       className={cn(
         'rounded-lg border-2 p-3 cursor-pointer transition-all hover:shadow-md relative group',
-        'sm:aspect-square', // Aspect ratio for larger screens
+        'sm:aspect-square',
         getStatusColors(table.status),
         'hover:scale-105'
       )}
     >
-      {/* Drag handle indicator */}
       <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-60 transition-opacity">
         <GripVertical className="h-3 w-3" />
       </div>
@@ -82,14 +92,13 @@ export function TableCard({ table, onEditReservation, onCreateReservation, onUnm
     </div>
   );
 
-  // If it's a group, render a simplified card with an unmerge button
   if (isGroup) {
     const group = table as TableGroup;
     return (
       <div
         className={cn(
           'aspect-square rounded-lg border-2 p-3 transition-all hover:shadow-md relative group',
-          'bg-blue-100 border-blue-300 text-blue-800', // Distinct color for groups
+          'bg-blue-100 border-blue-300 text-blue-800',
           'hover:scale-105'
         )}
       >
@@ -112,13 +121,25 @@ export function TableCard({ table, onEditReservation, onCreateReservation, onUnm
     );
   }
 
-  const handleCardClick = () => {
-    if ((table as DashboardTable).reservation) {
-      onEditReservation?.(table as DashboardTable);
-    } else {
-      onCreateReservation?.(table as DashboardTable);
-    }
-  };
+  const dashboardTable = table as DashboardTable;
 
-  return <div onClick={handleCardClick}>{TableCardContent}</div>;
+  if (dashboardTable.reservation) {
+    return (
+      <ReservationInfoPopover
+        table={dashboardTable}
+        onEdit={() => onEditReservation?.(dashboardTable)}
+        onDelete={onDeleteReservation}
+        onAccept={onAcceptReservation}
+        onDecline={onDeclineReservation}
+      >
+        {TableCardContent}
+      </ReservationInfoPopover>
+    );
+  } else {
+    return (
+      <div onClick={() => onCreateReservation?.(dashboardTable)}>
+        {TableCardContent}
+      </div>
+    );
+  }
 }

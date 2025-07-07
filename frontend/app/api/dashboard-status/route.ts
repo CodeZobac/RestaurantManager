@@ -48,22 +48,12 @@ export async function GET(request: Request) {
     const tablesWithReservations = tables.map(table => {
       const reservation = reservations.find(r => r.table_id === table.id);
       
-      // Determine table status based on reservation status
-      let tableStatus = 'available';
-      if (reservation) {
-        if (reservation.status === 'pending') {
-          tableStatus = 'pending';
-        } else if (reservation.status === 'confirmed') {
-          tableStatus = 'confirmed';
-        }
-      }
-      
       return {
         id: table.id,
         name: table.name,
         capacity: table.capacity,
         location: table.location,
-        status: tableStatus,
+        status: table.status, // Use the status from the tables table directly
         connections: table.connections,
         reservation: reservation ? {
           id: reservation.id,

@@ -3,6 +3,7 @@ import asyncio
 from app.services.reservation_service import reservation_service
 from app.services.telegram_service import telegram_service
 from app.supabase_client import supabase_patch, supabase_get
+from app.i18n.telegram_i18n import telegram_i18n, get_admin_language
 
 logger = logging.getLogger(__name__)
 
@@ -35,12 +36,18 @@ async def check_and_send_pending_reservations():
 
             for admin in admins_data:
                 if admin.get("telegram_chat_id") and telegram_service:
+                    # Get admin's preferred language
+                    language = await get_admin_language(admin["telegram_chat_id"])
+                    
+                    # Get field labels in appropriate language
+                    fields = telegram_i18n.get_reservation_info_template(language)
+                    
                     reservation_info = (
-                        f"<b>Reservation ID:</b> {reservation.id}\n"
-                        f"<b>Client Name:</b> {reservation.client_name}\n"
-                        f"<b>Contact:</b> {reservation.client_contact}\n"
-                        f"<b>Time:</b> {reservation.reservation_date} {reservation.reservation_time}\n"
-                        f"<b>Party Size:</b> {reservation.party_size}"
+                        f"<b>{fields['reservation_id']}:</b> {reservation.id}\n"
+                        f"<b>{fields['client_name']}:</b> {reservation.client_name}\n"
+                        f"<b>{fields['contact']}:</b> {reservation.client_contact}\n"
+                        f"<b>{fields['time']}:</b> {reservation.reservation_date} {reservation.reservation_time}\n"
+                        f"<b>{fields['party_size']}:</b> {reservation.party_size}"
                     )
                     await telegram_service.send_reservation_notification(
                         chat_id=admin["telegram_chat_id"],

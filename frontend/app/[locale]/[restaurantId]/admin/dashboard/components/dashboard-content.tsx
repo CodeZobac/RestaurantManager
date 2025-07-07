@@ -5,8 +5,8 @@ import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
 import { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
-import { dashboardApi, ApiError } from '@/lib/api';
-import { CreateReservationData, DashboardTable, DisplayTable, TableGroup } from '@/lib/types';
+import { dashboardApi, adminApi, ApiError } from '@/lib/api';
+import { CreateReservationData, DashboardTable, DisplayTable, TableGroup, Admin } from '@/lib/types';
 import { DashboardHeader } from './dashboard-header';
 import { TableGrid } from './table-grid';
 import { Button } from '@/components/ui/button';
@@ -29,6 +29,7 @@ export function DashboardContent({ restaurantId }: DashboardContentProps) {
   const [modalInitialData, setModalInitialData] = useState<
     ReservationFormData | undefined
   >(undefined);
+  const [admin, setAdmin] = useState<Admin | null>(null);
 
   const fetchDashboardData = useCallback(async (date: Date) => {
     setLoading(true);
@@ -38,7 +39,6 @@ export function DashboardContent({ restaurantId }: DashboardContentProps) {
       const dateString = format(date, 'yyyy-MM-dd');
       const response = await dashboardApi.getDashboardStatus(dateString);
       
-      // Sort tables by location
       const sortedTables = response.tables.sort((a: DashboardTable, b: DashboardTable) => {
         const locationA = a.location || '';
         const locationB = b.location || '';
@@ -48,9 +48,7 @@ export function DashboardContent({ restaurantId }: DashboardContentProps) {
       setTables(sortedTables);
     } catch (err) {
       if (err instanceof ApiError) {
-        // Special handling for users without restaurant (403 error)
         if (err.status === 403 && err.message.includes('No restaurant associated')) {
-          // Redirect to onboarding if user doesn't have a restaurant
           const locale = window.location.pathname.split('/')[1];
           window.location.href = `/${locale}/onboarding`;
           return;
@@ -68,6 +66,18 @@ export function DashboardContent({ restaurantId }: DashboardContentProps) {
   useEffect(() => {
     fetchDashboardData(selectedDate);
   }, [selectedDate, fetchDashboardData]);
+
+  useEffect(() => {
+    const fetchAdmin = async () => {
+      try {
+        const adminData = await adminApi.getAdmin();
+        setAdmin(adminData);
+      } catch (error) {
+        console.error('Failed to fetch admin data:', error);
+      }
+    };
+    fetchAdmin();
+  }, []);
 
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
@@ -101,12 +111,42 @@ export function DashboardContent({ restaurantId }: DashboardContentProps) {
       customer_phone: table.reservation?.customer_phone || '',
       party_size: table.reservation?.party_size || 1,
       reservation_time: table.reservation?.reservation_time || '',
-      special_requests: '', // Not available in data
+      special_requests: '',
     });
   };
 
   const handleCreateReservation = async (table: DashboardTable) => {
     handleOpenModal(table);
+  };
+
+  const handleDeleteReservation = async (reservationId: string) => {
+    try {
+      await dashboardApi.deleteReservation(reservationId);
+      fetchDashboardData(selectedDate);
+    } catch (error) {
+      console.error('Failed to delete reservation', error);
+      setError(t('errorDelete'));
+    }
+  };
+
+  const handleAcceptReservation = async (reservationId: string) => {
+    try {
+      await dashboardApi.updateReservation(reservationId, { status: 'confirmed' });
+      fetchDashboardData(selectedDate);
+    } catch (error) {
+      console.error('Failed to accept reservation', error);
+      setError(t('errorAccept'));
+    }
+  };
+
+  const handleDeclineReservation = async (reservationId: string) => {
+    try {
+      await dashboardApi.updateReservation(reservationId, { status: 'declined' });
+      fetchDashboardData(selectedDate);
+    } catch (error) {
+      console.error('Failed to decline reservation', error);
+      setError(t('errorDecline'));
+    }
   };
 
   const handleModalSubmit = async (
@@ -126,7 +166,6 @@ export function DashboardContent({ restaurantId }: DashboardContentProps) {
       });
 
       if (response.ok) {
-        // Refresh dashboard data after successful creation
         fetchDashboardData(selectedDate);
       } else {
         console.error('Failed to create reservation');
@@ -152,7 +191,6 @@ export function DashboardContent({ restaurantId }: DashboardContentProps) {
       const activeItem = currentTables.find((t) => t.id === activeId);
       const overItem = currentTables.find((t) => t.id === overId);
 
-      // Handle merging
       if (activeItem && overItem && activeId !== overId && !('isGroup' in activeItem) && !('isGroup' in overItem)) {
         const activeTable = activeItem as DashboardTable;
         const overTable = overItem as DashboardTable;
@@ -173,7 +211,6 @@ export function DashboardContent({ restaurantId }: DashboardContentProps) {
         ];
       }
 
-      // Handle reordering
       const oldIndex = currentTables.findIndex((item) => item.id === activeId);
       const newIndex = currentTables.findIndex((item) => item.id === overId);
       return arrayMove(currentTables, oldIndex, newIndex);
@@ -192,10 +229,6 @@ export function DashboardContent({ restaurantId }: DashboardContentProps) {
     });
   };
 
-  // Debug: log tables before reduce
-  console.log("DASHBOARD DEBUG: tables =", tables);
-
-  // Count tables by status
   const statusCounts = (tables ?? []).reduce(
     (acc, table) => {
       acc[table.status] = (acc[table.status] || 0) + 1;
@@ -209,9 +242,9 @@ export function DashboardContent({ restaurantId }: DashboardContentProps) {
       <DashboardHeader
         selectedDate={selectedDate}
         onDateChange={handleDateChange}
+        admin={admin}
       />
 
-      {/* Status Summary */}
       <MobileStatusCard
         statusCounts={statusCounts}
         onFilterChange={handleFilterChange}
@@ -253,7 +286,6 @@ export function DashboardContent({ restaurantId }: DashboardContentProps) {
         </div>
       </div>
 
-      {/* Main Content */}
       {loading ? (
         <div className="flex items-center justify-center h-64">
           <div className="text-gray-500">{t('loading')}</div>
@@ -282,6 +314,9 @@ export function DashboardContent({ restaurantId }: DashboardContentProps) {
                   : tables ?? []
               }
               onEditReservation={handleEditReservation}
+              onDeleteReservation={handleDeleteReservation}
+              onAcceptReservation={handleAcceptReservation}
+              onDeclineReservation={handleDeclineReservation}
               onCreateReservation={handleCreateReservation}
               onDragEnd={handleDragEnd}
               onUnmerge={handleUnmerge}

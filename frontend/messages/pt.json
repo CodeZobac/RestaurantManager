@@ -192,6 +192,11 @@
     "guests": "convidados",
     "at": "às"
   },
+  "TelegramAlert": {
+    "title": "Complete a sua Integração com o Telegram",
+    "message": "Você não está recebendo notificações do Telegram. Para completar a integração, por favor, vá para as suas",
+    "link": "configurações"
+  },
   "NewReservationPopover": {
     "title": "Nova Reserva",
     "seats": "lugares",
@@ -221,6 +226,8 @@
     "reservationTime": "Hora da reserva",
     "email": "Email",
     "phone": "Telefone",
+    "acceptButton": "Aceitar",
+    "declineButton": "Recusar",
     "editButton": "Editar",
     "cancelButton": "Cancelar"
   },
@@ -307,7 +314,9 @@
     "toggleMenu": "Alternar menu",
     "signOutButton": "Sair",
     "analyticsLabel": "Análise",
-    "analyticsDescription": "Insights de desempenho e relatórios"
+    "analyticsDescription": "Insights de desempenho e relatórios",
+    "settingsLabel": "Código QR",
+    "settingsDescription": "Gerir o seu código QR"
   },
   "Onboarding": {
     "contactInfoTitle": "Informações de Contacto",
@@ -482,6 +491,34 @@
       "checkbox": "Li e aceito os Termos de Serviço",
       "required": "Você deve aceitar os Termos de Serviço para continuar",
       "viewTerms": "Visualizar Termos de Serviço"
+    }
+  },
+  "SettingsPage": {
+    "title": "Configurações",
+    "description": "Gerencie as configurações e integrações do seu restaurante",
+    "signInMessage": "Por favor, inicie sessão para aceder às configurações.",
+    "telegramCard": {
+      "title": "Integração com o Telegram",
+      "description": "Conecte sua conta do Telegram para receber notificações instantâneas de novas reservas e gerenciá-las diretamente do seu celular."
+    },
+    "notificationsCard": {
+      "title": "Preferências de Notificação",
+      "description": "Configure como e quando você deseja receber notificações.",
+      "newReservations": "Novas Reservas",
+      "newReservationsDescription": "Seja notificado quando novas reservas forem feitas",
+      "cancellations": "Cancelamentos",
+      "cancellationsDescription": "Seja notificado quando as reservas forem canceladas",
+      "dailySummary": "Resumo Diário",
+      "dailySummaryDescription": "Receba um resumo diário das reservas"
+    },
+    "accountCard": {
+      "title": "Informações da Conta",
+      "description": "Visualize e gerencie os detalhes da sua conta.",
+      "name": "Nome",
+      "email": "Email",
+      "restaurant": "Restaurante",
+      "role": "Função",
+      "notAssigned": "Não atribuído"
     }
   }
 }

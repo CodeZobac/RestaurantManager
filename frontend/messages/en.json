@@ -165,6 +165,11 @@
     "guests": "guests",
     "at": "at"
   },
+  "TelegramAlert": {
+    "title": "Complete Your Telegram Integration",
+    "message": "You are not receiving Telegram notifications. To complete the integration, please go to your",
+    "link": "settings"
+  },
   "NewReservationPopover": {
     "title": "New Reservation",
     "seats": "seats",
@@ -194,6 +199,8 @@
     "reservationTime": "Reservation time",
     "email": "Email",
     "phone": "Phone",
+    "acceptButton": "Accept",
+    "declineButton": "Decline",
     "editButton": "Edit",
     "cancelButton": "Cancel"
   },
@@ -280,7 +287,9 @@
     "toggleMenu": "Toggle menu",
     "signOutButton": "Sign out",
     "analyticsLabel": "Analytics",
-    "analyticsDescription": "Performance insights and reports"
+    "analyticsDescription": "Performance insights and reports",
+    "settingsLabel": "QR Code",
+    "settingsDescription": "Manage your QR code"
   },
   "Onboarding": {
     "contactInfoTitle": "Contact Info",
@@ -481,6 +490,34 @@
       "checkbox": "I have read and agree to the Terms of Service",
       "required": "You must accept the Terms of Service to continue",
       "viewTerms": "View Terms of Service"
+    }
+  },
+  "SettingsPage": {
+    "title": "Settings",
+    "description": "Manage your restaurant settings and integrations",
+    "signInMessage": "Please sign in to access settings.",
+    "telegramCard": {
+      "title": "Telegram Integration",
+      "description": "Connect your Telegram account to receive instant notifications for new reservations and manage them directly from your phone."
+    },
+    "notificationsCard": {
+      "title": "Notification Preferences",
+      "description": "Configure how and when you want to receive notifications.",
+      "newReservations": "New Reservations",
+      "newReservationsDescription": "Get notified when new reservations are made",
+      "cancellations": "Cancellations",
+      "cancellationsDescription": "Get notified when reservations are cancelled",
+      "dailySummary": "Daily Summary",
+      "dailySummaryDescription": "Receive a daily summary of reservations"
+    },
+    "accountCard": {
+      "title": "Account Information",
+      "description": "View and manage your account details.",
+      "name": "Name",
+      "email": "Email",
+      "restaurant": "Restaurant",
+      "role": "Role",
+      "notAssigned": "Not assigned"
     }
   }
 }
