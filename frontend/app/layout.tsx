@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "The Golden Spoon - Exquisite Dining Experience",
-  description: "Book a table at The Golden Spoon and enjoy our delicious modern European cuisine. We are open for dinner from Monday to Friday, and for lunch and dinner on weekends.",
+  title: "Table Time - Exquisite Dining Experience",
+  description: "Book a table trough Table Time and enjoy the delicious dishes our vast Restaurant partners have to offer.",
 };
 
 export default function RootLayout({

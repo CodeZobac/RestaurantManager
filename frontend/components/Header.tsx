@@ -74,10 +74,10 @@ export default function Header() {
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
               <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">R</span>
+                <span className="text-white font-bold text-sm">TT</span>
               </div>
               <span className="font-semibold text-gray-900 hidden sm:inline-block">
-                {session?.user?.restaurant_name || t('restaurantAdmin')}
+                {session?.user?.restaurant_name || "Admin Panel"}
               </span>
             </div>
           </div>
@@ -150,10 +150,10 @@ export default function Header() {
                   {/* Mobile Header */}
                   <div className="flex items-center space-x-2 pb-6 border-b">
                     <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">R</span>
+                      <span className="text-white font-bold text-sm">TT</span>
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">{session?.user?.restaurant_name || t('restaurantAdmin')}</p>
+                      <p className="font-semibold text-gray-900">{session?.user?.restaurant_name || "Admin Panel"}</p>
                       <p className="text-sm text-gray-500">{session?.user?.name || t('adminLabel')}</p>
                     </div>
                   </div>
