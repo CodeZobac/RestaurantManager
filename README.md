@@ -85,12 +85,6 @@ Restaurant Manager is a comprehensive, full-stack application designed to stream
 
 ## 👥 Team
 
-<div align="center">
-  <a href="https://kapta.pt">
-    <img src="https://media.licdn.com/dms/image/v2/D4D3DAQEhPIKnSrFifw/image-scale_191_1128/image-scale_191_1128/0/1727791287468/kapta_pt_cover?e=1751587200&v=beta&t=uS-YRAg1XublVAcncXsopgLlS6_PAHrAFzjSpioqJPk" width="800px;" alt="Kapta"/>
-  </a>
-</div>
-
 <table align="center">
   <tr>
     <td align="center">
